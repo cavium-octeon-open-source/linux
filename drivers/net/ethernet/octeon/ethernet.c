@@ -861,7 +861,7 @@ static struct device_node *cvm_oct_node_for_port(struct device_node *pip,
 	return np;
 }
 
-static int __init cvm_oct_get_port_status(struct device_node *pip)
+static int cvm_oct_get_port_status(struct device_node *pip)
 {
 	int i, j;
 	int num_interfaces = cvmx_helper_get_number_of_interfaces();
