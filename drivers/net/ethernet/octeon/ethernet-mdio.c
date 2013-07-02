@@ -387,6 +387,7 @@ int cvm_oct_phy_setup_device(struct net_device *dev)
 {
 	struct octeon_ethernet *priv = netdev_priv(dev);
 	struct device_node *phy_node;
+	phy_interface_t iface;
 
 	if (!priv->of_node)
 		goto no_phy;
@@ -395,8 +396,23 @@ int cvm_oct_phy_setup_device(struct net_device *dev)
 	if (!phy_node)
 		goto no_phy;
 
+	switch (priv->imode) {
+	case CVMX_HELPER_INTERFACE_MODE_GMII:
+		iface = PHY_INTERFACE_MODE_GMII;
+		break;
+	case CVMX_HELPER_INTERFACE_MODE_RGMII:
+		iface = PHY_INTERFACE_MODE_RGMII;
+		break;
+	case CVMX_HELPER_INTERFACE_MODE_SGMII:
+		iface = PHY_INTERFACE_MODE_SGMII;
+		break;
+	default:
+		iface = PHY_INTERFACE_MODE_NA;
+		break;
+	}
+
 	priv->phydev = of_phy_connect(dev, phy_node, cvm_oct_adjust_link, 0,
-				      PHY_INTERFACE_MODE_GMII);
+				      iface);
 
 	if (priv->phydev == NULL)
 		return -ENODEV;
