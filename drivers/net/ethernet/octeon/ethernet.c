@@ -48,6 +48,7 @@
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-srio.h>
 #include <asm/octeon/cvmx-helper.h>
+#include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-pko-internal-ports-range.h>
 #include <asm/octeon/cvmx-app-config.h>
@@ -871,18 +872,49 @@ static int cvm_oct_get_port_status(struct device_node *pip)
 		int mode = cvmx_helper_interface_get_mode(i);
 
 		for (j = 0; j < num_ports; j++) {
-			if (mode == CVMX_HELPER_INTERFACE_MODE_RGMII
-			    || mode == CVMX_HELPER_INTERFACE_MODE_GMII
-			    || mode == CVMX_HELPER_INTERFACE_MODE_XAUI
-			    || mode == CVMX_HELPER_INTERFACE_MODE_RXAUI
-			    || mode == CVMX_HELPER_INTERFACE_MODE_SGMII
-			    || mode == CVMX_HELPER_INTERFACE_MODE_SPI) {
+			switch (mode) {
+			case CVMX_HELPER_INTERFACE_MODE_RGMII:
+			case CVMX_HELPER_INTERFACE_MODE_GMII:
+			case CVMX_HELPER_INTERFACE_MODE_XAUI:
+			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
+			case CVMX_HELPER_INTERFACE_MODE_SPI:
 				if (cvm_oct_node_for_port(pip, i, j) != NULL)
 					cvmx_helper_set_port_valid(i, j, true);
 				else
 					cvmx_helper_set_port_valid(i, j, false);
-			} else
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				break;
+			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			{
+				struct device_node *n;
+				if (cvm_oct_node_for_port(pip, i, j) != NULL)
+					cvmx_helper_set_port_valid(i, j, true);
+				else
+					cvmx_helper_set_port_valid(i, j, false);
+
+				n = of_find_compatible_node(NULL, NULL,
+						"cavium,octeon-3860-pip-port");
+				if (n != NULL && of_get_property(n, 
+					"cavium,sgmii-mac-phy-mode", NULL) != NULL)
+					cvmx_helper_set_mac_phy_mode(i, j, true);
+				else
+					cvmx_helper_set_mac_phy_mode(i, j, false);
+	
+				if (n != NULL && of_get_property(n, 
+					"cavium,sgmii-mac-1000x-mode", NULL) 
+					!= NULL)
+					cvmx_helper_set_1000x_mode(i, j, true);
+				else
+					cvmx_helper_set_1000x_mode(i, j, false);
+				break;
+			}
+			default:
 				cvmx_helper_set_port_valid(i, j, true);
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				break;
+			}
 		}
 	}
 	return 0;
