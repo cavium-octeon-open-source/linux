@@ -158,7 +158,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 
 			skb = (struct sk_buff *)packet_ptr.u64;
 			priv = netdev_priv(skb->dev);
-			if (!netif_running(skb->dev))
+			if (netif_queue_stopped(skb->dev))
 				netif_wake_queue(skb->dev);
 			if (unlikely((skb_shinfo(skb)->tx_flags | SKBTX_IN_PROGRESS) != 0 &&
 				     priv->tx_timestamp_hw)) {
