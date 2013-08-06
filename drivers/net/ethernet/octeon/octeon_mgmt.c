@@ -26,6 +26,7 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-mixx-defs.h>
 #include <asm/octeon/cvmx-agl-defs.h>
+#include "octeon_common.h"
 
 #define DRV_NAME "octeon_mgmt"
 #define DRV_VERSION "2.0"
@@ -538,105 +539,18 @@ static void octeon_mgmt_reset_hw(struct octeon_mgmt *p)
 			 (unsigned long long)agl_gmx_bist.u64);
 }
 
-struct octeon_mgmt_cam_state {
-	u64 cam[6];
-	u64 cam_mask;
-	int cam_index;
-};
-
-static void octeon_mgmt_cam_state_add(struct octeon_mgmt_cam_state *cs,
-				      unsigned char *addr)
-{
-	int i;
-
-	for (i = 0; i < 6; i++)
-		cs->cam[i] |= (u64)addr[i] << (8 * (cs->cam_index));
-	cs->cam_mask |= (1ULL << cs->cam_index);
-	cs->cam_index++;
-}
-
 static void octeon_mgmt_set_rx_filtering(struct net_device *netdev)
 {
 	struct octeon_mgmt *p = netdev_priv(netdev);
-	union cvmx_agl_gmx_rxx_adr_ctl adr_ctl;
-	union cvmx_agl_gmx_prtx_cfg agl_gmx_prtx;
-	unsigned long flags;
-	unsigned int prev_packet_enable;
-	unsigned int cam_mode = 1; /* 1 - Accept on CAM match */
-	unsigned int multicast_mode = 1; /* 1 - Reject all multicast.  */
-	struct octeon_mgmt_cam_state cam_state;
-	struct netdev_hw_addr *ha;
-	int available_cam_entries;
 
-	memset(&cam_state, 0, sizeof(cam_state));
-
-	if ((netdev->flags & IFF_PROMISC) || netdev->uc.count > 7) {
-		cam_mode = 0;
-		available_cam_entries = 8;
-	} else {
-		/* One CAM entry for the primary address, leaves seven
-		 * for the secondary addresses.
-		 */
-		available_cam_entries = 7 - netdev->uc.count;
-	}
-
-	if (netdev->flags & IFF_MULTICAST) {
-		if (cam_mode == 0 || (netdev->flags & IFF_ALLMULTI) ||
-		    netdev_mc_count(netdev) > available_cam_entries)
-			multicast_mode = 2; /* 2 - Accept all multicast.  */
-		else
-			multicast_mode = 0; /* 0 - Use CAM.  */
-	}
-
-	if (cam_mode == 1) {
-		/* Add primary address. */
-		octeon_mgmt_cam_state_add(&cam_state, netdev->dev_addr);
-		netdev_for_each_uc_addr(ha, netdev)
-			octeon_mgmt_cam_state_add(&cam_state, ha->addr);
-	}
-	if (multicast_mode == 0) {
-		netdev_for_each_mc_addr(ha, netdev)
-			octeon_mgmt_cam_state_add(&cam_state, ha->addr);
-	}
-
-	spin_lock_irqsave(&p->lock, flags);
-
-	/* Disable packet I/O. */
-	agl_gmx_prtx.u64 = cvmx_read_csr(p->agl + AGL_GMX_PRT_CFG);
-	prev_packet_enable = agl_gmx_prtx.s.en;
-	agl_gmx_prtx.s.en = 0;
-	cvmx_write_csr(p->agl + AGL_GMX_PRT_CFG, agl_gmx_prtx.u64);
-
-	adr_ctl.u64 = 0;
-	adr_ctl.s.cam_mode = cam_mode;
-	adr_ctl.s.mcst = multicast_mode;
-	adr_ctl.s.bcst = 1;     /* Allow broadcast */
-
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CTL, adr_ctl.u64);
-
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM0, cam_state.cam[0]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM1, cam_state.cam[1]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM2, cam_state.cam[2]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM3, cam_state.cam[3]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM4, cam_state.cam[4]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM5, cam_state.cam[5]);
-	cvmx_write_csr(p->agl + AGL_GMX_RX_ADR_CAM_EN, cam_state.cam_mask);
-
-	/* Restore packet I/O. */
-	agl_gmx_prtx.s.en = prev_packet_enable;
-	cvmx_write_csr(p->agl + AGL_GMX_PRT_CFG, agl_gmx_prtx.u64);
-
-	spin_unlock_irqrestore(&p->lock, flags);
+	cvm_oct_common_set_rx_filtering(netdev, p->agl, &p->lock);
 }
 
 static int octeon_mgmt_set_mac_address(struct net_device *netdev, void *addr)
 {
-	int r = eth_mac_addr(netdev, addr);
+	struct octeon_mgmt *p = netdev_priv(netdev);
 
-	if (r)
-		return r;
-
-	octeon_mgmt_set_rx_filtering(netdev);
+	cvm_oct_common_set_mac_address(netdev, addr, p->agl, &p->lock);
 
 	return 0;
 }

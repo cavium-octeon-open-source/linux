@@ -8,6 +8,7 @@ config OCTEON_ETHERNET
 	select MDIO_OCTEON
 	select NET_VENDOR_OCTEON
 	select OCTEON_ETHERNET_MEM
+	select OCTEON_ETHERNET_COMMON
 	help
 	  This driver supports the builtin ethernet ports on Cavium
 	  Inc.' products in the Octeon family. This driver supports the
@@ -39,6 +40,7 @@ config OCTEON_MGMT_ETHERNET
 	select PHYLIB
 	select MDIO_OCTEON
 	select NET_VENDOR_OCTEON
+	select OCTEON_ETHERNET_COMMON
 	default y
 	---help---
 	  This option enables the ethernet driver for the management
@@ -47,3 +49,6 @@ config OCTEON_MGMT_ETHERNET
 
 config NET_VENDOR_OCTEON
 	bool
+
+config OCTEON_ETHERNET_COMMON
+	tristate

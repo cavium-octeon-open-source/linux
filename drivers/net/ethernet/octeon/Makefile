@@ -6,6 +6,7 @@ obj-$(CONFIG_OCTEON_MGMT_ETHERNET)	+= octeon_mgmt.o
 obj-$(CONFIG_OCTEON_POW_ONLY_ETHERNET)	+= octeon-pow-ethernet.o
 obj-$(CONFIG_OCTEON_ETHERNET) +=  octeon-ethernet.o
 obj-$(CONFIG_OCTEON_ETHERNET_MEM) += ethernet-mem.o
+obj-$(CONFIG_OCTEON_ETHERNET_COMMON) += octeon_common.o
 
 octeon-ethernet-objs := ethernet.o
 octeon-ethernet-objs += ethernet-mdio.o

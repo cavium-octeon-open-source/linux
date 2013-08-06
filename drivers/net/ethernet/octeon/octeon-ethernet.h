@@ -67,6 +67,9 @@ struct octeon_ethernet {
 	unsigned int tx_multiple_queues:1;
 	unsigned int tx_lockless:1;
 
+	/* Base address for accessing GMX registers */
+	u64 gmx_base;
+
 	/* Optional intecept callback defined above */
 	cvm_oct_callback_t      intercept_cb;
 

@@ -41,6 +41,7 @@
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
+#include "octeon_common.h"
 
 #include <asm/octeon/cvmx-pip.h>
 #include <asm/octeon/cvmx-pko.h>
@@ -519,104 +520,34 @@ static int cvm_oct_common_change_mtu(struct net_device *dev, int new_mtu)
 }
 
 /**
- * cvm_oct_common_set_multicast_list - set the multicast list
+ * Set RX filtering
  * @dev:    Device to work on
  */
-static void cvm_oct_common_set_multicast_list(struct net_device *dev)
+static void cvm_oct_set_rx_filter(struct net_device *dev)
 {
-	union cvmx_gmxx_prtx_cfg gmx_cfg;
 	struct octeon_ethernet *priv = netdev_priv(dev);
 
-	if (priv->has_gmx_regs) {
-		union cvmx_gmxx_rxx_adr_ctl control;
-		control.u64 = 0;
-		control.s.bcst = 1;	/* Allow broadcast MAC addresses */
-
-		if (!netdev_mc_empty(dev) || (dev->flags & IFF_ALLMULTI) ||
-		    (dev->flags & IFF_PROMISC))
-			/* Force accept multicast packets */
-			control.s.mcst = 2;
-		else
-			/* Force reject multicat packets */
-			control.s.mcst = 1;
-
-		if (dev->flags & IFF_PROMISC)
-			/* Reject matches if promisc. Since CAM is
-			 * shut off, should accept everything.
-			 */
-			control.s.cam_mode = 0;
-		else
-			/* Filter packets based on the CAM */
-			control.s.cam_mode = 1;
-
-		gmx_cfg.u64 =
-		    cvmx_read_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface));
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface),
-			       gmx_cfg.u64 & ~1ull);
-
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CTL(priv->interface_port, priv->interface),
-			       control.u64);
-		if (dev->flags & IFF_PROMISC)
-			cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM_EN(priv->interface_port, priv->interface), 0);
-		else
-			cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM_EN(priv->interface_port, priv->interface), 1);
-
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface),
-			       gmx_cfg.u64);
-	}
+	if (priv->gmx_base)
+		cvm_oct_common_set_rx_filtering(dev, priv->gmx_base,
+					 &priv->poll_lock);
 }
 
 /**
- * cvm_oct_common_set_mac_address - set the hardware MAC address for a device
+ * Set the hardware MAC address for a device
  * @dev:    The device in question.
  * @addr:   Address structure to change it too.
  *
  * Returns Zero on success
  */
-static int cvm_oct_set_mac_filter(struct net_device *dev)
+static int cvm_oct_set_mac_address(struct net_device *dev, void *addr)
 {
 	struct octeon_ethernet *priv = netdev_priv(dev);
-	union cvmx_gmxx_prtx_cfg gmx_cfg;
 
-	if (priv->has_gmx_regs) {
-		int i;
-		u8 *ptr = dev->dev_addr;
-		u64 mac = 0;
-		for (i = 0; i < 6; i++)
-			mac = (mac << 8) | (u64)ptr[i];
+	if (priv->gmx_base)
+		cvm_oct_common_set_mac_address(dev, addr, priv->gmx_base,
+					 &priv->poll_lock);
 
-		gmx_cfg.u64 =
-		    cvmx_read_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface));
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface),
-			       gmx_cfg.u64 & ~1ull);
-
-		cvmx_write_csr(CVMX_GMXX_SMACX(priv->interface_port, priv->interface), mac);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM0(priv->interface_port, priv->interface),
-			       ptr[0]);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM1(priv->interface_port, priv->interface),
-			       ptr[1]);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM2(priv->interface_port, priv->interface),
-			       ptr[2]);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM3(priv->interface_port, priv->interface),
-			       ptr[3]);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM4(priv->interface_port, priv->interface),
-			       ptr[4]);
-		cvmx_write_csr(CVMX_GMXX_RXX_ADR_CAM5(priv->interface_port, priv->interface),
-			       ptr[5]);
-		cvm_oct_common_set_multicast_list(dev);
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface),
-			       gmx_cfg.u64);
-	}
 	return 0;
-}
-
-static int cvm_oct_common_set_mac_address(struct net_device *dev, void *addr)
-{
-	int r = eth_mac_addr(dev, addr);
-
-	if (r)
-		return r;
-	return cvm_oct_set_mac_filter(dev);
 }
 
 /**
@@ -631,6 +562,7 @@ int cvm_oct_common_init(struct net_device *dev)
 	cvmx_pko_port_status_t tx_status;
 	struct octeon_ethernet *priv = netdev_priv(dev);
 	const u8 *mac = NULL;
+	struct sockaddr sa;
 
 	if (priv->of_node)
 		mac = of_get_mac_address(priv->of_node);
@@ -652,7 +584,8 @@ int cvm_oct_common_init(struct net_device *dev)
 	dev->features |= NETIF_F_LLTX;
 	SET_ETHTOOL_OPS(dev, &cvm_oct_ethtool_ops);
 
-	cvm_oct_set_mac_filter(dev);
+	memcpy(sa.sa_data, dev->dev_addr, ETH_ALEN);
+	cvm_oct_common_set_mac_address(dev, &sa, priv->gmx_base, &priv->poll_lock);
 	dev->netdev_ops->ndo_change_mtu(dev, dev->mtu);
 
 	spin_lock_irqsave(&cvm_oct_tx_stat_lock, flags);
@@ -671,8 +604,8 @@ int cvm_oct_common_init(struct net_device *dev)
 static const struct net_device_ops cvm_oct_npi_netdev_ops = {
 	.ndo_init		= cvm_oct_common_init,
 	.ndo_start_xmit		= cvm_oct_xmit,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -688,8 +621,8 @@ static const struct net_device_ops cvm_oct_sgmii_netdev_ops = {
 	.ndo_open		= cvm_oct_sgmii_open,
 	.ndo_stop		= cvm_oct_sgmii_stop,
 	.ndo_start_xmit		= cvm_oct_xmit,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -703,8 +636,8 @@ static const struct net_device_ops cvm_oct_sgmii_lockless_netdev_ops = {
 	.ndo_open		= cvm_oct_sgmii_open,
 	.ndo_stop		= cvm_oct_sgmii_stop,
 	.ndo_start_xmit		= cvm_oct_xmit_lockless,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -717,8 +650,8 @@ static const struct net_device_ops cvm_oct_spi_netdev_ops = {
 	.ndo_uninit		= cvm_oct_spi_uninit,
 	.ndo_open		= cvm_oct_phy_setup_device,
 	.ndo_start_xmit		= cvm_oct_xmit,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -731,8 +664,8 @@ static const struct net_device_ops cvm_oct_spi_lockless_netdev_ops = {
 	.ndo_uninit		= cvm_oct_spi_uninit,
 	.ndo_open		= cvm_oct_phy_setup_device,
 	.ndo_start_xmit		= cvm_oct_xmit_lockless,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -745,8 +678,8 @@ static const struct net_device_ops cvm_oct_rgmii_netdev_ops = {
 	.ndo_open		= cvm_oct_rgmii_open,
 	.ndo_stop		= cvm_oct_rgmii_stop,
 	.ndo_start_xmit		= cvm_oct_xmit,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -759,8 +692,8 @@ static const struct net_device_ops cvm_oct_rgmii_lockless_netdev_ops = {
 	.ndo_open		= cvm_oct_rgmii_open,
 	.ndo_stop		= cvm_oct_rgmii_stop,
 	.ndo_start_xmit		= cvm_oct_xmit_lockless,
-	.ndo_set_rx_mode	= cvm_oct_common_set_multicast_list,
-	.ndo_set_mac_address	= cvm_oct_common_set_mac_address,
+	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
+	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
 	.ndo_change_mtu		= cvm_oct_common_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
@@ -1014,6 +947,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 			priv->netdev = dev;
 			priv->interface = interface;
 			priv->interface_port = interface_port;
+			priv->gmx_base = 0;
 			spin_lock_init(&priv->poll_lock);
 			INIT_DELAYED_WORK(&priv->port_periodic_work,
 					  cvm_oct_periodic_worker);
@@ -1078,6 +1012,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "xaui%d");
 				break;
@@ -1092,6 +1027,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "eth%d");
 				break;
@@ -1108,6 +1044,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_rgmii_lockless_netdev_ops : &cvm_oct_rgmii_netdev_ops;
+				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "eth%d");
 				break;
