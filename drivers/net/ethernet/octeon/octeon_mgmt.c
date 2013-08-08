@@ -93,15 +93,6 @@ union mgmt_port_ring_entry {
 #define AGL_GMX_RX_STATS_OCTS_DRP	0xb8
 #define AGL_GMX_RX_STATS_PKTS_BAD	0xc0
 
-#define AGL_GMX_RX_ADR_CTL		0x100
-#define AGL_GMX_RX_ADR_CAM_EN		0x108
-#define AGL_GMX_RX_ADR_CAM0		0x180
-#define AGL_GMX_RX_ADR_CAM1		0x188
-#define AGL_GMX_RX_ADR_CAM2		0x190
-#define AGL_GMX_RX_ADR_CAM3		0x198
-#define AGL_GMX_RX_ADR_CAM4		0x1a0
-#define AGL_GMX_RX_ADR_CAM5		0x1a8
-
 #define AGL_GMX_TX_CLK			0x208
 #define AGL_GMX_TX_STATS_CTL		0x268
 #define AGL_GMX_TX_CTL			0x270
