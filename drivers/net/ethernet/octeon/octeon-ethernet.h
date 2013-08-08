@@ -61,7 +61,6 @@ struct octeon_ethernet {
 	int imode;
 
 	unsigned int rx_strip_fcs:1;
-	unsigned int has_gmx_regs:1;
 	unsigned int tx_timestamp_hw:1;
 	unsigned int rx_timestamp_hw:1;
 	unsigned int tx_multiple_queues:1;

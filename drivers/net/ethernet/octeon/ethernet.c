@@ -28,8 +28,6 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/netdevice.h>
-#include <linux/etherdevice.h>
 #include <linux/phy.h>
 #include <linux/slab.h>
 #include <linux/of_net.h>
@@ -459,63 +457,28 @@ static struct net_device_stats *cvm_oct_common_get_stats(struct net_device *dev)
 }
 
 /**
- * cvm_oct_common_change_mtu - change the link MTU
+ * cvm_oct_change_mtu - change the link MTU
  * @dev:     Device to change
  * @new_mtu: The new MTU
  *
  * Returns Zero on success
  */
-static int cvm_oct_common_change_mtu(struct net_device *dev, int new_mtu)
+static int cvm_oct_change_mtu(struct net_device *dev, int new_mtu)
 {
 	struct octeon_ethernet *priv = netdev_priv(dev);
-#if IS_ENABLED(CONFIG_VLAN_8021Q)
-	int vlan_bytes = 4;
-#else
-	int vlan_bytes = 0;
-#endif
+	int ret;
+	u64 ipd_reg;
 
-	/* Limit the MTU to make sure the ethernet packets are between
-	 * 64 bytes and 65535 bytes.
-	 */
-	if ((new_mtu + 14 + 4 + vlan_bytes < 64)
-	    || (new_mtu + 14 + 4 + vlan_bytes > 65392)) {
-		netdev_err(dev, "MTU must be between %d and %d.\n",
-			   64 - 14 - 4 - vlan_bytes,
-			   65392 - 14 - 4 - vlan_bytes);
-		return -EINVAL;
-	}
-	dev->mtu = new_mtu;
+	if (OCTEON_IS_MODEL(OCTEON_CN3XXX) || OCTEON_IS_MODEL(OCTEON_CN58XX))
+		ipd_reg = 0;
+	else
+		ipd_reg = CVMX_PIP_PRT_CFGX(priv->ipd_pkind);
 
-	if (priv->has_gmx_regs) {
-		/* Add ethernet header and FCS, and VLAN if configured. */
-		int max_packet = new_mtu + 14 + 4 + vlan_bytes;
+	ret = cvm_oct_common_change_mtu(dev, new_mtu, priv->gmx_base, ipd_reg, 65392);
 
-		if (OCTEON_IS_MODEL(OCTEON_CN3XXX)
-		    || OCTEON_IS_MODEL(OCTEON_CN58XX)) {
-			/* Signal errors on packets larger than the MTU */
-			cvmx_write_csr(CVMX_GMXX_RXX_FRM_MAX(priv->interface_port, priv->interface),
-				       max_packet);
-		} else {
-			union cvmx_pip_prt_cfgx port_cfg;
+	if (ret)
+		return ret;
 
-			port_cfg.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGX(priv->ipd_pkind));
-			if (port_cfg.s.maxerr_en) {
-				/* Disable the PIP check as it can
-				 * only be controlled over a group of
-				 * ports, let the check be done in the
-				 * GMX instead.
-				 */
-				port_cfg.s.maxerr_en = 0;
-				cvmx_write_csr(CVMX_PIP_PRT_CFGX(priv->ipd_pkind), port_cfg.u64);
-			}
-		}
-		/* Set the hardware to truncate packets larger than
-		 * the MTU. The jabber register must be set to a
-		 * multiple of 8 bytes, so round up.
-		 */
-		cvmx_write_csr(CVMX_GMXX_RXX_JABBER(priv->interface_port, priv->interface),
-			       (max_packet + 7) & ~7u);
-	}
 	return 0;
 }
 
@@ -607,7 +570,7 @@ static const struct net_device_ops cvm_oct_npi_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -624,7 +587,7 @@ static const struct net_device_ops cvm_oct_sgmii_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -639,7 +602,7 @@ static const struct net_device_ops cvm_oct_sgmii_lockless_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -653,7 +616,7 @@ static const struct net_device_ops cvm_oct_spi_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -667,7 +630,7 @@ static const struct net_device_ops cvm_oct_spi_lockless_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -681,7 +644,7 @@ static const struct net_device_ops cvm_oct_rgmii_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -695,7 +658,7 @@ static const struct net_device_ops cvm_oct_rgmii_lockless_netdev_ops = {
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,
 	.ndo_do_ioctl		= cvm_oct_ioctl,
-	.ndo_change_mtu		= cvm_oct_common_change_mtu,
+	.ndo_change_mtu		= cvm_oct_change_mtu,
 	.ndo_get_stats		= cvm_oct_common_get_stats,
 #ifdef CONFIG_NET_POLL_CONTROLLER
 	.ndo_poll_controller	= cvm_oct_poll_controller,
@@ -1013,7 +976,6 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
-				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "xaui%d");
 				break;
 
@@ -1028,7 +990,6 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
-				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "eth%d");
 				break;
 
@@ -1045,7 +1006,6 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_rgmii_lockless_netdev_ops : &cvm_oct_rgmii_netdev_ops;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
-				priv->has_gmx_regs = 1;
 				strcpy(dev->name, "eth%d");
 				break;
 #ifdef CONFIG_RAPIDIO
