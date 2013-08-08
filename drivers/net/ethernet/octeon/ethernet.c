@@ -39,7 +39,6 @@
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
-#include "octeon_common.h"
 
 #include <asm/octeon/cvmx-pip.h>
 #include <asm/octeon/cvmx-pko.h>
@@ -251,6 +250,7 @@ static void cvm_oct_set_pko_multiqueue(void)
 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
 			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			case CVMX_HELPER_INTERFACE_MODE_AGL:
 			case CVMX_HELPER_INTERFACE_MODE_RGMII:
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
@@ -577,7 +577,7 @@ static const struct net_device_ops cvm_oct_npi_netdev_ops = {
 #endif
 };
 
-/* SGMII and XAUI handled the same so they both use this. */
+/* SGMII, AGL and XAUI handled the same so they both use this. */
 static const struct net_device_ops cvm_oct_sgmii_netdev_ops = {
 	.ndo_init		= cvm_oct_sgmii_init,
 	.ndo_uninit		= cvm_oct_sgmii_uninit,
@@ -990,6 +990,14 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
+				strcpy(dev->name, "eth%d");
+				break;
+
+			case CVMX_HELPER_INTERFACE_MODE_AGL:
+				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
+				dev->netdev_ops = priv->tx_lockless ?
+					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				priv->gmx_base = CVMX_AGL_GMX_RXX_INT_REG(0);
 				strcpy(dev->name, "eth%d");
 				break;
 

@@ -96,9 +96,9 @@ int cvm_oct_sgmii_open(struct net_device *dev)
 	if (rv)
 		return rv;
 
-	gmx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface));
+	gmx_cfg.u64 = cvmx_read_csr(priv->gmx_base + GMX_PRT_CFG);
 	gmx_cfg.s.en = 1;
-	cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface), gmx_cfg.u64);
+	cvmx_write_csr(priv->gmx_base + GMX_PRT_CFG, gmx_cfg.u64);
 
 	if (octeon_is_simulation())
 		return 0;
@@ -178,9 +178,9 @@ int cvm_oct_sgmii_stop(struct net_device *dev)
 	union cvmx_gmxx_prtx_cfg gmx_cfg;
 	struct octeon_ethernet *priv = netdev_priv(dev);
 
-	gmx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface));
+	gmx_cfg.u64 = cvmx_read_csr(priv->gmx_base + GMX_PRT_CFG);
 	gmx_cfg.s.en = 0;
-	cvmx_write_csr(CVMX_GMXX_PRTX_CFG(priv->interface_port, priv->interface), gmx_cfg.u64);
+	cvmx_write_csr(priv->gmx_base + GMX_PRT_CFG, gmx_cfg.u64);
 
 	if (priv->hw_status_notifier.notifier_call) {
 		struct octeon_hw_status_reg sr;

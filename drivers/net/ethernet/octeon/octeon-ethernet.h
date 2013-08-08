@@ -33,6 +33,8 @@
 
 #include <linux/of.h>
 
+#include "octeon_common.h"
+
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-fau.h>
 #include <asm/octeon/octeon-ethernet-user.h>

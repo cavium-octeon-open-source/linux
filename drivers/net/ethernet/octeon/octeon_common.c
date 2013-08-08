@@ -15,19 +15,6 @@
 #include <asm/octeon/cvmx-agl-defs.h>
 #include <asm/octeon/cvmx-pip-defs.h>
 
-#define GMX_PRT_CFG                 0x10
-
-#define GMX_RX_FRM_MAX              0x30
-#define GMX_RX_JABBER               0x38
-#define GMX_RX_ADR_CTL              0x100
-#define GMX_RX_ADR_CAM_EN           0x108
-#define GMX_RX_ADR_CAM0             0x180
-#define GMX_RX_ADR_CAM1             0x188
-#define GMX_RX_ADR_CAM2             0x190
-#define GMX_RX_ADR_CAM3             0x198
-#define GMX_RX_ADR_CAM4             0x1a0
-#define GMX_RX_ADR_CAM5             0x1a8
-
 struct cvm_oct_cam_state {
 	u64 cam[6];
 	u64 cam_mask;
