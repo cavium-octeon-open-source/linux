@@ -319,18 +319,13 @@ static irqreturn_t octeon_pow_interrupt(int cpl, void *dev_id)
 	asm volatile ("synciobdma" : : : "memory");
 
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
-		cvmx_write_csr(CVMX_SSO_WQ_INT, 1ull << priv->rx_group);
-		cvmx_write_csr(CVMX_SSO_WQ_IQ_DIS, 1ull << priv->rx_group);
-
+		/* Only allow work for our group */
 		old_group_mask = cvmx_read_csr(CVMX_SSO_PPX_GRP_MSK(coreid));
 		cvmx_write_csr(CVMX_SSO_PPX_GRP_MSK(coreid),
 			       1ull << priv->rx_group);
 		/* Read it back so it takes effect before we request work */
 		cvmx_read_csr(CVMX_SSO_PPX_GRP_MSK(coreid));
 	} else {
-		/* Acknowledge the interrupt */
-		cvmx_write_csr(CVMX_POW_WQ_INT, 0x10001 << priv->rx_group);
-
 		/* Only allow work for our group */
 		old_group_mask = cvmx_read_csr(CVMX_POW_PP_GRP_MSKX(coreid));
 		cvmx_write_csr(CVMX_POW_PP_GRP_MSKX(coreid), 1 << priv->rx_group);
@@ -413,13 +408,20 @@ static irqreturn_t octeon_pow_interrupt(int cpl, void *dev_id)
 		netif_rx(skb);
 	}
 
-	/* Restore the original POW group mask */
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
+		/* Restore the original POW group mask */
 		cvmx_write_csr(CVMX_SSO_PPX_GRP_MSK(coreid), old_group_mask);
 		/* Read it back so it takes effect before ?? */
 		cvmx_read_csr(CVMX_SSO_PPX_GRP_MSK(coreid));
+
+		/* Acknowledge the interrupt */
+		cvmx_write_csr(CVMX_SSO_WQ_INT, 1ull << priv->rx_group);
 	} else {
+		/* Restore the original POW group mask */
 		cvmx_write_csr(CVMX_POW_PP_GRP_MSKX(coreid), old_group_mask);
+
+		/* Acknowledge the interrupt */
+		cvmx_write_csr(CVMX_POW_WQ_INT, 1ull << priv->rx_group);
 	}
 	return IRQ_HANDLED;
 }
