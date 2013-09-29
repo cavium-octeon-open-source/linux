@@ -782,6 +782,7 @@ static int cvm_oct_get_port_status(struct device_node *pip)
 				cvmx_helper_set_1000x_mode(i, j, false);
 				break;
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			case CVMX_HELPER_INTERFACE_MODE_AGL:
 			{
 				struct device_node *n;
 				if (cvm_oct_node_for_port(pip, i, j) != NULL)
@@ -998,7 +999,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
 				priv->gmx_base = CVMX_AGL_GMX_RXX_INT_REG(0);
-				strcpy(dev->name, "eth%d");
+				strcpy(dev->name, "agl%d");
 				break;
 
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
