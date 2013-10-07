@@ -239,7 +239,15 @@ static int cvm_oct_check_rcv_error(cvmx_wqe_t *work)
 		int interface = cvmx_helper_get_interface_num(port);
 		int index = cvmx_helper_get_interface_index_num(port);
 		union cvmx_gmxx_rxx_frm_ctl gmxx_rxx_frm_ctl;
-		gmxx_rxx_frm_ctl.u64 = cvmx_read_csr(CVMX_GMXX_RXX_FRM_CTL(index, interface));
+		uint64_t frm_ctl_reg;
+
+		if (cvmx_helper_interface_get_mode(interface) ==
+			CVMX_HELPER_INTERFACE_MODE_AGL)
+			frm_ctl_reg = CVMX_AGL_GMX_RXX_FRM_CTL(index);
+		else
+			frm_ctl_reg = CVMX_GMXX_RXX_FRM_CTL(index, interface);
+
+		gmxx_rxx_frm_ctl.u64 = cvmx_read_csr(frm_ctl_reg);
 		if (gmxx_rxx_frm_ctl.s.pre_chk == 0) {
 
 			u8 *ptr = phys_to_virt(work->packet_ptr.s.addr);
