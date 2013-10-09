@@ -213,6 +213,7 @@ static bool cvm_oct_pko_lockless(void)
 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
 			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			case CVMX_HELPER_INTERFACE_MODE_RGMII:
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
@@ -250,6 +251,7 @@ static void cvm_oct_set_pko_multiqueue(void)
 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
 			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
+			case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			case CVMX_HELPER_INTERFACE_MODE_AGL:
 			case CVMX_HELPER_INTERFACE_MODE_RGMII:
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
@@ -774,6 +776,7 @@ static int cvm_oct_get_port_status(struct device_node *pip)
 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
 			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
+			case CVMX_HELPER_INTERFACE_MODE_AGL:
 				if (cvm_oct_node_for_port(pip, i, j) != NULL)
 					cvmx_helper_set_port_valid(i, j, true);
 				else
@@ -782,7 +785,7 @@ static int cvm_oct_get_port_status(struct device_node *pip)
 				cvmx_helper_set_1000x_mode(i, j, false);
 				break;
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
-			case CVMX_HELPER_INTERFACE_MODE_AGL:
+			case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			{
 				struct device_node *n;
 				if (cvm_oct_node_for_port(pip, i, j) != NULL)
