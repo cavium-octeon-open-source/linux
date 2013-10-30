@@ -930,10 +930,10 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				tx_header.s.lns = 1;
 				tx_header.s.intr = 1;
 				priv->srio_tx_header = tx_header.u64;
-				priv->ipd_port = cvmx_helper_get_ipd_port(interface, mbox >> 1);
+				priv->ipd_port = cvmx_helper_get_ipd_port(interface, mbox);
 				priv->pko_port = priv->ipd_port;
 				priv->key = priv->ipd_port + (0x10000 * mbox);
-				base_queue = cvmx_pko_get_base_queue(priv->ipd_port) + (mbox & 1);
+				base_queue = cvmx_pko_get_base_queue(priv->ipd_port);
 				priv->num_tx_queues = 1;
 				cvm_oct_by_srio_mbox[interface - 4][mbox] = priv;
 			} else {
