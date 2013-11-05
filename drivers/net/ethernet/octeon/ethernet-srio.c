@@ -43,6 +43,12 @@
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
 
+/* SRIO packets' length must be a multiple of 8 */
+#define SRIO_PAD		8
+
+/* SRIO header length */
+#define SRIO_HDR_LEN		8
+
 struct net_device_stats *cvm_oct_srio_get_stats(struct net_device *dev)
 {
 	return &dev->stats;
@@ -67,9 +73,18 @@ int cvm_oct_srio_change_mtu(struct net_device *dev, int new_mtu)
 
 	/*
 	 * Limit the MTU to make sure the ethernet packets are between
-	 * 68 bytes and 4096 - ethernet header, fcs and optional VLAN bytes.
+	 * 68 bytes and 4096. The MTU does not include the following:
+	 *	SRIO header
+	 *	Ethernet header
+	 *	VLAN tags (optional)
+	 *	SRIO padding
+	 *	FCS
+	 *
+	 * Note: we could use "SRIO_PAD - 1" in this calculation, but that would
+	 * make the MTU and odd number, which doesn't look right to me.
 	 */
-	max_mtu = RIO_MAX_MSG_SIZE - ETH_HLEN - vlan_bytes - ETH_FCS_LEN;
+	max_mtu = RIO_MAX_MSG_SIZE - SRIO_HDR_LEN - ETH_HLEN - vlan_bytes - 
+		SRIO_PAD - ETH_FCS_LEN;
 	if ((new_mtu < 68) || (new_mtu > max_mtu)) {
 		netdev_warn(dev, "MTU must be between %d and %d.\n",
 			    68, max_mtu);
@@ -97,12 +112,21 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 		return 0;
 	}
 
+	/*
+	 * Since we are emulating ethernet over srio, small packets must be
+	 * padded or the receiver will discard them for being too short.
+	 */
+	if (unlikely(skb->len < 64)) {
+		if (likely(skb_tailroom(skb) >= 64 - skb->len)) {
+			skb->len = 64;
+		}
+	}
+
 	/* srio message length needs to be a multiple of 8 */
-	if (unlikely(skb_tailroom(skb) < 8))
-		/* can optionally allocate a larger sk_buff and do a copy */
-		skb->len = skb->len;
-	else
-		skb->len = ((skb->len >> 3) + 1) << 3;
+	if (skb->len % SRIO_PAD) {
+		if (likely(skb_tailroom(skb) > SRIO_PAD - 1))
+			skb->len = (skb->len + SRIO_PAD - 1) & ~(SRIO_PAD - 1);
+	}
 
 	tx_header.u64 = priv->srio_tx_header;
 	/* Use the socket priority if it is available */
