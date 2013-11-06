@@ -63,6 +63,7 @@ CVM_OCT_XMIT
 	unsigned long flags;
 	cvmx_wqe_t *work = NULL;
 	bool timestamp_this_skb = false;
+	bool can_do_reuse = true;
 
 	/* Prefetch the private data structure.  It is larger than one
 	 * cache line.
@@ -167,7 +168,6 @@ CVM_OCT_XMIT
 		buffers_being_recycled = 1;
 	} else {
 		u64 *hw_buffer_list;
-		bool can_do_reuse = true;
 
 		work = cvmx_fpa_alloc(wqe_pool);
 		if (unlikely(!work)) {
@@ -211,42 +211,32 @@ CVM_OCT_XMIT
 		buffers_being_recycled = i;
 		pko_command.s.segs = hw_buffer.s.size;
 		pko_command.s.gather = 1;
-		if (!can_do_reuse)
-			goto dont_put_skbuff_in_hw;
 	}
 
-	if (unlikely(priv->tx_timestamp_hw &&
-		     (skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP))) {
+	if (unlikely(priv->tx_timestamp_hw) &&
+	    (skb_shinfo(skb)->tx_flags & SKBTX_HW_TSTAMP)) {
 		timestamp_this_skb = true;
 		skb_shinfo(skb)->tx_flags |= SKBTX_IN_PROGRESS;
-		goto dont_put_skbuff_in_hw;
+		can_do_reuse = false;
 	}
+
 	/* See if we can put this skb in the FPA pool. Any strange
 	 * behavior from the Linux networking stack will most likely
 	 * be caused by a bug in the following code. If some field is
 	 * in use by the network stack and get carried over when a
 	 * buffer is reused, bad thing may happen.  If in doubt and
-	 * you dont need the absolute best performance, disable the
-	 * define REUSE_SKBUFFS_WITHOUT_FREE. The reuse of buffers has
-	 * shown a 25% increase in performance under some loads.
+	 * you dont need the absolute best performance, set recycle_tx
+	 * to zero . The reuse of buffers has shown a 25% increase in
+	 * performance under some loads.
 	 */
-#if REUSE_SKBUFFS_WITHOUT_FREE
-	if (!cvm_oct_skb_ok_for_reuse(skb))
-		goto dont_put_skbuff_in_hw;
-	if (unlikely(skb_header_cloned(skb)))
-		goto dont_put_skbuff_in_hw;
-	if (unlikely(skb->destructor))
-		goto dont_put_skbuff_in_hw;
-
-
-	/* We can use this buffer in the FPA.  We don't need the FAU
-	 * update anymore
-	 */
-	pko_command.s.dontfree = 0;
-
-#endif /* REUSE_SKBUFFS_WITHOUT_FREE */
-
-dont_put_skbuff_in_hw:
+	if (octeon_recycle_tx && can_do_reuse &&
+	    cvm_oct_skb_ok_for_reuse(skb) &&
+	    likely(!skb_header_cloned(skb)) &&
+	    likely(!skb->destructor))
+		/* We can use this buffer in the FPA.  We don't need
+		 * the FAU update anymore
+		 */
+		pko_command.s.dontfree = 0;
 
 	/* Check if we can use the hardware checksumming */
 	if (USE_HW_TCPUDP_CHECKSUM && (skb->protocol == htons(ETH_P_IP)) &&

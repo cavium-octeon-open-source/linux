@@ -27,6 +27,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/netdevice.h>
+#include <linux/skbuff.h>
 #include <linux/init.h>
 #include <linux/etherdevice.h>
 #include <linux/ip.h>
@@ -60,7 +61,6 @@
 #define GET_SKBUFF_QOS(skb) 0
 #endif
 
-#if REUSE_SKBUFFS_WITHOUT_FREE
 static bool cvm_oct_skb_ok_for_reuse(struct sk_buff *skb)
 {
 	unsigned char *fpa_head = cvm_oct_get_fpa_head(skb);
@@ -82,17 +82,30 @@ static bool cvm_oct_skb_ok_for_reuse(struct sk_buff *skb)
 	return true;
 }
 
+static void skb_recycle(struct sk_buff *skb)
+{
+	struct skb_shared_info *shinfo;
+
+	skb_release_head_state(skb);
+
+	shinfo = skb_shinfo(skb);
+	memset(shinfo, 0, offsetof(struct skb_shared_info, dataref));
+	atomic_set(&shinfo->dataref, 1);
+
+	memset(skb, 0, offsetof(struct sk_buff, tail));
+	skb->data = skb->head + NET_SKB_PAD;
+	skb_reset_tail_pointer(skb);
+}
+
 static void cvm_oct_skb_prepare_for_reuse(struct sk_buff *skb)
 {
-	int r;
 	unsigned char *fpa_head = cvm_oct_get_fpa_head(skb);
 
 	skb->data_len = 0;
 	skb_frag_list_init(skb);
 
 	/* The check also resets all the fields. */
-	r = skb_recycle_check(skb, FPA_PACKET_POOL_SIZE);
-	WARN(!r, "SKB recycle logic fail\n");
+	skb_recycle(skb);
 
 	*(struct sk_buff **)(fpa_head - sizeof(void *)) = skb;
 	skb->truesize = sizeof(*skb) + skb_end_pointer(skb) - skb->head;
@@ -105,23 +118,6 @@ static inline void cvm_oct_set_back(struct sk_buff *skb,
 
 	hw_buffer->s.back = ((unsigned long)skb->data >> 7) - ((unsigned long)fpa_head >> 7);
 }
-#else
-static bool cvm_oct_skb_ok_for_reuse(struct sk_buff *skb)
-{
-	return false;
-}
-static void cvm_oct_skb_prepare_for_reuse(struct sk_buff *skb)
-{
-	/* Do nothing */
-}
-
-static inline void cvm_oct_set_back(struct sk_buff *skb,
-				    union cvmx_buf_ptr *hw_buffer)
-{
-	/* Do nothing. */
-}
-
-#endif
 
 #define CVM_OCT_LOCKLESS 1
 #include "ethernet-xmit.c"

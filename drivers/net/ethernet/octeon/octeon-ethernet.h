@@ -164,6 +164,7 @@ void cvm_oct_mem_cleanup(void);
 extern const struct ethtool_ops cvm_oct_ethtool_ops;
 
 extern int rx_cpu_factor;
+extern int octeon_recycle_tx;
 extern int packet_pool;
 extern int wqe_pool;
 extern int output_pool;

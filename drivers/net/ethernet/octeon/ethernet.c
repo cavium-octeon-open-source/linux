@@ -59,6 +59,10 @@ module_param(rx_cpu_factor, int, S_IRUGO | S_IWUSR | S_IWGRP);
 MODULE_PARM_DESC(rx_cpu_factor, "Control how many CPUs are used for packet reception.\n"
 		 "\tLarger numbers result in fewer CPUs used.");
 
+int octeon_recycle_tx = REUSE_SKBUFFS_WITHOUT_FREE;
+module_param(octeon_recycle_tx, int, S_IRUGO | S_IWUSR | S_IWGRP);
+MODULE_PARM_DESC(octeon_recycle_tx, "Allow hardware SKB recycling.");
+
 int num_packet_buffers = 1024;
 module_param(num_packet_buffers, int, 0444);
 MODULE_PARM_DESC(num_packet_buffers, "\n"
