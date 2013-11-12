@@ -338,6 +338,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 		if (!CVM_OCT_NAPI_HAS_CN68XX_SSO && unlikely(priv == NULL)) {
 			const struct cvmx_srio_rx_message_header *rx_header =
 				(const struct cvmx_srio_rx_message_header *)skb->data;
+			*(u64 *)rx_header = be64_to_cpu(*(u64 *)rx_header);
 			priv = cvm_oct_by_srio_mbox[(port - 40) >> 1][rx_header->word0.s.mbox];
 		}
 

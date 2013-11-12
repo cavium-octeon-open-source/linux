@@ -140,7 +140,7 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 	}
 
 	/* Extract the destination MAC address from the packet */
-	dest_mac = *(u64 *)skb->data >> 16;
+	dest_mac = cpu_to_be64(*(u64 *)skb->data >> 16);
 
 	/* If this is a broadcast/multicast we must manually send to everyone */
 	if (dest_mac>>40) {
@@ -155,7 +155,7 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 			new_skb = skb_copy(skb, GFP_ATOMIC);
 			if (new_skb) {
 				tx_header.s.did = t->destid;
-				*(u64 *)__skb_push(new_skb, 8) = tx_header.u64;
+				*(u64 *)__skb_push(new_skb, 8) = cpu_to_be64(tx_header.u64);
 				cvm_oct_xmit(new_skb, dev);
 			} else {
 				netdev_dbg(dev, "SKB allocation failed\n");
@@ -185,7 +185,7 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 
 		dev->stats.tx_packets++;
 		dev->stats.tx_bytes += skb->len;
-		*(u64 *)__skb_push(skb, 8) = tx_header.u64;
+		*(u64 *)__skb_push(skb, 8) = cpu_to_be64(tx_header.u64);
 		return cvm_oct_xmit(skb, dev);
 	}
 }
