@@ -162,9 +162,7 @@ static void cvm_oct_periodic_worker(struct work_struct *work)
 						    port_periodic_work.work);
 	void (*poll_fn) (struct net_device *);
 
-	spin_lock(&priv->poll_lock);
-	poll_fn = priv->poll;
-	spin_unlock(&priv->poll_lock);
+	poll_fn = ACCESS_ONCE(priv->poll);
 
 	if (poll_fn)
 		poll_fn(priv->netdev);

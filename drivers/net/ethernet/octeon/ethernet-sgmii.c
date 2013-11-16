@@ -112,9 +112,7 @@ int cvm_oct_sgmii_open(struct net_device *dev)
 		link_info = cvmx_helper_link_get(priv->ipd_port);
 		if (!link_info.s.link_up)
 			netif_carrier_off(dev);
-		spin_lock(&priv->poll_lock);
 		priv->poll = cvm_oct_sgmii_poll;
-		spin_unlock(&priv->poll_lock);
 		cvm_oct_sgmii_poll(dev);
 	}
 	imode = cvmx_helper_interface_get_mode(priv->interface);
@@ -199,9 +197,7 @@ int cvm_oct_sgmii_stop(struct net_device *dev)
 		priv->hw_status_notifier.notifier_call = NULL;
 	}
 
-	spin_lock(&priv->poll_lock);
 	priv->poll = NULL;
-	spin_unlock(&priv->poll_lock);
 
 	if (priv->phydev)
 		phy_disconnect(priv->phydev);
