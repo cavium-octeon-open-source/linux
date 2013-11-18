@@ -1139,6 +1139,11 @@ static int cvm_oct_remove(struct platform_device *pdev)
 	return 0;
 }
 
+static void cvm_oct_shutdown(struct platform_device *pdev)
+{
+	cvm_oct_remove(pdev);
+}
+
 static struct of_device_id cvm_oct_match[] = {
 	{
 		.compatible = "cavium,octeon-3860-pip",
@@ -1150,7 +1155,7 @@ MODULE_DEVICE_TABLE(of, cvm_oct_match);
 static struct platform_driver cvm_oct_driver = {
 	.probe		= cvm_oct_probe,
 	.remove		= cvm_oct_remove,
-	.shutdown       = cvmx_oct_remove,
+	.shutdown       = cvm_oct_shutdown,
 	.driver		= {
 		.owner	= THIS_MODULE,
 		.name	= KBUILD_MODNAME,
