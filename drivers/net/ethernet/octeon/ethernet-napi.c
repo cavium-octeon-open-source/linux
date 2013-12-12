@@ -148,6 +148,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 			    cores_in_use < core_state.baseline_cores)
 				cvm_oct_enable_one_cpu();
 		}
+		rx_count++;
 
 		/* If WORD2[SOFTWARE] then this WQE is a complete for
 		 * a TX packet.
@@ -383,7 +384,6 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 					switch (callback_result) {
 					case CVM_OCT_PASS:
 						netif_receive_skb(skb);
-						rx_count++;
 						break;
 					case CVM_OCT_DROP:
 						dev_kfree_skb_any(skb);
@@ -413,7 +413,6 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 				} else {
 					netif_receive_skb(skb);
 					callback_result = CVM_OCT_PASS;
-					rx_count++;
 				}
 			} else {
 				/* Drop any packet received for a device that isn't up */

@@ -98,10 +98,6 @@ static int disable_lockless_pko;
 module_param(disable_lockless_pko, int, S_IRUGO);
 MODULE_PARM_DESC(disable_lockless_pko, "Disable lockless PKO access (use locking for queues instead).");
 
-/* internal ports count for each port in a interface */
-int iport_count = 1;
-/* pko queue count for each port in a interface */
-int queues_count = 1;
 /* packet pool */
 int packet_pool = 0;
 /* wqe pool */
@@ -962,7 +958,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 			}
 
 			/* Cache the fact that there may be multiple queues */
-			priv->tx_multiple_queues = (queues_count > 1);
+			priv->tx_multiple_queues = (priv->num_tx_queues > 1);
 
 			switch (priv->imode) {
 			/* These types don't support ports to IPD/PKO */
