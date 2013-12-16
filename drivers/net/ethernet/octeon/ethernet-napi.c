@@ -105,7 +105,6 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 		else
 			work = cvmx_pow_work_request_sync(CVMX_POW_NO_WAIT);
 
-		prefetch(work);
 		did_work_request = false;
 		if (unlikely(work == NULL)) {
 			/* It takes so long to get here, so lets wait
@@ -122,12 +121,12 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 		pskb = cvm_oct_packet_to_skb(cvm_oct_get_buffer_ptr(packet_ptr));
 		prefetch(pskb);
 
-		if (USE_ASYNC_IOBDMA && rx_count < (budget - 1)) {
+		if (likely(USE_ASYNC_IOBDMA && rx_count < (budget - 1))) {
 			cvmx_pow_work_request_async_nocheck(CVMX_SCR_SCRATCH, CVMX_POW_NO_WAIT);
 			did_work_request = true;
 		}
 
-		if (rx_count == 0) {
+		if (unlikely(rx_count == 0)) {
 			/* First time through, see if there is enough
 			 * work waiting to merit waking another
 			 * CPU.
