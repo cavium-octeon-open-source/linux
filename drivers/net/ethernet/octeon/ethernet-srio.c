@@ -118,14 +118,14 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 	 */
 	if (unlikely(skb->len < 64)) {
 		if (likely(skb_tailroom(skb) >= 64 - skb->len)) {
-			skb->len = 64;
+			skb_put(skb, 64 - skb->len);
 		}
 	}
 
 	/* srio message length needs to be a multiple of 8 */
-	if (skb->len % SRIO_PAD) {
+	if (skb->len & (SRIO_PAD - 1)) {
 		if (likely(skb_tailroom(skb) > SRIO_PAD - 1))
-			skb->len = (skb->len + SRIO_PAD - 1) & ~(SRIO_PAD - 1);
+			skb_put(skb, SRIO_PAD - (skb->len & (SRIO_PAD - 1)));
 	}
 
 	tx_header.u64 = priv->srio_tx_header;
@@ -152,7 +152,13 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 
 			t = container_of(pos, struct octeon_ethernet_srio_bcast_target, list);
 			/* Create a new SKB since each packet will have different data */
-			new_skb = skb_copy(skb, GFP_ATOMIC);
+			if (skb_headroom(skb) < 8) {
+				new_skb = skb_realloc_headroom(skb,
+					8 - skb_headroom(skb));
+			}
+			else
+				new_skb = skb_copy(skb, GFP_ATOMIC);
+
 			if (new_skb) {
 				tx_header.s.did = t->destid;
 				*(u64 *)__skb_push(new_skb, 8) = cpu_to_be64(tx_header.u64);
@@ -173,14 +179,14 @@ int cvm_oct_xmit_srio(struct sk_buff *skb, struct net_device *dev)
 		/* tx_header.s.did = *(u16 *)(skb->data + 4); */
 		tx_header.s.did = *(u8 *)(skb->data + 5);
 		if (unlikely(skb_headroom(skb) < 8)) {
-			struct sk_buff *new_skb = skb_copy(skb, GFP_ATOMIC);
-			dev_kfree_skb(skb);
-			if (!new_skb) {
+			int	nhead = 8 - skb_headroom(skb);
+
+			if (pskb_expand_head(skb, nhead, 0, GFP_ATOMIC)) {
 				netdev_dbg(dev,
-					   "SKB didn't have room for SRIO header and allocation failed\n");
+					   "SKB didn't have room for SRIO "
+					   "header and allocation failed\n");
 				return NETDEV_TX_OK;
 			}
-			skb = new_skb;
 		}
 
 		dev->stats.tx_packets++;
