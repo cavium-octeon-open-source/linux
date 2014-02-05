@@ -785,26 +785,23 @@ static int cvm_oct_get_port_status(struct device_node *pip)
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
 			case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			{
-				struct device_node *n;
-				if (cvm_oct_node_for_port(pip, i, j) != NULL)
+				struct device_node *port_node;
+				port_node = cvm_oct_node_for_port(pip, i, j);
+				if (port_node != NULL)
 					cvmx_helper_set_port_valid(i, j, true);
 				else
 					cvmx_helper_set_port_valid(i, j, false);
-
-				n = of_find_compatible_node(NULL, NULL,
-						"cavium,octeon-3860-pip-port");
-				if (n != NULL && of_get_property(n, 
-					"cavium,sgmii-mac-phy-mode", NULL) != NULL)
-					cvmx_helper_set_mac_phy_mode(i, j, true);
-				else
-					cvmx_helper_set_mac_phy_mode(i, j, false);
-	
-				if (n != NULL && of_get_property(n, 
-					"cavium,sgmii-mac-1000x-mode", NULL) 
-					!= NULL)
-					cvmx_helper_set_1000x_mode(i, j, true);
-				else
-					cvmx_helper_set_1000x_mode(i, j, false);
+				cvmx_helper_set_mac_phy_mode(i, j, false);
+				cvmx_helper_set_1000x_mode(i, j, false);
+				if (port_node) {
+					if (of_get_property(port_node, 
+					    "cavium,sgmii-mac-phy-mode", NULL) != NULL)
+						cvmx_helper_set_mac_phy_mode(i, j, true);
+					if (of_get_property(port_node, 
+					    "cavium,sgmii-mac-1000x-mode", NULL) 
+					    != NULL)
+						cvmx_helper_set_1000x_mode(i, j, true);
+				}
 				break;
 			}
 			default:
