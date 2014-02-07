@@ -1004,6 +1004,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_spi_lockless_netdev_ops : &cvm_oct_spi_netdev_ops;
+				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				strcpy(dev->name, "spi%d");
 				break;
 
