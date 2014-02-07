@@ -974,6 +974,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				dev->priv_flags |= IFF_UNICAST_FLT;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				strcpy(dev->name, "xaui%d");
 				break;
@@ -988,6 +989,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				dev->priv_flags |= IFF_UNICAST_FLT;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				strcpy(dev->name, "eth%d");
 				break;
@@ -996,6 +998,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_sgmii_lockless_netdev_ops : &cvm_oct_sgmii_netdev_ops;
+				dev->priv_flags |= IFF_UNICAST_FLT;
 				priv->gmx_base = CVMX_AGL_GMX_RXX_INT_REG(0);
 				strcpy(dev->name, "agl%d");
 				break;
@@ -1004,6 +1007,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_spi_lockless_netdev_ops : &cvm_oct_spi_netdev_ops;
+				dev->priv_flags |= IFF_UNICAST_FLT;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				strcpy(dev->name, "spi%d");
 				break;
@@ -1013,6 +1017,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_lockless = priv->tx_multiple_queues && !disable_lockless_pko;
 				dev->netdev_ops = priv->tx_lockless ?
 					&cvm_oct_rgmii_lockless_netdev_ops : &cvm_oct_rgmii_netdev_ops;
+				dev->priv_flags |= IFF_UNICAST_FLT;
 				priv->gmx_base = CVMX_GMXX_RXX_INT_REG(interface_port, interface);
 				strcpy(dev->name, "eth%d");
 				break;
