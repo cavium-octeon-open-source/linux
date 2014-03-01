@@ -612,6 +612,7 @@ static const struct net_device_ops cvm_oct_spi_netdev_ops = {
 	.ndo_init		= cvm_oct_spi_init,
 	.ndo_uninit		= cvm_oct_spi_uninit,
 	.ndo_open		= cvm_oct_phy_setup_device,
+	.ndo_stop		= cvm_oct_common_stop,
 	.ndo_start_xmit		= cvm_oct_xmit,
 	.ndo_set_rx_mode	= cvm_oct_set_rx_filter,
 	.ndo_set_mac_address	= cvm_oct_set_mac_address,

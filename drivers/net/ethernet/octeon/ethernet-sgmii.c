@@ -197,12 +197,6 @@ int cvm_oct_sgmii_stop(struct net_device *dev)
 		priv->hw_status_notifier.notifier_call = NULL;
 	}
 
-	priv->poll = NULL;
-
-	if (priv->phydev)
-		phy_disconnect(priv->phydev);
-	priv->phydev = NULL;
-
 	return cvm_oct_common_stop(dev);
 }
 

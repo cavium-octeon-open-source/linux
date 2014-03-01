@@ -280,7 +280,7 @@ int cvm_oct_rgmii_stop(struct net_device *dev)
 	cvmx_write_csr(CVMX_IPD_SUB_PORT_FCS, ipd_sub_port_fcs.u64);
 	priv->rx_strip_fcs = 0;
 
-	return 0;
+	return cvm_oct_common_stop(dev);
 }
 
 int cvm_oct_rgmii_init(struct net_device *dev)

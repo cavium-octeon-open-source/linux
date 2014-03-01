@@ -362,6 +362,12 @@ int cvm_oct_common_stop(struct net_device *dev)
 	struct octeon_ethernet *priv = netdev_priv(dev);
 	cvmx_helper_link_info_t link_info;
 
+	priv->poll = NULL;
+
+	if (priv->phydev)
+		phy_disconnect(priv->phydev);
+	priv->phydev = NULL;
+
 	if (priv->last_link) {
 		link_info.u64 = 0;
 		priv->last_link = 0;
