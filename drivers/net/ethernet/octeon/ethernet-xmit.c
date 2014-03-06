@@ -79,7 +79,7 @@ CVM_OCT_XMIT
 		/* Fetch and increment the number of packets to be
 		 * freed.
 		 */
-		cvmx_fau_async_fetch_and_add32(CVMX_SCR_SCRATCH + 8,
+		cvmx_hwfau_async_fetch_and_add32(CVMX_SCR_SCRATCH + 8,
 					       FAU_NUM_PACKET_BUFFERS_TO_FREE,
 					       0);
 	}
@@ -101,7 +101,7 @@ CVM_OCT_XMIT
 		qos = 0;
 #endif
 	if (USE_ASYNC_IOBDMA) {
-		cvmx_fau_async_fetch_and_add32(CVMX_SCR_SCRATCH,
+		cvmx_hwfau_async_fetch_and_add32(CVMX_SCR_SCRATCH,
 					       priv->tx_queue[qos].fau, 1);
 	}
 
@@ -256,8 +256,8 @@ CVM_OCT_XMIT
 		buffers_to_free = cvmx_scratch_read64(CVMX_SCR_SCRATCH + 8);
 	} else {
 		/* Get the number of skbuffs in use by the hardware */
-		queue_depth = cvmx_fau_fetch_and_add32(priv->tx_queue[qos].fau, 1);
-		buffers_to_free = cvmx_fau_fetch_and_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE, 0);
+		queue_depth = cvmx_hwfau_fetch_and_add32(priv->tx_queue[qos].fau, 1);
+		buffers_to_free = cvmx_hwfau_fetch_and_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE, 0);
 	}
 
 	/* If we're sending faster than the receive can free them then
@@ -338,14 +338,14 @@ CVM_OCT_XMIT
 		if (timestamp_this_skb)
 			word2 |= 1ull << 40; /* Bit 40 controls timestamps */
 
-		if (unlikely(cvmx_pko_send_packet_finish3_pkoid(priv->pko_port,
+		if (unlikely(cvmx_hwpko_send_packet_finish3_pkoid(priv->pko_port,
 							  priv->tx_queue[qos].queue, pko_command, hw_buffer,
 							  word2, CVM_OCT_PKO_LOCK_TYPE))) {
 				queue_type = QUEUE_DROP;
 				netdev_err(dev, "Failed to send the packet with wqe\n");
 		}
 	} else {
-		if (unlikely(cvmx_pko_send_packet_finish_pkoid(priv->pko_port,
+		if (unlikely(cvmx_hwpko_send_packet_finish_pkoid(priv->pko_port,
 							 priv->tx_queue[qos].queue,
 							 pko_command, hw_buffer,
 							 CVM_OCT_PKO_LOCK_TYPE))) {
@@ -358,14 +358,14 @@ CVM_OCT_XMIT
 skip_xmit:
 	switch (queue_type) {
 	case QUEUE_DROP:
-		cvmx_fau_atomic_add32(priv->tx_queue[qos].fau, -1);
+		cvmx_hwfau_atomic_add32(priv->tx_queue[qos].fau, -1);
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		if (work)
 			cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
 		break;
 	case QUEUE_HW:
-		cvmx_fau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE, -buffers_being_recycled);
+		cvmx_hwfau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE, -buffers_being_recycled);
 		break;
 	case QUEUE_WQE:
 		/* Cleanup is done on the RX path when the WQE returns */

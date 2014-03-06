@@ -871,7 +871,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 	/* Initialize the FAU used for counting packet buffers that
 	 * need to be freed.
 	 */
-	cvmx_fau_atomic_write32(FAU_NUM_PACKET_BUFFERS_TO_FREE, 0);
+	cvmx_hwfau_atomic_write32(FAU_NUM_PACKET_BUFFERS_TO_FREE, 0);
 
 	num_interfaces = cvmx_helper_get_number_of_interfaces();
 	for (interface = 0; interface < num_interfaces; interface++) {
@@ -952,7 +952,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->tx_queue[qos].queue = base_queue + qos;
 				fau = fau - sizeof(u32);
 				priv->tx_queue[qos].fau = fau;
-				cvmx_fau_atomic_write32(priv->tx_queue[qos].fau, 0);
+				cvmx_hwfau_atomic_write32(priv->tx_queue[qos].fau, 0);
 			}
 
 			/* Cache the fact that there may be multiple queues */

@@ -175,7 +175,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 			/* We are done with this one, adjust the queue
 			 * depth.
 			 */
-			cvmx_fau_atomic_add32(priv->tx_queue[packet_qos].fau, -1);
+			cvmx_hwfau_atomic_add32(priv->tx_queue[packet_qos].fau, -1);
 			continue;
 		}
 		segments = work->word2.s.bufs;
@@ -440,7 +440,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 				 * the number of buffers we need to free by
 				 * one.
 				 */
-				cvmx_fau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE,
+				cvmx_hwfau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE,
 						      packets_to_replace);
 
 				cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));

@@ -210,7 +210,7 @@ int cvm_oct_transmit_qos(struct net_device *dev,
 		pko_command.s.ipoffp1 = sizeof(struct ethhdr) + 1;
 
 	/* Send the packet to the output queue */
-	if (unlikely(cvmx_pko_send_packet_finish_pkoid(priv->pko_port, priv->tx_queue[qos].queue, pko_command, hw_buffer, lock_type))) {
+	if (unlikely(cvmx_hwpko_send_packet_finish_pkoid(priv->pko_port, priv->tx_queue[qos].queue, pko_command, hw_buffer, lock_type))) {
 		netdev_err(dev, "Error: Failed to send the packet\n");
 		dropped = -1;
 	}
