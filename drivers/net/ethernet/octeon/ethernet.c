@@ -41,8 +41,8 @@
 #include "octeon-ethernet.h"
 
 #include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-pko.h>
-#include <asm/octeon/cvmx-fau.h>
+#include <asm/octeon/cvmx-hwpko.h>
+#include <asm/octeon/cvmx-hwfau.h>
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-srio.h>
 #include <asm/octeon/cvmx-helper.h>
@@ -270,7 +270,7 @@ static void cvm_oct_set_pko_multiqueue(void)
 static int cvm_oct_configure_common_hw(void)
 {
 	/* Setup the FPA */
-	cvmx_fpa_enable();
+	cvmx_fpa1_enable();
 
 	/* allocate packet pool */
 	packet_pool = cvm_oct_alloc_fpa_pool(packet_pool, FPA_PACKET_POOL_SIZE);
@@ -386,12 +386,12 @@ int cvm_oct_free_work(void *work_queue_entry)
 	while (segments--) {
 		union cvmx_buf_ptr next_ptr = *(union cvmx_buf_ptr *)phys_to_virt(segment_ptr.s.addr - 8);
 		if (!segment_ptr.s.i)
-			cvmx_fpa_free(cvm_oct_get_buffer_ptr(segment_ptr),
+			cvmx_fpa1_free(cvm_oct_get_buffer_ptr(segment_ptr),
 				      segment_ptr.s.pool,
 				      DONT_WRITEBACK(FPA_PACKET_POOL_SIZE / 128));
 		segment_ptr = next_ptr;
 	}
-	cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
+	cvmx_fpa1_free(work, wqe_pool, DONT_WRITEBACK(1));
 
 	return 0;
 }

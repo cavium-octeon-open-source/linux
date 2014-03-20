@@ -51,7 +51,7 @@
 
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-wqe.h>
-#include <asm/octeon/cvmx-fau.h>
+#include <asm/octeon/cvmx-hwfau.h>
 #include <asm/octeon/cvmx-pow.h>
 #include <asm/octeon/cvmx-pip.h>
 #include <asm/octeon/cvmx-ipd.h>

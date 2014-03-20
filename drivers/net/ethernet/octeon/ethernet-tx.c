@@ -42,10 +42,10 @@
 #include "octeon-ethernet.h"
 
 #include <asm/octeon/cvmx-wqe.h>
-#include <asm/octeon/cvmx-fau.h>
+#include <asm/octeon/cvmx-hwfau.h>
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-pko.h>
+#include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-helper.h>
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
@@ -222,7 +222,7 @@ int cvm_oct_transmit_qos(struct net_device *dev,
 		dev->stats.tx_dropped++;
 	} else
 	if (do_free)
-		cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
+		cvmx_fpa1_free(work, wqe_pool, DONT_WRITEBACK(1));
 
 	return dropped;
 }

@@ -169,7 +169,7 @@ CVM_OCT_XMIT
 	} else {
 		u64 *hw_buffer_list;
 
-		work = cvmx_fpa_alloc(wqe_pool);
+		work = cvmx_fpa1_alloc(wqe_pool);
 		if (unlikely(!work)) {
 			netdev_err(dev, "Failed WQE allocate\n");
 			queue_type = QUEUE_DROP;
@@ -298,7 +298,7 @@ CVM_OCT_XMIT
 
 	if (queue_type == QUEUE_WQE) {
 		if (!work) {
-			work = cvmx_fpa_alloc(wqe_pool);
+			work = cvmx_fpa1_alloc(wqe_pool);
 			if (unlikely(!work)) {
 				netdev_err(dev, "Failed WQE allocate\n");
 				queue_type = QUEUE_DROP;
@@ -362,7 +362,7 @@ skip_xmit:
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		if (work)
-			cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
+			cvmx_fpa1_free(work, wqe_pool, DONT_WRITEBACK(1));
 		break;
 	case QUEUE_HW:
 		cvmx_hwfau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE, -buffers_being_recycled);

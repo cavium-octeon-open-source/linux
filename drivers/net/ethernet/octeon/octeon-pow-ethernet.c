@@ -19,7 +19,7 @@
 
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-fpa.h>
+#include <asm/octeon/cvmx-fpa1.h>
 #include <asm/octeon/cvmx-pow.h>
 #include <asm/octeon/cvmx-wqe.h>
 #include <asm/octeon/cvmx-pow-defs.h>
@@ -134,11 +134,11 @@ static int octeon_pow_free_work(cvmx_wqe_t *work)
 		union cvmx_buf_ptr next_ptr =
 			*(union cvmx_buf_ptr *)phys_to_virt(segment_ptr.s.addr - 8);
 		if (unlikely(!segment_ptr.s.i))
-			cvmx_fpa_free(get_buffer_ptr(segment_ptr),
+			cvmx_fpa1_free(get_buffer_ptr(segment_ptr),
 				 segment_ptr.s.pool, 0);
 		segment_ptr = next_ptr;
 	}
-	cvmx_fpa_free(work, fpa_wqe_pool, 0);
+	cvmx_fpa1_free(work, fpa_wqe_pool, 0);
 
 	return 0;
 }
@@ -175,7 +175,7 @@ static int octeon_pow_xmit(struct sk_buff *skb, struct net_device *dev)
 			continue;
 
 		/* Get a work queue entry */
-		work = cvmx_fpa_alloc(fpa_wqe_pool);
+		work = cvmx_fpa1_alloc(fpa_wqe_pool);
 		if (unlikely(work == NULL)) {
 			DEBUGPRINT("%s: Failed to allocate a work queue entry\n",
 				   dev->name);
@@ -183,7 +183,7 @@ static int octeon_pow_xmit(struct sk_buff *skb, struct net_device *dev)
 		}
 
 		/* Get a packet buffer */
-		packet_buffer = cvmx_fpa_alloc(fpa_packet_pool);
+		packet_buffer = cvmx_fpa1_alloc(fpa_packet_pool);
 		if (unlikely(packet_buffer == NULL)) {
 			DEBUGPRINT("%s: Failed to allocate a packet buffer\n",
 				   dev->name);
@@ -321,9 +321,9 @@ static int octeon_pow_xmit(struct sk_buff *skb, struct net_device *dev)
 
 fail:
 	if (work)
-		cvmx_fpa_free(work, fpa_wqe_pool, 0);
+		cvmx_fpa1_free(work, fpa_wqe_pool, 0);
 	if (packet_buffer)
-		cvmx_fpa_free(packet_buffer, fpa_packet_pool, 0);
+		cvmx_fpa1_free(packet_buffer, fpa_packet_pool, 0);
 	dev->stats.tx_dropped++;
 	dev_kfree_skb(skb);
 	return NETDEV_TX_OK;

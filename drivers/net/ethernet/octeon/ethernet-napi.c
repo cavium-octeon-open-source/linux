@@ -170,7 +170,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 			}
 			dev_kfree_skb_any(skb);
 
-			cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
+			cvmx_fpa1_free(work, wqe_pool, DONT_WRITEBACK(1));
 
 			/* We are done with this one, adjust the queue
 			 * depth.
@@ -443,7 +443,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 				cvmx_hwfau_atomic_add32(FAU_NUM_PACKET_BUFFERS_TO_FREE,
 						      packets_to_replace);
 
-				cvmx_fpa_free(work, wqe_pool, DONT_WRITEBACK(1));
+				cvmx_fpa1_free(work, wqe_pool, DONT_WRITEBACK(1));
 			} else {
 				cvm_oct_free_work(work);
 			}
