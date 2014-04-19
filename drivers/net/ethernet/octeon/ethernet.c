@@ -866,7 +866,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 		}
 	}
 
-	cvmx_helper_ipd_and_packet_input_enable();
+	cvmx_helper_ipd_and_packet_input_enable_node(0);
 
 	/* Initialize the FAU used for counting packet buffers that
 	 * need to be freed.
