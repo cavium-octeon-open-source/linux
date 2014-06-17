@@ -215,7 +215,7 @@ static bool cvm_oct_pko_lockless(void)
 			case CVMX_HELPER_INTERFACE_MODE_RGMII:
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
-				queues += num_possible_cpus();
+				queues += max(8u, num_possible_cpus());
 				break;
 			case CVMX_HELPER_INTERFACE_MODE_NPI:
 			case CVMX_HELPER_INTERFACE_MODE_LOOP:
@@ -255,7 +255,7 @@ static void cvm_oct_set_pko_multiqueue(void)
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
 			case CVMX_HELPER_INTERFACE_MODE_SPI:
 				rv = cvmx_pko_alloc_iport_and_queues(interface, port, 1,
-								     num_possible_cpus());
+								     max(8u, num_possible_cpus()));
 				WARN(rv, "cvmx_pko_alloc_iport_and_queues failed");
 				if (rv)
 					return;
