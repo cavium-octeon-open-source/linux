@@ -46,6 +46,7 @@
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-pip-defs.h>
 #include <asm/octeon/cvmx-pko-defs.h>
+#include <asm/octeon/cvmx-pcsx-defs.h>
 
 static void cvm_oct_get_drvinfo(struct net_device *dev,
 				struct ethtool_drvinfo *info)
@@ -96,12 +97,90 @@ static int cvm_oct_nway_reset(struct net_device *dev)
 	return -EOPNOTSUPP;
 }
 
+/* for qca833x & at803x, unhang phy by PCS down/up */
+/* PHY-specific code should save/restore state, this just zaps it */
+static inline void set_port_pcs(struct net_device *dev, bool up)
+{
+      struct octeon_ethernet *priv = netdev_priv(dev);
+      int interface = cvmx_helper_get_interface_num(priv->ipd_port);
+      int index = cvmx_helper_get_interface_index_num(priv->ipd_port);
+      union cvmx_pcsx_mrx_control_reg control_reg;
+      union cvmx_gmxx_prtx_cfg gmxx_prtx_cfg;
+      union cvmx_pcsx_miscx_ctl_reg pcsx_miscx_ctl_reg;
+
+      control_reg.u64 = cvmx_read_csr(CVMX_PCSX_MRX_CONTROL_REG(index, interface));
+      control_reg.s.an_en = 1;
+      control_reg.s.pwr_dn = 0;
+
+      if (up) {
+	  control_reg.s.pwr_dn = 0;
+	  control_reg.s.spdmsb = 1;
+	  control_reg.s.spdlsb = 0;
+	  control_reg.s.dup = 1;
+
+	  gmxx_prtx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(index, interface));
+	  gmxx_prtx_cfg.s.speed = 1;
+	  gmxx_prtx_cfg.s.speed_msb = 0;
+	  gmxx_prtx_cfg.s.slottime = 1;
+	  cvmx_write_csr(CVMX_GMXX_PRTX_CFG(index, interface), gmxx_prtx_cfg.u64);
+
+	  pcsx_miscx_ctl_reg.u64 = cvmx_read_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface));
+	  pcsx_miscx_ctl_reg.s.samp_pt = 1;
+	  cvmx_write_csr(CVMX_PCSX_MISCX_CTL_REG(index, interface),pcsx_miscx_ctl_reg.u64);
+
+      } else {
+	  control_reg.s.pwr_dn = 1;
+	  control_reg.s.spdmsb = 1;
+	  control_reg.s.spdlsb = 0;
+	  control_reg.s.dup = 1;
+      }
+      cvmx_write_csr(CVMX_PCSX_MRX_CONTROL_REG(index, interface), control_reg.u64);
+}
+
+static int cvm_oct_reset(struct net_device *dev, u32 *maskp)
+{
+	struct octeon_ethernet *priv = netdev_priv(dev);
+
+	if (!capable(CAP_NET_ADMIN))
+		return -EPERM;
+
+	if (!priv->phydev)
+		return -EOPNOTSUPP;
+
+	if (!maskp)
+		return 0;
+
+	/* for qca833x & friends, where PHY must be reset by PCS cycling */
+	if (*maskp & ETH_RESET_PHY) {
+		struct octeon_ethernet *priv = netdev_priv(dev);
+		int ipd_port = priv->ipd_port;
+		cvmx_helper_link_info_t link_info = cvmx_helper_link_get(ipd_port);
+
+		if (priv->last_link)
+		{
+			cvmx_helper_link_info_t down_info = link_info;
+
+			down_info.s.link_up = 0;
+			cvmx_helper_link_set(priv->ipd_port, down_info);
+			set_port_pcs(dev, 0);
+			msleep(10);
+			set_port_pcs(dev, 1);
+			link_info.s.link_up = 1;
+			cvmx_helper_link_set(priv->ipd_port, link_info);
+		}
+		*maskp &= ~ETH_RESET_PHY;
+	}
+
+	return 0;
+}
+
 const struct ethtool_ops cvm_oct_ethtool_ops = {
 	.get_drvinfo = cvm_oct_get_drvinfo,
 	.get_settings = cvm_oct_get_settings,
 	.set_settings = cvm_oct_set_settings,
 	.nway_reset = cvm_oct_nway_reset,
 	.get_link = ethtool_op_get_link,
+	.reset = cvm_oct_reset,
 };
 
 /**
