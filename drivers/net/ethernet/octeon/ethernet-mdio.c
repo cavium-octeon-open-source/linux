@@ -137,7 +137,7 @@ static inline void set_port_pcs(struct net_device *dev, bool up)
       cvmx_write_csr(CVMX_PCSX_MRX_CONTROL_REG(index, interface), control_reg.u64);
 }
 
-static int cvm_oct_reset(struct net_device *dev, u32 *maskp)
+static int cvm_eth_reset(struct net_device *dev, u32 *maskp)
 {
 	struct octeon_ethernet *priv = netdev_priv(dev);
 
@@ -154,7 +154,7 @@ static int cvm_oct_reset(struct net_device *dev, u32 *maskp)
 	if (*maskp & ETH_RESET_PHY) {
 		struct octeon_ethernet *priv = netdev_priv(dev);
 		int ipd_port = priv->ipd_port;
-		cvmx_helper_link_info_t link_info = cvmx_helper_link_get(ipd_port);
+		cvmx_helper_link_info_t link_info = (cvmx_helper_link_info_t) priv->link_info;
 
 		if (priv->last_link)
 		{
@@ -180,7 +180,7 @@ const struct ethtool_ops cvm_oct_ethtool_ops = {
 	.set_settings = cvm_oct_set_settings,
 	.nway_reset = cvm_oct_nway_reset,
 	.get_link = ethtool_op_get_link,
-	.reset = cvm_oct_reset,
+	.reset = cvm_eth_reset,
 };
 
 /**
