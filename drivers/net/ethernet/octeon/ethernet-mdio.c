@@ -163,7 +163,7 @@ static int cvm_eth_reset(struct net_device *dev, u32 *maskp)
 			down_info.s.link_up = 0;
 			cvmx_helper_link_set(priv->ipd_port, down_info);
 			set_port_pcs(dev, 0);
-			msleep(10);
+			msleep(30);
 			set_port_pcs(dev, 1);
 			link_info.s.link_up = 1;
 			cvmx_helper_link_set(priv->ipd_port, link_info);
