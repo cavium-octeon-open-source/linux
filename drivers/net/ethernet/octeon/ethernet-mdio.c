@@ -153,7 +153,6 @@ static int cvm_eth_reset(struct net_device *dev, u32 *maskp)
 	/* for qca833x & friends, where PHY must be reset by PCS cycling */
 	if (*maskp & ETH_RESET_PHY) {
 		struct octeon_ethernet *priv = netdev_priv(dev);
-		int ipd_port = priv->ipd_port;
 		cvmx_helper_link_info_t link_info = (cvmx_helper_link_info_t) priv->link_info;
 
 		if (priv->last_link)
