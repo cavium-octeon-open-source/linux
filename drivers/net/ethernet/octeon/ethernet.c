@@ -940,6 +940,14 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->num_tx_queues = cvmx_pko_get_num_queues(priv->ipd_port);
 			}
 
+			if (priv->num_tx_queues == 0) {
+				dev_err(&pdev->dev,
+					"tx_queue count not configured for port %d:%d\n",
+					interface, interface_port);
+				free_netdev(dev);
+				continue;
+			}
+
 			BUG_ON(priv->num_tx_queues < 1);
 			BUG_ON(priv->num_tx_queues > 32);
 
