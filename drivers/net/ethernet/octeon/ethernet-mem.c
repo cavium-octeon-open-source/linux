@@ -46,9 +46,8 @@ struct fpa_pool {
 };
 
 static DEFINE_MUTEX(cvm_oct_pools_lock);
-/* Eight pools. */
-static struct fpa_pool cvm_oct_pools[] = {
-	{-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}, {-1}
+static struct fpa_pool cvm_oct_pools[CVMX_FPA1_NUM_POOLS+1] = {
+	[0 ... CVMX_FPA1_NUM_POOLS] = {-1,},
 };
 
 /**
