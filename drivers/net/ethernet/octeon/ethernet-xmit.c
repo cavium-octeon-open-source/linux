@@ -55,7 +55,7 @@ CVM_OCT_XMIT
 	int qos;
 	int i;
 	int frag_count;
-	enum {QUEUE_HW, QUEUE_WQE, QUEUE_DROP} queue_type;
+	enum {QUEUE_HW, QUEUE_WQE, QUEUE_DROP, QUEUE_DROP_NO_DEC} queue_type;
 	struct octeon_ethernet *priv = netdev_priv(dev);
 	s32 queue_depth;
 	s32 buffers_to_free;
@@ -84,6 +84,27 @@ CVM_OCT_XMIT
 					       0);
 	}
 
+	frag_count = 0;
+	if (skb_has_frag_list(skb))
+		skb_walk_frags(skb, skb_tmp)
+			frag_count++;
+	/* We have space for 12 segment pointers, If there will be
+	 * more than that, we must linearize.  The count is: 1 (base
+	 * SKB) + frag_count + nr_frags.
+	 */
+	if (unlikely(skb_shinfo(skb)->nr_frags + frag_count > 11)) {
+		if (unlikely(__skb_linearize(skb))) {
+			dev_kfree_skb_any(skb);
+			dev->stats.tx_dropped++;
+			goto post_preempt_out;
+		}
+		frag_count = 0;
+	}
+
+	/* We cannot move to a different CPU once we determine our
+	 * queue number/qos
+	 */
+	preempt_disable();
 #ifdef CVM_OCT_LOCKLESS
 	qos = cvmx_get_core_num();
 #else
@@ -103,22 +124,6 @@ CVM_OCT_XMIT
 	if (USE_ASYNC_IOBDMA) {
 		cvmx_hwfau_async_fetch_and_add32(CVMX_SCR_SCRATCH,
 					       priv->tx_queue[qos].fau, 1);
-	}
-
-	frag_count = 0;
-	if (skb_has_frag_list(skb))
-		skb_walk_frags(skb, skb_tmp)
-			frag_count++;
-	/* We have space for 12 segment pointers, If there will be
-	 * more than that, we must linearize.  The count is: 1 (base
-	 * SKB) + frag_count + nr_frags.
-	 */
-	if (unlikely(skb_shinfo(skb)->nr_frags + frag_count > 11)) {
-		if (unlikely(__skb_linearize(skb))) {
-			queue_type = QUEUE_DROP;
-			goto skip_xmit;
-		}
-		frag_count = 0;
 	}
 
 #ifndef CVM_OCT_LOCKLESS
@@ -172,7 +177,7 @@ CVM_OCT_XMIT
 		work = cvmx_fpa1_alloc(wqe_pool);
 		if (unlikely(!work)) {
 			netdev_err(dev, "Failed WQE allocate\n");
-			queue_type = QUEUE_DROP;
+			queue_type = USE_ASYNC_IOBDMA ? QUEUE_DROP : QUEUE_DROP_NO_DEC;
 			goto skip_xmit;
 		}
 		hw_buffer_list = (u64 *)work->packet_data;
@@ -359,6 +364,8 @@ skip_xmit:
 	switch (queue_type) {
 	case QUEUE_DROP:
 		cvmx_hwfau_atomic_add32(priv->tx_queue[qos].fau, -1);
+		/* Fall through */
+	case QUEUE_DROP_NO_DEC:
 		dev_kfree_skb_any(skb);
 		dev->stats.tx_dropped++;
 		if (work)
@@ -373,7 +380,8 @@ skip_xmit:
 	default:
 		BUG();
 	}
-
+	preempt_enable();
+post_preempt_out:
 	if (USE_ASYNC_IOBDMA) {
 		CVMX_SYNCIOBDMA;
 		/* Restore the scratch area */
