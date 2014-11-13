@@ -214,6 +214,7 @@ static int cvm_oct_ioctl_hwtstamp(struct net_device *dev,
 		case CVMX_HELPER_INTERFACE_MODE_XAUI:
 		case CVMX_HELPER_INTERFACE_MODE_RXAUI:
 		case CVMX_HELPER_INTERFACE_MODE_SGMII:
+		case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			break;
 		default:
 			/* No timestamp support*/
@@ -488,6 +489,7 @@ int cvm_oct_phy_setup_device(struct net_device *dev)
 		iface = PHY_INTERFACE_MODE_RGMII;
 		break;
 	case CVMX_HELPER_INTERFACE_MODE_SGMII:
+	case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 		iface = PHY_INTERFACE_MODE_SGMII;
 		break;
 	default:
