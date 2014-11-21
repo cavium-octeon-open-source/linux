@@ -65,6 +65,9 @@ static bool cvm_oct_skb_ok_for_reuse(struct sk_buff *skb)
 {
 	unsigned char *fpa_head = cvm_oct_get_fpa_head(skb);
 
+	if (*(struct sk_buff **)(fpa_head - sizeof(void *)) != skb)
+		return false;
+
 	if (unlikely(skb->data < fpa_head))
 		return false;
 
