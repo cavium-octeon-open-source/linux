@@ -244,10 +244,7 @@ CVM_OCT_XMIT
 		pko_command.s.dontfree = 0;
 
 	/* Check if we can use the hardware checksumming */
-	if (USE_HW_TCPUDP_CHECKSUM && (skb->protocol == htons(ETH_P_IP)) &&
-	    (ip_hdr(skb)->version == 4) && (ip_hdr(skb)->ihl == 5) &&
-	    ((ip_hdr(skb)->frag_off == 0) || (ip_hdr(skb)->frag_off == htons(1 << 14)))
-	    && ((ip_hdr(skb)->protocol == IPPROTO_TCP) || (ip_hdr(skb)->protocol == IPPROTO_UDP))) {
+	if (USE_HW_TCPUDP_CHECKSUM && (skb->ip_summed != CHECKSUM_NONE)) {
 		/* Use hardware checksum calc */
 		pko_command.s.ipoffp1 = sizeof(struct ethhdr) + 1;
 		if (unlikely(priv->imode == CVMX_HELPER_INTERFACE_MODE_SRIO))
