@@ -719,7 +719,7 @@ struct octeon_ethernet *cvm_oct_dev_for_port(int port_number)
 		if (s->key > port_number)
 			n = n->rb_left;
 		else if (s->key < port_number)
-			n = n->rb_left;
+			n = n->rb_right;
 		else
 			return s;
 	}
