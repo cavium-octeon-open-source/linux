@@ -21,6 +21,8 @@
 #include <linux/phy.h>
 #include <linux/io.h>
 
+#include <asm/bitfield.h>
+
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-mixx-defs.h>
 #include <asm/octeon/cvmx-agl-defs.h>
@@ -44,23 +46,16 @@ union mgmt_port_ring_entry {
 	struct {
 #define RING_ENTRY_CODE_DONE 0xf
 #define RING_ENTRY_CODE_MORE 0x10
-#ifdef __BIG_ENDIAN_BITFIELD
-		u64 reserved_62_63:2;
+		__BITFIELD_FIELD(u64 reserved_62_63:2,
 		/* Length of the buffer/packet in bytes */
-		u64 len:14;
+		__BITFIELD_FIELD(u64 len:14,
 		/* For TX, signals that the packet should be timestamped */
-		u64 tstamp:1;
+		 __BITFIELD_FIELD(u64 tstamp:1,
 		/* The RX error code */
-		u64 code:7;
+		__BITFIELD_FIELD(u64 code:7,
 		/* Physical address of the buffer */
-		u64 addr:40;
-#else
-		u64 addr:40;
-		u64 code:7;
-		u64 tstamp:1;
-		u64 len:14;
-		u64 reserved_62_63:2;
-#endif
+		__BITFIELD_FIELD(u64 addr:40,
+		;)))))
 	} s;
 };
 
