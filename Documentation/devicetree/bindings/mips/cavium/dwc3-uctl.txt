@@ -1,0 +1,61 @@
+* UCTL USB controller glue for DesignWare USB3 DRD
+
+Required properties:
+
+- compatible: "cavium,octeon-7130-usb-uctl"
+
+  Compatibility with the cn7130 SOC.
+
+- reg: The base address of the UCTL register bank.
+
+- #address-cells, #size-cells, and ranges must be present and hold
+        suitable values to map all child nodes.
+
+- refclk-frequency: A single cell containing the reference clock
+  frequency in Hz.
+
+- refclk-type: A string describing the reference clock connection
+  either "crystal" or "external".
+
+- refclk-frequency: A single cell containing the frequency of the
+  dlmc_ref_clk0, dlmc_ref_clk1 reference clocks.
+  50MHz, 100MHz and 125MHz allowed
+
+- refclk-type-ss: A string describing the reference clock connection for
+  SuperSpeed function, dlmc_ref_clk0 or pll_ref_clk
+
+- refclk-type-hs:  A string describing the reference clock connection for
+  SuperSpeed function, dlmc_ref_clk0, dlmc_ref_clk1 or pll_ref_clk
+
+	Only four combinations of reference clocks allowed:
+
+	1. dlmc_ref_clk0 for SS, dlmc_ref_clk0 for HS
+	2. dlmc_ref_clk1 for SS, dlmc_ref_clk1 for HS
+	3. dlmc_ref_clk0 for SS, pll_ref_clk for HS
+	4. pll_ref_clk   for SS, pll_ref_clk for HS
+
+	In cases 1. and 2. refclk-frequency should be 100MHz
+
+Example:
+
+	uctl@1180068000000 {
+		compatible = "cavium,octeon-7130-usb-uctl";
+		reg = <0x11800 0x68000000 0x0 0x100>;
+		ranges; /* Direct mapping */
+		#address-cells = <2>;
+		#size-cells = <2>;
+		/* 50MHz, 100MHz and 125MHz allowed */
+		refclk-frequency = <100000000>;
+		/* Either "dlmc_ref_clk0" "dlmc_ref_clk1" or "pll_ref_clk" */
+		refclk-type-ss = "dlmc_ref_clk0";
+		/* Either "dlmc_ref_clk0" "dlmc_ref_clk1" or "pll_ref_clk" */
+		refclk-type-hs = "pll_ref_clk";
+
+		xhci@1680000000000 {
+			compatible = "cavium,octeon-7130-xhci","synopsys,dwc3";
+			reg = <0x16800 0x00000000 0x10 0x0>;
+			interrupt-parent = <&cibusb0>;
+			interrupts = <9 4>; /* Bit: 9, level */
+		};
+	};
+
