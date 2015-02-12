@@ -211,6 +211,7 @@ config PINCTRL_OCTEON
 	tristate "Cavium OCTEON GPIO"
 	depends on CAVIUM_OCTEON_SOC
 	select GPIOLIB
+	select PINMUX
 	default y
 	help
 	  Say yes here to support the on-chip GPIO lines on the OCTEON
