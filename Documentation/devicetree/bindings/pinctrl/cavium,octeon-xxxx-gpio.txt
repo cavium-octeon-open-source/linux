@@ -1,9 +1,9 @@
 * General Purpose Input Output (GPIO) bus.
 
 Properties:
-- compatible: "cavium,octeon-3860-gpio"
+- compatible: "cavium,octeon-3860-gpio", "cavium,octeon-7130-gpio"
 
-  Compatibility with all cn3XXX, cn5XXX and cn6XXX SOCs.
+  Compatibility with all cn3XXX, cn5XXX, cn6XXX and cn71XX SOCs.
 
 - reg: The base address of the GPIO unit's register bank.
 
@@ -25,11 +25,45 @@ Properties:
 
 - interrupts: Interrupt routing for each pin.
 
+GPIO controller on cn7130 supports muxing functions.  If the device is
+compatible with "cavium,octeon-7130-gpio", a pinctrl device with pinmux is
+registered by the driver.  It declares 20 groups "grp0".."grp19"
+of single pin "pinX" each.  Each group supports any of these functions:
+
+"PTP_CKOUT",
+"PTP_PPS",
+"CLK_SYNCE0",
+"CLK_SYNCE1",
+"MCD0" (MCD0 multicore debug output),
+"MCD1" (MCD1 multicore debug output),
+"MCD2" (MCD2 multicore debug output),
+"LMC_ECC" (LMC_ECC(0) LMC ECC error detected),
+"GPIO_CLK_GEN0" (GPIO_CLK_GEN0, GPIO clock generator),
+"GPIO_CLK_GEN1" (GPIO_CLK_GEN1, GPIO clock generator),
+"GPIO_CLK_GEN2" (GPIO_CLK_GEN2, GPIO clock generator),
+"GPIO_CLK_GEN3" (GPIO_CLK_GEN3, GPIO clock generator),
+"USB0_VBUS_CTRL" (USB0 Vbus Control),
+"SATA0_COLD_PRESENCE" (SATA port0 cold presence power-on device. (p0_cp_pod)),
+"SATA1_COLD_PRESENCE" (SATA port1 cold presence power-on device. (p1_cp_pod)),
+"SATA0_LED" (SATA port0 LED (p0_act_led)),
+"SATA1_LED" (SATA port1 LED (p1_act_led)),
+"USB1_VBUS_CTRL" (USB1 Vbus control),
+
+Additional properties for cn713-compatible devices:
+
+- gpio-ranges - should be "<&gpio 0 0 20>;", where "gpio" points to this
+  device' node.  This establishes 1-to-1 correspondence between pins and gpio
+  as described in Documentation/devicetree/bindings/gpio/gpio.txt
+
+- Generic pin configuration nodes - as described in
+  Documentation/devicetree/bindings/pinctrl/pinctrl-bindings.txt, section
+  "Generic pin multiplexing node content"
+
 Example:
 
 	gpio-controller@1070000000800 {
 		#gpio-cells = <2>;
-		compatible = "cavium,octeon-3860-gpio";
+		compatible = "cavium,octeon-7130-gpio";
 		reg = <0x10700 0x00000800 0x0 0x100>;
 		gpio-controller;
 		/* Interrupts are specified by two parts:
@@ -46,4 +80,24 @@ Example:
 			     <0 20>, <0 21>, <0 22>, <0 23>,
 			     <0 24>, <0 25>, <0 26>, <0 27>,
 			     <0 28>, <0 29>, <0 30>, <0 31>;
+		gpio-ranges = <&gpio 0 0 20>;
+		usb0_vbus_mode: usb0-vbus {
+			function = "USB0_VBUS_CTRL";
+			groups = "grp1";
+		};
+		usb1_vbus_mode: usb1-vbus {
+			function = "USB1_VBUS_CTRL";
+			groups = "grp2";
+		};
+	};
+
+	...
+
+	xhci@1680000000000 {
+		compatible = "cavium,octeon-7130-xhci","synopsys,dwc3";
+
+		...
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&usb0_vbus_mode>;
 	};
