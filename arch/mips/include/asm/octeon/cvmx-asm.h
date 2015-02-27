@@ -34,6 +34,18 @@
 
 #include <asm/octeon/octeon-model.h>
 
+#define CVMX_MAX_CORES          (48)
+#define CVMX_NODE_NO_SHIFT      (7)     /* Maximum # of bits to define core in node */
+#define CVMX_NODE_BITS          (2)     /* Number of bits to define a node */
+#define CVMX_MAX_NODES          (1 << CVMX_NODE_BITS)
+#define CVMX_NODE_MASK          (CVMX_MAX_NODES - 1)
+#define CVMX_NODE_IO_SHIFT      (36)
+#define CVMX_NODE_MEM_SHIFT     (40)
+#define CVMX_NODE_IO_MASK       ((uint64_t)CVMX_NODE_MASK << CVMX_NODE_IO_SHIFT)
+
+#define CVMX_MIPS_MAX_CORE_BITS (10)    /** Maximum # of bits to define cores */
+#define CVMX_MIPS_MAX_CORES     (1 << CVMX_MIPS_MAX_CORE_BITS)
+
 /* other useful stuff */
 #define CVMX_SYNC asm volatile ("sync" : : : "memory")
 /* String version of SYNCW macro for using in inline asm constructs */
