@@ -36,15 +36,6 @@
 
 /* CSR typedefs have been moved to cvmx-pko-defs.h */
 
-#if 0				// XXX Not clear what this is intended for !
-/**
- * Definition of internal state for Packet output processing
- */
-typedef struct {
-	uint64_t *start_ptr;		/**< ptr to start of buffer, offset kept in FAU reg */
-} cvmx_pko_state_elem_t;
-#endif
-
 /**
  * cvmx_override_pko_queue_priority(int ipd_port, uint64_t
  * priorities[16]) is a function pointer. It is meant to allow
