@@ -1,5 +1,5 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
+ * Copyright (c) 2013  Cavium Inc. (support@cavium.com). All rights
  * reserved.
  *
  *
@@ -40,43 +40,60 @@
 /**
  * @file
  *
- * Functions for RGMII/GMII/MII initialization, configuration,
+ * Functions for AGL (RGMII) initialization, configuration,
  * and monitoring.
  *
- * <hr>$Revision: 107037 $<hr>
+ * <hr>$Revision: 83639 $<hr>
  */
-#ifndef __CVMX_HELPER_RGMII_H__
-#define __CVMX_HELPER_RGMII_H__
+
+#ifndef __CVMX_HELPER_AGL_H__
+#define __CVMX_HELPER_AGL_H__
+
+#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
+#include <asm/octeon/cvmx.h>
+#include <asm/octeon/cvmx-qlm.h>
+#include <asm/octeon/cvmx-helper.h>
+#include <asm/octeon/cvmx-agl-defs.h>
+#else
+#include "cvmx.h"
+#include "cvmx-agl.h"
+#include "cvmx-helper.h"
+#include "cvmx-agl-defs.h"
+#endif
+
+#ifdef  __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
+
+extern int __cvmx_helper_agl_enumerate(int interface);
+
+extern int cvmx_helper_agl_get_port(int xiface);
 
 /**
  * @INTERNAL
- * Probe RGMII ports and determine the number present
+ * Probe a RGMII interface and determine the number of ports
+ * connected to it. The RGMII interface should still be down
+ * after this call.
  *
- * @param xiface Interface to probe
+ * @param interface Interface to probe
  *
- * @return Number of RGMII/GMII/MII ports (0-4).
+ * @return Number of ports on the interface. Zero to disable.
  */
-extern int __cvmx_helper_rgmii_probe(int xiface);
-
-/**
- * Put an RGMII interface in loopback mode. Internal packets sent
- * out will be received back again on the same port. Externally
- * received packets will echo back out.
- *
- * @param port   IPD port number to loop.
- */
-extern void cvmx_helper_rgmii_internal_loopback(int port);
+extern int __cvmx_helper_agl_probe(int interface);
 
 /**
  * @INTERNAL
- * Configure all of the ASX, GMX, and PKO regsiters required
- * to get RGMII to function on the supplied interface.
+ * Bringup and enable a RGMII interface. After this call packet
+ * I/O should be fully functional. This is called with IPD
+ * enabled but PKO disabled.
  *
- * @param xiface PKO Interface to configure (0 or 1)
+ * @param interface Interface to bring up
  *
- * @return Zero on success
+ * @return Zero on success, negative on failure
  */
-extern int __cvmx_helper_rgmii_enable(int xiface);
+extern int __cvmx_helper_agl_enable(int interface);
 
 /**
  * @INTERNAL
@@ -89,20 +106,7 @@ extern int __cvmx_helper_rgmii_enable(int xiface);
  *
  * @return Link state
  */
-extern cvmx_helper_link_info_t __cvmx_helper_gmii_link_get(int ipd_port);
-
-/**
- * @INTERNAL
- * Return the link state of an IPD/PKO port as returned by
- * auto negotiation. The result of this function may not match
- * Octeon's link config if auto negotiation has changed since
- * the last call to cvmx_helper_link_set().
- *
- * @param ipd_port IPD/PKO port to query
- *
- * @return Link state
- */
-extern cvmx_helper_link_info_t __cvmx_helper_rgmii_link_get(int ipd_port);
+extern cvmx_helper_link_info_t __cvmx_helper_agl_link_get(int ipd_port);
 
 /**
  * @INTERNAL
@@ -117,22 +121,12 @@ extern cvmx_helper_link_info_t __cvmx_helper_rgmii_link_get(int ipd_port);
  *
  * @return Zero on success, negative on failure
  */
-extern int __cvmx_helper_rgmii_link_set(int ipd_port, cvmx_helper_link_info_t link_info);
+extern int __cvmx_helper_agl_link_set(int ipd_port,
+				      cvmx_helper_link_info_t link_info);
 
-/**
- * @INTERNAL
- * Configure a port for internal and/or external loopback. Internal loopback
- * causes packets sent by the port to be received by Octeon. External loopback
- * causes packets received from the wire to sent out again.
- *
- * @param ipd_port IPD/PKO port to loopback.
- * @param enable_internal
- *                 Non zero if you want internal loopback
- * @param enable_external
- *                 Non zero if you want external loopback
- *
- * @return Zero on success, negative on failure.
- */
-extern int __cvmx_helper_rgmii_configure_loopback(int ipd_port, int enable_internal, int enable_external);
-
+#ifdef  __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
 #endif
+#endif /* __CVMX_HELPER_AGL_H__ */
