@@ -133,7 +133,7 @@ typedef union {
 	uint64_t u64;
 	struct {
 #ifdef __BIG_ENDIAN_BITFIELD
-		cvmx_mips_space_t mem_space:2;
+		uint64_t mem_space:2;
 						/**< Must CVMX_IO_SEG */
 		uint64_t reserved:13;		/**< Must be zero */
 		uint64_t is_io:1;		/**< Must be one */
@@ -152,7 +152,7 @@ typedef union {
 		uint64_t did:8;
 		uint64_t is_io:1;
 		uint64_t reserved:13;
-		cvmx_mips_space_t mem_space:2;
+		uint64_t mem_space:2;
 #endif
 	} s;
 } cvmx_pko_doorbell_address_t;
@@ -362,7 +362,7 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish(uint64_t
 								    queue,
 								    cvmx_pko_command_word0_t
 								    pko_command,
-								    cvmx_buf_ptr_t
+								    union cvmx_buf_ptr
 								    packet,
 								    cvmx_pko_lock_t
 								    use_locking)
@@ -414,7 +414,7 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3(uint64_t
 								     queue,
 								     cvmx_pko_command_word0_t
 								     pko_command,
-								     cvmx_buf_ptr_t
+								     union cvmx_buf_ptr
 								     packet,
 								     uint64_t
 								     addr,
@@ -608,7 +608,7 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish_pkoid(int
 									  queue,
 									  cvmx_pko_command_word0_t
 									  pko_command,
-									  cvmx_buf_ptr_t
+									  union cvmx_buf_ptr
 									  packet,
 									  cvmx_pko_lock_t
 									  use_locking)
@@ -651,7 +651,7 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish_pkoid(int
 static inline cvmx_pko_return_value_t
 cvmx_hwpko_send_packet_finish3_pkoid(uint64_t pko_port, uint64_t queue,
 				     cvmx_pko_command_word0_t pko_command,
-				     cvmx_buf_ptr_t packet, uint64_t addr,
+				     union cvmx_buf_ptr packet, uint64_t addr,
 				     cvmx_pko_lock_t use_locking)
 {
 	cvmx_cmd_queue_result_t result;
