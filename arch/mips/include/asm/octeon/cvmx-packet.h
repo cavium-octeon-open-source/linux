@@ -36,17 +36,19 @@
 #ifndef __CVMX_PACKET_H__
 #define __CVMX_PACKET_H__
 
+#include <asm/bitfield.h>
+
 union cvmx_buf_ptr_pki {
 	uint64_t u64;
 	struct {
-		CVMX_BITFIELD_FIELD(uint64_t size:16,
-		/**< The size of the segment pointed to by addr (in bytes) */
-				    CVMX_BITFIELD_FIELD(uint64_t
-							packet_outside_wqe:1,
-		/**< sets is packet is not stored in same buffer as WQE*/
-							CVMX_BITFIELD_FIELD(uint64_t rsvd0:5, CVMX_BITFIELD_FIELD(uint64_t addr:42,
-							/**< Pointer to the first byte of the data, NOT buffer */
-									    ))));
+		/* The size of the segment pointed to by addr (in bytes) */
+		__BITFIELD_FIELD(uint64_t size:16,
+		/* sets is packet is not stored in same buffer as WQE */
+		__BITFIELD_FIELD(uint64_t packet_outside_wqe:1,
+		__BITFIELD_FIELD(uint64_t rsvd0:5,
+		/* Pointer to the first byte of the data, NOT buffer */
+		__BITFIELD_FIELD(uint64_t addr:42,
+	    ))));
 	};
 };
 
