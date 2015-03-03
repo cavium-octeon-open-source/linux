@@ -82,10 +82,10 @@ extern CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg;
  */
 static inline int64_t cvmx_fpa_get_packet_pool(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_aura[node].aura_num;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_aura[node].aura_num;
+//	}
 	return (cvmx_ipd_cfg.packet_pool.pool_num);
 }
 
@@ -94,10 +94,10 @@ static inline int64_t cvmx_fpa_get_packet_pool(void)
  */
 static inline uint64_t cvmx_fpa_get_packet_pool_block_size(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_pool[node].buffer_size;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_pool[node].buffer_size;
+//	}
 	return (cvmx_ipd_cfg.packet_pool.buffer_size);
 }
 
@@ -106,10 +106,10 @@ static inline uint64_t cvmx_fpa_get_packet_pool_block_size(void)
  */
 static inline uint64_t cvmx_fpa_get_packet_pool_buffer_count(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_pool[node].buffer_count;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_pool[node].buffer_count;
+//	}
 	return (cvmx_ipd_cfg.packet_pool.buffer_count);
 }
 
@@ -118,10 +118,10 @@ static inline uint64_t cvmx_fpa_get_packet_pool_buffer_count(void)
  */
 static inline int64_t cvmx_fpa_get_wqe_pool(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_aura[node].aura_num;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_aura[node].aura_num;
+//	}
 	return (cvmx_ipd_cfg.wqe_pool.pool_num);
 }
 
@@ -130,10 +130,10 @@ static inline int64_t cvmx_fpa_get_wqe_pool(void)
  */
 static inline uint64_t cvmx_fpa_get_wqe_pool_block_size(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_pool[node].buffer_size;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_pool[node].buffer_size;
+//	}
 	return (cvmx_ipd_cfg.wqe_pool.buffer_size);
 }
 
@@ -142,10 +142,10 @@ static inline uint64_t cvmx_fpa_get_wqe_pool_block_size(void)
  */
 static inline uint64_t cvmx_fpa_get_wqe_pool_buffer_count(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		return pki_dflt_pool[node].buffer_count;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		int node = cvmx_get_node_num();
+//		return pki_dflt_pool[node].buffer_count;
+//	}
 	return (cvmx_ipd_cfg.wqe_pool.buffer_count);
 }
 
