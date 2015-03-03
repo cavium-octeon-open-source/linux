@@ -169,6 +169,7 @@ static const struct iface_ops iface_ops_bgx_sgmii = {
 	.link_set = __cvmx_helper_bgx_sgmii_link_set,
 	.loopback = __cvmx_helper_bgx_sgmii_configure_loopback,
 };
+#endif
 
 /**
  * @INTERNAL
@@ -184,7 +185,6 @@ static const struct iface_ops iface_ops_qsgmii = {
 	.link_set = __cvmx_helper_sgmii_link_set,
 	.loopback = __cvmx_helper_sgmii_configure_loopback,
 };
-#endif
 
 /**
  * @INTERNAL
@@ -216,6 +216,7 @@ static const struct iface_ops iface_ops_bgx_xaui = {
 	.link_set = __cvmx_helper_bgx_xaui_link_set,
 	.loopback = __cvmx_helper_bgx_xaui_configure_loopback,
 };
+#endif
 
 /**
  * @INTERNAL
@@ -232,6 +233,7 @@ static const struct iface_ops iface_ops_rxaui = {
 	.loopback = __cvmx_helper_xaui_configure_loopback,
 };
 
+#if 0
 /**
  * @INTERNAL
  * This structure specifies the interface methods used by interfaces
@@ -706,6 +708,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn70xx(int interface)
 	return iface_ops[interface]->mode;
 }
 
+#if 0
 /**
  * @INTERNAL
  * Return interface mode for CN78XX.
@@ -786,6 +789,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn78xx(int xiface)
 
 	return iface_node_ops[xi.node][xi.interface]->mode;
 }
+#endif
 
 /**
  * @INTERNAL
@@ -1026,6 +1030,8 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn68xx(int interface)
 
 	case 5:
 	case 6:
+		iface_ops[interface] = &iface_ops_dis;
+#if 0
 		qlm_cfg.u64 = cvmx_read_csr(CVMX_MIO_QLMX_CFG(interface - 4));
 		/* QLM is disabled when QLM SPD is 15. */
 		if (qlm_cfg.s.qlm_spd == 15)
@@ -1034,6 +1040,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn68xx(int interface)
 			iface_ops[interface] = &iface_ops_ilk;
 		else
 			iface_ops[interface] = &iface_ops_dis;
+#endif
 		break;
 
 	case 7:
@@ -1084,7 +1091,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_octeon2(int interface)
 		 (OCTEON_IS_MODEL(OCTEON_CN66XX) &&
 		  interface >= 4 && interface <= 7)) {
 		/* Only present in CN63XX & CN66XX Octeon model */
-		union cvmx_sriox_status_reg sriox_status_reg;
+		// union cvmx_sriox_status_reg sriox_status_reg;
 
 		/* cn66xx pass1.0 has only 2 SRIO interfaces. */
 		if ((interface == 5 || interface == 7) &&
@@ -1097,12 +1104,15 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_octeon2(int interface)
 			 */
 			iface_ops[interface] = &iface_ops_dis;
 		else {
+			iface_ops[interface] = &iface_ops_dis;
+#if 0
 			sriox_status_reg.u64 =
 			    cvmx_read_csr(CVMX_SRIOX_STATUS_REG(interface - 4));
 			if (sriox_status_reg.s.srio)
 				iface_ops[interface] = &iface_ops_srio;
 			else
 				iface_ops[interface] = &iface_ops_dis;
+#endif
 		}
 	} else if (OCTEON_IS_MODEL(OCTEON_CN66XX)) {
 		union cvmx_mio_qlmx_cfg mio_qlm_cfg;
@@ -1222,6 +1232,7 @@ cvmx_helper_interface_mode_t cvmx_helper_interface_get_mode(int xiface)
 	if (OCTEON_IS_MODEL(OCTEON_CN70XX))
 		return __cvmx_get_mode_cn70xx(xi.interface);
 
+#if 0
 	if (OCTEON_IS_MODEL(OCTEON_CN78XX))
 		return __cvmx_get_mode_cn78xx(xiface);
 
@@ -1230,6 +1241,7 @@ cvmx_helper_interface_mode_t cvmx_helper_interface_get_mode(int xiface)
 		mode = __cvmx_get_mode_cn75xx(xiface);
 		return mode;
 	}
+#endif
 
 	if (OCTEON_IS_MODEL(OCTEON_CN73XX))
 		return __cvmx_get_mode_cn73xx(xiface);
@@ -1384,10 +1396,10 @@ int cvmx_helper_interface_probe(int xiface)
 		/* XAUI is a single high speed port */
 	case CVMX_HELPER_INTERFACE_MODE_XAUI:
 	case CVMX_HELPER_INTERFACE_MODE_RXAUI:
-	case CVMX_HELPER_INTERFACE_MODE_XLAUI:
-	case CVMX_HELPER_INTERFACE_MODE_XFI:
-	case CVMX_HELPER_INTERFACE_MODE_10G_KR:
-	case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
+//	case CVMX_HELPER_INTERFACE_MODE_XLAUI:
+//	case CVMX_HELPER_INTERFACE_MODE_XFI:
+//	case CVMX_HELPER_INTERFACE_MODE_10G_KR:
+//	case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
 		has_fcs = 1;
 		padding = CVMX_PKO_PADDING_60;
 		break;
@@ -1426,8 +1438,8 @@ int cvmx_helper_interface_probe(int xiface)
 	case CVMX_HELPER_INTERFACE_MODE_LOOP:
 		break;
 		/* SRIO has 2^N ports, where N is number of interfaces */
-	case CVMX_HELPER_INTERFACE_MODE_SRIO:
-		break;
+//	case CVMX_HELPER_INTERFACE_MODE_SRIO:
+//		break;
 	case CVMX_HELPER_INTERFACE_MODE_ILK:
 		padding = CVMX_PKO_PADDING_60;
 		has_fcs = 1;
@@ -1473,16 +1485,16 @@ static int __cvmx_helper_global_setup_backpressure(int node)
 			switch (cvmx_helper_interface_get_mode(xiface)) {
 			case CVMX_HELPER_INTERFACE_MODE_DISABLED:
 			case CVMX_HELPER_INTERFACE_MODE_PCIE:
-			case CVMX_HELPER_INTERFACE_MODE_SRIO:
+//			case CVMX_HELPER_INTERFACE_MODE_SRIO:
 			case CVMX_HELPER_INTERFACE_MODE_ILK:
 			case CVMX_HELPER_INTERFACE_MODE_NPI:
 			case CVMX_HELPER_INTERFACE_MODE_LOOP:
 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
 			case CVMX_HELPER_INTERFACE_MODE_RXAUI:
-			case CVMX_HELPER_INTERFACE_MODE_XLAUI:
-			case CVMX_HELPER_INTERFACE_MODE_XFI:
-			case CVMX_HELPER_INTERFACE_MODE_10G_KR:
-			case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
+//			case CVMX_HELPER_INTERFACE_MODE_XLAUI:
+//			case CVMX_HELPER_INTERFACE_MODE_XFI:
+//			case CVMX_HELPER_INTERFACE_MODE_10G_KR:
+//			case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
 				break;
 			case CVMX_HELPER_INTERFACE_MODE_RGMII:
 			case CVMX_HELPER_INTERFACE_MODE_GMII:
@@ -1490,10 +1502,12 @@ static int __cvmx_helper_global_setup_backpressure(int node)
 			case CVMX_HELPER_INTERFACE_MODE_SGMII:
 			case CVMX_HELPER_INTERFACE_MODE_QSGMII:
 			case CVMX_HELPER_INTERFACE_MODE_PICMG:
+#if 0
 				if (octeon_has_feature(OCTEON_FEATURE_BGX))
 					cvmx_bgx_set_backpressure_override
 					    (xiface, 0xf);
 				else
+#endif
 					cvmx_gmx_set_backpressure_override
 					    (interface, 0xf);
 				break;
