@@ -2018,12 +2018,12 @@ int cvmx_helper_shutdown_packet_io_global(void)
 	int packet_pool = (int)cvmx_fpa_get_packet_pool();
 	uint64_t packet_pool_size = cvmx_fpa_get_packet_pool_block_size();
 	int wqe_pool = (int)cvmx_fpa_get_wqe_pool();
-	int node = cvmx_get_node_num();
+//	int node = cvmx_get_node_num();
 	cvmx_pcsx_mrx_control_reg_t control_reg;
 
-	if (octeon_has_feature(OCTEON_FEATURE_BGX)) {
-		return cvmx_helper_shutdown_packet_io_global_cn78xx(node);
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_BGX)) {
+//		return cvmx_helper_shutdown_packet_io_global_cn78xx(node);
+//	}
 
 	/* Step 1: Disable all backpressure */
 	for (interface = 0; interface < num_interfaces; interface++) {
@@ -2050,8 +2050,8 @@ step2:
 			/* Not a packet interface */
 			break;
 		case CVMX_HELPER_INTERFACE_MODE_NPI:
-		case CVMX_HELPER_INTERFACE_MODE_SRIO:
-		case CVMX_HELPER_INTERFACE_MODE_ILK:
+//		case CVMX_HELPER_INTERFACE_MODE_SRIO:
+//		case CVMX_HELPER_INTERFACE_MODE_ILK:
 			/*
 			 * We don't handle the NPI/NPEI/SRIO packet
 			 * engines. The caller must know these are
@@ -2262,7 +2262,8 @@ step2:
 					start_cycle = cvmx_get_cycle();
 					stop_cycle =
 					    start_cycle +
-					    cvmx_clock_get_rate(CVMX_CLOCK_CORE)
+					    /* cvmx_clock_get_rate(CVMX_CLOCK_CORE) */
+					    octeon_get_clock_rate()
 					    * timeout;
 					while (cvmx_cmd_queue_length
 					       (CVMX_CMD_QUEUE_PKO(queue))
@@ -2301,8 +2302,8 @@ step2:
 		switch (cvmx_helper_interface_get_mode(interface)) {
 		case CVMX_HELPER_INTERFACE_MODE_DISABLED:
 		case CVMX_HELPER_INTERFACE_MODE_PCIE:
-		case CVMX_HELPER_INTERFACE_MODE_SRIO:
-		case CVMX_HELPER_INTERFACE_MODE_ILK:
+//		case CVMX_HELPER_INTERFACE_MODE_SRIO:
+//		case CVMX_HELPER_INTERFACE_MODE_ILK:
 		case CVMX_HELPER_INTERFACE_MODE_NPI:
 		case CVMX_HELPER_INTERFACE_MODE_LOOP:
 			break;
@@ -2625,15 +2626,15 @@ void cvmx_helper_setup_simulator_io_buffer_counts(int node,
 						  int num_packet_buffers,
 						  int pko_buffers)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		cvmx_helper_pki_set_dflt_pool_buffer(node, num_packet_buffers);
-		cvmx_helper_pki_set_dflt_aura_buffer(node, num_packet_buffers);
-
-	} else {
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		cvmx_helper_pki_set_dflt_pool_buffer(node, num_packet_buffers);
+//		cvmx_helper_pki_set_dflt_aura_buffer(node, num_packet_buffers);
+//
+//	} else {
 		cvmx_ipd_set_packet_pool_buffer_count(num_packet_buffers);
 		cvmx_ipd_set_wqe_pool_buffer_count(num_packet_buffers);
 		cvmx_pko_set_cmd_queue_pool_buffer_count(pko_buffers);
-	}
+//	}
 }
 
 void *cvmx_helper_mem_alloc(int node, uint64_t alloc_size, uint64_t align)
