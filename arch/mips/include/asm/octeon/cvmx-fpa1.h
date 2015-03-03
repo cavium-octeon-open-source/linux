@@ -36,6 +36,7 @@
 
 #include <asm/octeon/cvmx-scratch.h>
 #include <asm/octeon/cvmx-fpa-defs.h>
+#include <asm/octeon/cvmx-address.h>
 
 #include <asm/bitfield.h>
 
