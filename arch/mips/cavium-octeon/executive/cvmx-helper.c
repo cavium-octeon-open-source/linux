@@ -694,7 +694,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn70xx(int interface)
 	else if (interface == 3)	/* LOOP */
 		iface_ops[interface] = &iface_ops_loop;
 	else if (interface == 4) {	/* RGMII (AGL) */
-		cvmx_agl_prtx_ctl_t prtx_ctl;
+		union cvmx_agl_prtx_ctl prtx_ctl;
 		prtx_ctl.u64 = cvmx_read_csr(CVMX_AGL_PRTX_CTL(0));
 		if (prtx_ctl.s.mode == 0)
 			iface_ops[interface] = &iface_ops_agl;
