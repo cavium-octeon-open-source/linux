@@ -389,7 +389,7 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
 
 	if (OCTEON_IS_MODEL(OCTEON_CN30XX) || OCTEON_IS_MODEL(OCTEON_CN50XX)) {
 		if ((link_info.s.speed == 10) || (link_info.s.speed == 100)) {
-			cvmx_gmxx_inf_mode_t mode;
+			union cvmx_gmxx_inf_mode mode;
 			mode.u64 = cvmx_read_csr(CVMX_GMXX_INF_MODE(interface));
 
 			/*
