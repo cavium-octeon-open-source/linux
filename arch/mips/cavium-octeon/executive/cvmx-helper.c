@@ -50,7 +50,7 @@
 // #include <asm/octeon/cvmx-sso-defs.h>
 
 #include <asm/octeon/cvmx-agl.h>
-// #include <asm/octeon/cvmx-gmx.h>
+#include <asm/octeon/cvmx-gmx.h>
 #include <asm/octeon/cvmx-fpa.h>
 #include <asm/octeon/cvmx-pip.h>
 #include <asm/octeon/cvmx-hwpko.h>
@@ -69,7 +69,7 @@
 //#include <asm/octeon/cvmx-pki.h>
 #include <asm/octeon/cvmx-helper-pko.h>
 // #include <asm/octeon/cvmx-helper-pko3.h>
-// #include <asm/octeon/cvmx-helper-ipd.h>
+#include <asm/octeon/cvmx-helper-ipd.h>
 
 /**
  * @INTERNAL
