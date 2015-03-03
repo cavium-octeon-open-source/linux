@@ -287,6 +287,17 @@ static inline uint64_t cvmx_read_csr(uint64_t csr_addr)
 }
 
 
+static inline void cvmx_write_csr_node(uint64_t node, uint64_t csr_addr,
+				       uint64_t val)
+{
+	cvmx_write_csr(csr_addr, val);
+}
+
+static inline uint64_t cvmx_read_csr_node(uint64_t node, uint64_t csr_addr)
+{
+	return cvmx_read_csr(csr_addr);
+}
+
 static inline void cvmx_send_single(uint64_t data)
 {
 	const uint64_t CVMX_IOBDMA_SENDSINGLE = 0xffffffffffffa200ull;
