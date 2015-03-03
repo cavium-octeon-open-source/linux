@@ -1686,10 +1686,10 @@ int cvmx_helper_ipd_and_packet_input_enable_node(int node)
 	int interface;
 	int num_ports;
 
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		cvmx_helper_pki_enable(node);
-
-	} else
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		cvmx_helper_pki_enable(node);
+//
+//	} else
 		/* Enable IPD */
 		cvmx_ipd_enable();
 
@@ -1709,11 +1709,11 @@ int cvmx_helper_ipd_and_packet_input_enable_node(int node)
 
 	/* Finally enable PKO now that the entire path is up and running */
 	/* enable pko */
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		;		// cvmx_pko_enable_78xx(0); already enabled
-	} else {
+//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
+//		;		// cvmx_pko_enable_78xx(0); already enabled
+//	} else {
 		cvmx_pko_enable();
-	}
+//	}
 
 	if ((OCTEON_IS_MODEL(OCTEON_CN31XX_PASS1) ||
 	     OCTEON_IS_MODEL(OCTEON_CN30XX_PASS1)) &&
