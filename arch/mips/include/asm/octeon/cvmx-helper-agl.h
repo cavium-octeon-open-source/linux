@@ -37,7 +37,7 @@
 #define __CVMX_HELPER_AGL_H__
 
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-qlm.h>
+// #include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-agl-defs.h>
 
