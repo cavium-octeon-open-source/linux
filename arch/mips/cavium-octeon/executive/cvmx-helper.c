@@ -154,6 +154,7 @@ static const struct iface_ops iface_ops_sgmii = {
 	.loopback = __cvmx_helper_sgmii_configure_loopback,
 };
 
+#if 0
 /**
  * @INTERNAL
  * This structure specifies the interface methods used by interfaces
@@ -183,6 +184,7 @@ static const struct iface_ops iface_ops_qsgmii = {
 	.link_set = __cvmx_helper_sgmii_link_set,
 	.loopback = __cvmx_helper_sgmii_configure_loopback,
 };
+#endif
 
 /**
  * @INTERNAL
@@ -199,6 +201,7 @@ static const struct iface_ops iface_ops_xaui = {
 	.loopback = __cvmx_helper_xaui_configure_loopback,
 };
 
+#if 0
 /**
  * @INTERNAL
  * This structure specifies the interface methods used by interfaces
@@ -307,6 +310,7 @@ static const struct iface_ops iface_ops_ilk = {
 	.link_get = __cvmx_helper_ilk_link_get,
 	.link_set = __cvmx_helper_ilk_link_set,
 };
+#endif
 
 /**
  * @INTERNAL
@@ -320,6 +324,7 @@ static const struct iface_ops iface_ops_npi = {
 	.enable = __cvmx_helper_npi_enable,
 };
 
+#if 0
 /**
  * @INTERNAL
  * This structure specifies the interface methods used by interfaces
@@ -333,6 +338,7 @@ static const struct iface_ops iface_ops_srio = {
 	.link_get = __cvmx_helper_srio_link_get,
 	.link_set = __cvmx_helper_srio_link_set,
 };
+#endif
 
 /**
  * @INTERNAL
