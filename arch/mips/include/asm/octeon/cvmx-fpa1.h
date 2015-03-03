@@ -37,6 +37,8 @@
 #include <asm/octeon/cvmx-scratch.h>
 #include <asm/octeon/cvmx-fpa-defs.h>
 
+#include <asm/bitfield.h>
+
 #ifndef __CVMX_FPA1_HW_H__
 #define __CVMX_FPA1_HW_H__
 
@@ -61,26 +63,27 @@ typedef struct {
 typedef union {
 	uint64_t u64;
 	struct {
-		CVMX_BITFIELD_FIELD(uint64_t scraddr:8,	/**
-					 * the (64-bit word) location in
-					 * scratchpad to write to (if len != 0)
-					 */
-				    CVMX_BITFIELD_FIELD(uint64_t len:8,
-								/**
-					 * the number of words in the response
-					 * (0 => no response)
-					 */
-							CVMX_BITFIELD_FIELD(uint64_t did:8,
-								/**
-					 * the ID of the device on the
-					 * non-coherent bus
-					 */
-									    CVMX_BITFIELD_FIELD(uint64_t addr:40,
-							/**
-					 * the address that will appear in the
-					 * first tick on the NCB bus
-					 */
-									    ))));
+		/*
+		 * the (64-bit word) location in
+		 * scratchpad to write to (if len != 0)
+		 */
+		__BITFIELD_FIELD(uint64_t scraddr:8,
+		/*
+		 * the number of words in the response
+		 * (0 => no response)
+		 */
+		__BITFIELD_FIELD(uint64_t len:8,
+		/*
+		 * the ID of the device on the
+		 * non-coherent bus
+		 */
+		__BITFIELD_FIELD(uint64_t did:8,
+		/*
+		 * the address that will appear in the
+		 * first tick on the NCB bus
+		 */
+		__BITFIELD_FIELD(uint64_t addr:40,
+		))));
 	} s;
 } cvmx_fpa1_iobdma_data_t;
 
