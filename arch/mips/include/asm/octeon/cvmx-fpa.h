@@ -41,15 +41,21 @@
 
 #include "cvmx-fpa-defs.h"
 #include "cvmx-fpa1.h"
-#include "cvmx-fpa3.h"
+// #include "cvmx-fpa3.h"
 
 #define CVMX_FPA_MIN_BLOCK_SIZE 128
 #define CVMX_FPA_ALIGNMENT      128
 #define CVMX_FPA_POOL_NAME_LEN  16
 
+#if 0
 /* On CN78XX in backward-compatible mode, pool is mapped to AURA */
 #define CVMX_FPA_NUM_POOLS (octeon_has_feature(OCTEON_FEATURE_FPA3) ? \
 			cvmx_fpa3_num_auras() : CVMX_FPA1_NUM_POOLS)
+
+/* On CN78XX in backward-compatible mode, pool is mapped to AURA */
+#endif
+#define CVMX_FPA_NUM_POOLS CVMX_FPA1_NUM_POOLS
+
 
 /**
  * Structure to store FPA pool configuration parameters.
@@ -98,10 +104,10 @@ int cvmx_fpa_global_init_node(int node);
  */
 static inline void cvmx_fpa_enable(void)
 {
-	if (!octeon_has_feature(OCTEON_FEATURE_FPA3))
+//	if (!octeon_has_feature(OCTEON_FEATURE_FPA3))
 		cvmx_fpa1_enable();
-	else
-		cvmx_fpa_global_init_node(cvmx_get_node_num());
+//	else
+//		cvmx_fpa_global_init_node(cvmx_get_node_num());
 }
 
 /**
@@ -109,7 +115,7 @@ static inline void cvmx_fpa_enable(void)
  */
 static inline void cvmx_fpa_disable(void)
 {
-	if (!octeon_has_feature(OCTEON_FEATURE_FPA3))
+//	if (!octeon_has_feature(OCTEON_FEATURE_FPA3))
 		cvmx_fpa1_disable();
 	/* FPA3 does not have a disable funcion */
 }
@@ -125,6 +131,7 @@ static inline void cvmx_fpa_global_initialize(void)
 	cvmx_fpa_global_init_node(cvmx_get_node_num());
 }
 
+#if 0
 /**
  * @INTERNAL
  *
@@ -141,6 +148,7 @@ cvmx_fpa1_pool_to_fpa3_aura(cvmx_fpa1_pool_t pool)
 	}
 	return CVMX_FPA3_INVALID_GAURA;
 }
+#endif
 
 /**
  * Get a new block from the FPA
@@ -150,10 +158,10 @@ cvmx_fpa1_pool_to_fpa3_aura(cvmx_fpa1_pool_t pool)
  */
 static inline void *cvmx_fpa_alloc(uint64_t pool)
 {
-	/* FPA3 is handled differently */
-	if ((octeon_has_feature(OCTEON_FEATURE_FPA3))) {
-		return cvmx_fpa3_alloc(cvmx_fpa1_pool_to_fpa3_aura(pool));
-	} else
+//	/* FPA3 is handled differently */
+//	if ((octeon_has_feature(OCTEON_FEATURE_FPA3))) {
+//		return cvmx_fpa3_alloc(cvmx_fpa1_pool_to_fpa3_aura(pool));
+//	} else
 		return cvmx_fpa1_alloc(pool);
 }
 
@@ -169,10 +177,10 @@ static inline void *cvmx_fpa_alloc(uint64_t pool)
  */
 static inline void cvmx_fpa_async_alloc(uint64_t scr_addr, uint64_t pool)
 {
-	if ((octeon_has_feature(OCTEON_FEATURE_FPA3))) {
-		return cvmx_fpa3_async_alloc(scr_addr,
-					     cvmx_fpa1_pool_to_fpa3_aura(pool));
-	} else
+//	if ((octeon_has_feature(OCTEON_FEATURE_FPA3))) {
+//		return cvmx_fpa3_async_alloc(scr_addr,
+//					     cvmx_fpa1_pool_to_fpa3_aura(pool));
+//	} else
 		return cvmx_fpa1_async_alloc(scr_addr, pool);
 }
 
@@ -190,11 +198,11 @@ static inline void cvmx_fpa_async_alloc(uint64_t scr_addr, uint64_t pool)
 static inline void *cvmx_fpa_async_alloc_finish(uint64_t scr_addr,
 						uint64_t pool)
 {
-	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
-		return cvmx_fpa3_async_alloc_finish(scr_addr,
-						    cvmx_fpa1_pool_to_fpa3_aura
-						    (pool));
-	else
+//	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
+//		return cvmx_fpa3_async_alloc_finish(scr_addr,
+//						    cvmx_fpa1_pool_to_fpa3_aura
+//						    (pool));
+//	else
 		return cvmx_fpa1_async_alloc_finish(scr_addr, pool);
 }
 
@@ -211,11 +219,11 @@ static inline void *cvmx_fpa_async_alloc_finish(uint64_t scr_addr,
 static inline void cvmx_fpa_free_nosync(void *ptr, uint64_t pool,
 					uint64_t num_cache_lines)
 {
-	/* FPA3 is handled differently */
-	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
-		cvmx_fpa3_free_nosync(ptr, cvmx_fpa1_pool_to_fpa3_aura(pool),
-				      num_cache_lines);
-	else
+//	/* FPA3 is handled differently */
+//	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
+//		cvmx_fpa3_free_nosync(ptr, cvmx_fpa1_pool_to_fpa3_aura(pool),
+//				      num_cache_lines);
+//	else
 		cvmx_fpa1_free_nosync(ptr, pool, num_cache_lines);
 }
 
@@ -231,10 +239,10 @@ static inline void cvmx_fpa_free_nosync(void *ptr, uint64_t pool,
 static inline void cvmx_fpa_free(void *ptr, uint64_t pool,
 				 uint64_t num_cache_lines)
 {
-	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
-		cvmx_fpa3_free(ptr, cvmx_fpa1_pool_to_fpa3_aura(pool),
-			       num_cache_lines);
-	else
+//	if ((octeon_has_feature(OCTEON_FEATURE_FPA3)))
+//		cvmx_fpa3_free(ptr, cvmx_fpa1_pool_to_fpa3_aura(pool),
+//			       num_cache_lines);
+//	else
 		cvmx_fpa1_free(ptr, pool, num_cache_lines);
 }
 
