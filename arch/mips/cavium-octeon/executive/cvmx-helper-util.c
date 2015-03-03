@@ -43,8 +43,8 @@
 #include <asm/octeon/cvmx-sli-defs.h>
 #include <asm/octeon/cvmx-pexp-defs.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-ilk.h>
-#include <asm/octeon/cvmx-pki.h>
+// #include <asm/octeon/cvmx-ilk.h>
+// #include <asm/octeon/cvmx-pki.h>
 
 /**
  * @INTERNAL
@@ -190,20 +190,20 @@ const char *cvmx_helper_interface_mode_to_string(cvmx_helper_interface_mode_t
 		return "NPI";
 	case CVMX_HELPER_INTERFACE_MODE_LOOP:
 		return "LOOP";
-	case CVMX_HELPER_INTERFACE_MODE_SRIO:
-		return "SRIO";
+// 	case CVMX_HELPER_INTERFACE_MODE_SRIO:
+// 		return "SRIO";
 	case CVMX_HELPER_INTERFACE_MODE_ILK:
 		return "ILK";
 	case CVMX_HELPER_INTERFACE_MODE_AGL:
 		return "AGL";
-	case CVMX_HELPER_INTERFACE_MODE_XLAUI:
-		return "XLAUI";
-	case CVMX_HELPER_INTERFACE_MODE_XFI:
-		return "XFI";
-	case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
-		return "40G_KR4";
-	case CVMX_HELPER_INTERFACE_MODE_10G_KR:
-		return "10G_KR";
+// 	case CVMX_HELPER_INTERFACE_MODE_XLAUI:
+// 		return "XLAUI";
+// 	case CVMX_HELPER_INTERFACE_MODE_XFI:
+// 		return "XFI";
+// 	case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
+// 		return "40G_KR4";
+// 	case CVMX_HELPER_INTERFACE_MODE_10G_KR:
+// 		return "10G_KR";
 	}
 	return "UNKNOWN";
 }
@@ -225,8 +225,8 @@ void cvmx_helper_free_packet_data(cvmx_wqe_t * work)
 	uint64_t next_buffer_ptr;
 	unsigned ncl;
 	cvmx_buf_ptr_t buffer_ptr;
-	cvmx_buf_ptr_pki_t bptr;
-	cvmx_wqe_78xx_t *wqe = (void *)work;
+	// cvmx_buf_ptr_pki_t bptr;
+	// cvmx_wqe_78xx_t *wqe = (void *)work;
 
 	number_buffers = cvmx_wqe_get_bufs(work);
 
@@ -239,13 +239,13 @@ void cvmx_helper_free_packet_data(cvmx_wqe_t * work)
 		return;
 
 	/* Interpret PKI-style bufptr unless it has been translated */
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE) &&
-	    !wqe->pki_wqe_translated) {
-		cvmx_wqe_pki_errata_20776(work);
-		bptr.u64 = buffer_ptr.u64;
-		next_buffer_ptr = *(uint64_t *)
-		    cvmx_phys_to_ptr(bptr.addr - 8);
-	} else {
+// 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE) &&
+// 	    !wqe->pki_wqe_translated) {
+// 		cvmx_wqe_pki_errata_20776(work);
+// 		bptr.u64 = buffer_ptr.u64;
+// 		next_buffer_ptr = *(uint64_t *)
+// 		    cvmx_phys_to_ptr(bptr.addr - 8);
+// 	} else {
 		start_of_buffer =
 		    ((buffer_ptr.s.addr >> 7) - buffer_ptr.s.back) << 7;
 		next_buffer_ptr = *(uint64_t *)
@@ -259,29 +259,29 @@ void cvmx_helper_free_packet_data(cvmx_wqe_t * work)
 			buffer_ptr.u64 = next_buffer_ptr;
 			number_buffers--;
 		}
-	}
+//	}
 	while (number_buffers--) {
-		if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE) &&
-		    !wqe->pki_wqe_translated) {
-			cvmx_fpa3_gaura_t aura =
-			    __cvmx_fpa3_gaura(wqe->word0.aura >> 10,
-					      wqe->word0.aura * 0x3ff);
-
-			bptr.u64 = buffer_ptr.u64;
-
-			ncl = (bptr.size + CVMX_CACHE_LINE_SIZE - 1) /
-			    CVMX_CACHE_LINE_SIZE;
-
-			/* XXX- assumes the buffer is cache-line aligned */
-			start_of_buffer = (bptr.addr >> 7) << 7;
-
-			/* Read pointer to next buffer before we free the current buffer. */
-			next_buffer_ptr = *(uint64_t *)
-			    cvmx_phys_to_ptr(bptr.addr - 8);
-			/* FPA AURA comes from WQE, includes node */
-			cvmx_fpa3_free(cvmx_phys_to_ptr(start_of_buffer), aura,
-				       ncl);
-		} else {
+// 		if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE) &&
+// 		    !wqe->pki_wqe_translated) {
+// 			cvmx_fpa3_gaura_t aura =
+// 			    __cvmx_fpa3_gaura(wqe->word0.aura >> 10,
+// 					      wqe->word0.aura * 0x3ff);
+// 
+// 			bptr.u64 = buffer_ptr.u64;
+// 
+// 			ncl = (bptr.size + CVMX_CACHE_LINE_SIZE - 1) /
+// 			    CVMX_CACHE_LINE_SIZE;
+// 
+// 			/* XXX- assumes the buffer is cache-line aligned */
+// 			start_of_buffer = (bptr.addr >> 7) << 7;
+// 
+// 			/* Read pointer to next buffer before we free the current buffer. */
+// 			next_buffer_ptr = *(uint64_t *)
+// 			    cvmx_phys_to_ptr(bptr.addr - 8);
+// 			/* FPA AURA comes from WQE, includes node */
+// 			cvmx_fpa3_free(cvmx_phys_to_ptr(start_of_buffer), aura,
+// 				       ncl);
+// 		} else {
 			ncl = (buffer_ptr.s.size + CVMX_CACHE_LINE_SIZE - 1) /
 			    CVMX_CACHE_LINE_SIZE + buffer_ptr.s.back;
 			/* Calculate buffer start using "back" offset,
@@ -295,22 +295,23 @@ void cvmx_helper_free_packet_data(cvmx_wqe_t * work)
 			next_buffer_ptr = *(uint64_t *)
 			    cvmx_phys_to_ptr(buffer_ptr.s.addr - 8);
 			/* FPA pool comes from buf_ptr itself */
-			if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-				cvmx_fpa3_gaura_t aura =
-				    cvmx_fpa1_pool_to_fpa3_aura(buffer_ptr.s.
-								pool);
-				cvmx_fpa3_free(cvmx_phys_to_ptr
-					       (start_of_buffer), aura, ncl);
-			} else
+//			if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
+//				cvmx_fpa3_gaura_t aura =
+//				    cvmx_fpa1_pool_to_fpa3_aura(buffer_ptr.s.
+//								pool);
+//				cvmx_fpa3_free(cvmx_phys_to_ptr
+//					       (start_of_buffer), aura, ncl);
+//			} else
 				cvmx_fpa1_free(cvmx_phys_to_ptr
 					       (start_of_buffer),
 					       buffer_ptr.s.pool, ncl);
-		}
+//		}
 		buffer_ptr.u64 = next_buffer_ptr;
 	}
 
 }
 
+#if 0
 void cvmx_helper_setup_legacy_red(int pass_thresh, int drop_thresh)
 {
 	unsigned int node = cvmx_get_node_num();
@@ -347,6 +348,7 @@ void cvmx_helper_setup_legacy_red(int pass_thresh, int drop_thresh)
 	cvmx_helper_setup_aura_qos(node, aura, ena_red, ena_drop, pass_thresh,
 				   drop_thresh, ena_bp, 0);
 }
+#endif
 
 /**
  * Setup Random Early Drop to automatically begin dropping packets.
@@ -361,9 +363,9 @@ void cvmx_helper_setup_legacy_red(int pass_thresh, int drop_thresh)
  */
 int cvmx_helper_setup_red(int pass_thresh, int drop_thresh)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-		cvmx_helper_setup_legacy_red(pass_thresh, drop_thresh);
-	else
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI))
+//		cvmx_helper_setup_legacy_red(pass_thresh, drop_thresh);
+//	else
 		cvmx_ipd_setup_red(pass_thresh, drop_thresh);
 	return 0;
 }
@@ -392,8 +394,8 @@ int __cvmx_helper_setup_gmx(int xiface, int num_ports)
 
 	/* The common BGX settings are already done in the appropriate
 	   enable functions, nothing to do here. */
-	if (octeon_has_feature(OCTEON_FEATURE_BGX))
-		return 0;
+//	if (octeon_has_feature(OCTEON_FEATURE_BGX))
+//		return 0;
 
 	/* Tell GMX the number of TX ports on this interface */
 	gmx_tx_prts.u64 = cvmx_read_csr(CVMX_GMXX_TX_PRTS(xi.interface));
@@ -638,17 +640,17 @@ EXPORT_SYMBOL(cvmx_helper_get_bpid);
  */
 void cvmx_helper_show_stats(int port)
 {
-	cvmx_pip_port_status_t status;
+//	cvmx_pip_port_status_t status;
 	cvmx_pko_port_status_t pko_status;
 
 	/* ILK stats */
-	if (octeon_has_feature(OCTEON_FEATURE_ILK))
-		__cvmx_helper_ilk_show_stats();
+//	if (octeon_has_feature(OCTEON_FEATURE_ILK))
+//		__cvmx_helper_ilk_show_stats();
 
 	/* PIP stats */
-	cvmx_pip_get_port_stats(port, 0, &status);
-	cvmx_dprintf("port %d: the number of packets - ipd: %d\n",
-		     port, (int)status.packets);
+//	cvmx_pip_get_port_stats(port, 0, &status);
+//	cvmx_dprintf("port %d: the number of packets - ipd: %d\n",
+//		     port, (int)status.packets);
 
 	/* PKO stats */
 	cvmx_pko_get_port_status(port, 0, &pko_status);
