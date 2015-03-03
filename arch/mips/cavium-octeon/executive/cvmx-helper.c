@@ -1774,12 +1774,12 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 	}
 
 	/* PKO3 init precedes that of interfaces */
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		__cvmx_helper_init_port_config_data(node);
-		result = cvmx_helper_pko3_init_global(node);
-	} else {
+//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
+//		__cvmx_helper_init_port_config_data(node);
+//		result = cvmx_helper_pko3_init_global(node);
+//	} else {
 		result = cvmx_helper_pko_init();
-	}
+//	}
 
 	if (result < 0)
 		return result;
@@ -1796,15 +1796,15 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 			    (cvmx_helper_interface_get_mode(xiface)));
 
 		result |= __cvmx_helper_ipd_setup_interface(xiface);
-		if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-			result |= cvmx_helper_pko3_init_interface(xiface);
-		else
+//		if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
+//			result |= cvmx_helper_pko3_init_interface(xiface);
+//		else
 			result |= __cvmx_helper_interface_setup_pko(interface);
 	}
 
-	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-		result |= __cvmx_helper_pki_global_setup(node);
-	else
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI))
+//		result |= __cvmx_helper_pki_global_setup(node);
+//	else
 		result |= __cvmx_helper_ipd_global_setup();
 
 	/* Enable any flow control and backpressure */
