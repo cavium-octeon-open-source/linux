@@ -35,7 +35,7 @@
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
-#include <asm/octeon/cvmx-bgxx-defs.h>
+// #include <asm/octeon/cvmx-bgxx-defs.h>
 #include <asm/octeon/cvmx-sriox-defs.h>
 #include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
@@ -44,10 +44,10 @@
 #include <asm/octeon/cvmx-pip-defs.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-gserx-defs.h>
+// #include <asm/octeon/cvmx-gserx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
-#include <asm/octeon/cvmx-sso-defs.h>
+// #include <asm/octeon/cvmx-sso-defs.h>
 
 #include <asm/octeon/cvmx-agl.h>
 #include <asm/octeon/cvmx-gmx.h>
