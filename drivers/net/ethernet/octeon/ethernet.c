@@ -53,6 +53,7 @@
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
+#include <asm/octeon/cvmx-agl-defs.h>
 
 int rx_cpu_factor = 8;
 module_param(rx_cpu_factor, int, S_IRUGO | S_IWUSR | S_IWGRP);
