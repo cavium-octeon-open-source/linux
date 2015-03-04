@@ -546,7 +546,7 @@ int cvm_oct_common_init(struct net_device *dev)
 
 	/* We do our own locking, Linux doesn't need to */
 	dev->features |= NETIF_F_LLTX;
-	SET_ETHTOOL_OPS(dev, &cvm_oct_ethtool_ops);
+	dev->ethtool_ops = &cvm_oct_ethtool_ops;
 
 	memcpy(sa.sa_data, dev->dev_addr, ETH_ALEN);
 	cvm_oct_common_set_mac_address(dev, &sa, priv->gmx_base, &priv->poll_lock);
