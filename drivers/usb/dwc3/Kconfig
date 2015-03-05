@@ -61,6 +61,13 @@ config USB_DWC3_EXYNOS
 	  Recent Exynos5 SoCs ship with one DesignWare Core USB3 IP inside,
 	  say 'Y' or 'M' if you have one such device.
 
+config USB_DWC3_OCTEON
+	tristate "Cavium Octeon Platform"
+	depends on CAVIUM_OCTEON_SOC && OF || COMPILE_TEST
+	help
+	  Recent Cavium Octeon SoCs ship with one DesignWare Core USB3 IP inside,
+	  say 'Y' or 'M' if you have one such device.
+
 config USB_DWC3_PCI
 	tristate "PCIe-based Platforms"
 	depends on PCI
