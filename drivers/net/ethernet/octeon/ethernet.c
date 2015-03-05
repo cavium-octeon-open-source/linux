@@ -880,8 +880,10 @@ static int cvm_oct_probe(struct platform_device *pdev)
 		int num_ports = cvmx_helper_ports_on_interface(interface);
 		int interface_port;
 
+#ifdef CONFIG_RAPIDIO
 		if (imode == CVMX_HELPER_INTERFACE_MODE_SRIO)
 			num_ports = 2; /* consistent with se apps. could be 4 */
+#endif
 
 		for (interface_port = 0; interface_port < num_ports;
 		     interface_port++) {
@@ -917,6 +919,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
 					  cvm_oct_periodic_worker);
 			priv->imode = imode;
 
+#ifdef CONFIG_RAPIDIO
 			if (imode == CVMX_HELPER_INTERFACE_MODE_SRIO) {
 				int mbox = cvmx_helper_get_ipd_port(interface, interface_port) - cvmx_helper_get_ipd_port(interface, 0);
 				union cvmx_srio_tx_message_header tx_header;
@@ -934,12 +937,15 @@ static int cvm_oct_probe(struct platform_device *pdev)
 				priv->num_tx_queues = 1;
 				cvm_oct_by_srio_mbox[interface - 4][mbox] = priv;
 			} else {
+#endif
 				priv->ipd_port = cvmx_helper_get_ipd_port(interface, interface_port);
 				priv->key = priv->ipd_port;
 				priv->pko_port = cvmx_helper_get_pko_port(interface, interface_port);
 				base_queue = cvmx_pko_get_base_queue(priv->ipd_port);
 				priv->num_tx_queues = cvmx_pko_get_num_queues(priv->ipd_port);
+#ifdef CONFIG_RAPIDIO
 			}
+#endif
 
 			if (priv->num_tx_queues == 0) {
 				dev_err(&pdev->dev,
