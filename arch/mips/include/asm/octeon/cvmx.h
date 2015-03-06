@@ -66,7 +66,6 @@ enum cvmx_mips_space {
 #include <asm/octeon/cvmx-led-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
 #include <asm/octeon/cvmx-pow-defs.h>
-#include <asm/octeon/cvmx-rst-defs.h>
 
 #include <asm/octeon/cvmx-bootinfo.h>
 #include <asm/octeon/cvmx-bootmem.h>
@@ -442,10 +441,7 @@ static inline void cvmx_reset_octeon(void)
 	union cvmx_ciu_soft_rst ciu_soft_rst;
 	ciu_soft_rst.u64 = 0;
 	ciu_soft_rst.s.soft_rst = 1;
-	if (OCTEON_IS_OCTEON3())
-		cvmx_write_csr(CVMX_RST_SOFT_RST, ciu_soft_rst.u64);
-	else
-		cvmx_write_csr(CVMX_CIU_SOFT_RST, ciu_soft_rst.u64);
+	cvmx_write_csr(CVMX_CIU_SOFT_RST, ciu_soft_rst.u64);
 }
 
 /* Return the number of cores available in the chip */
