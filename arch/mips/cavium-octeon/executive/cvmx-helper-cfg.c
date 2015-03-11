@@ -37,10 +37,10 @@
 #include <asm/octeon/cvmx-helper-board.h>
 #include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-helper-ilk.h>
-#include <asm/octeon/cvmx-helper-bgx.h>
-#include <asm/octeon/cvmx-ilk.h>
-#include <asm/octeon/cvmx-range.h>
+// #include <asm/octeon/cvmx-helper-ilk.h>
+// #include <asm/octeon/cvmx-helper-bgx.h>
+// #include <asm/octeon/cvmx-ilk.h>
+// #include <asm/octeon/cvmx-range.h>
 #include <asm/octeon/cvmx-global-resources.h>
 #include <asm/octeon/cvmx-pko-internal-ports-range.h>
 
