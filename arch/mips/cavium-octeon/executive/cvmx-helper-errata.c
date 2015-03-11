@@ -63,7 +63,7 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 	cvmx_buf_ptr_t g_buffer, pkt_buffer;
 	cvmx_wqe_t *work;
 	int size, num_segs = 0, wqe_pcnt, pkt_pcnt;
-	cvmx_gmxx_prtx_cfg_t gmx_cfg;
+	union cvmx_gmxx_prtx_cfg gmx_cfg;
 	int retry_cnt;
 	int retry_loop_cnt;
 	int i;
