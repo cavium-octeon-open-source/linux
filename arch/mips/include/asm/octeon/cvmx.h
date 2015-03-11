@@ -45,6 +45,12 @@
 #define CVMX_ADD_IO_SEG(add) CVMX_ADD_SEG(CVMX_IO_SEG, (add))
 #endif
 
+#define cvmx_safe_printf pr_err
+#define cvmx_warn pr_warning
+#define cvmx_warn_if(p, fmt, ...) ({if (p) pr_warning(pr_fmt(fmt), ##__VA_ARGS__);})
+#define cvmx_unlikely unlikely
+#define cvmx_likely likely
+
 #include <asm/octeon/cvmx-address.h>
 #include <asm/octeon/cvmx-asm.h>
 #include <asm/octeon/cvmx-packet.h>
