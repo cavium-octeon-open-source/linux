@@ -50,6 +50,8 @@
 #define cvmx_warn_if(p, fmt, ...) ({if (p) pr_warning(pr_fmt(fmt), ##__VA_ARGS__);})
 #define cvmx_unlikely unlikely
 #define cvmx_likely likely
+#define cvmx_printf printk
+#define CVMX_SHARED
 
 #include <asm/octeon/cvmx-address.h>
 #include <asm/octeon/cvmx-asm.h>
