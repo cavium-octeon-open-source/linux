@@ -342,6 +342,16 @@ static inline unsigned int cvmx_get_core_num(void)
 	return core_num;
 }
 
+static inline unsigned int cvmx_get_node_num(void)
+{
+        unsigned int core_num = cvmx_get_core_num();
+        return (core_num >> CVMX_NODE_NO_SHIFT) & CVMX_NODE_MASK;
+}
+static inline unsigned int cvmx_get_local_core_num(void)
+{
+        return cvmx_get_core_num() & ((1 << CVMX_NODE_NO_SHIFT) - 1);
+}
+
 /**
  * Returns the number of bits set in the provided value.
  * Simple wrapper for POP instruction.
