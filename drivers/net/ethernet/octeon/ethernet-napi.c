@@ -164,7 +164,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 				     priv->tx_timestamp_hw)) {
 					u64 ns = *(u64 *)work->packet_data;
 					struct skb_shared_hwtstamps ts;
-					ts.syststamp = cvm_oct_ptp_to_ktime(ns);
+					// ts.syststamp = cvm_oct_ptp_to_ktime(ns);
 					ts.hwtstamp = ns_to_ktime(ns);
 					skb_tstamp_tx(skb, &ts);
 			}
@@ -361,7 +361,7 @@ static int CVM_OCT_NAPI_POLL(struct napi_struct *napi, int budget)
 					struct skb_shared_hwtstamps *ts;
 					ts = skb_hwtstamps(skb);
 					ts->hwtstamp = ns_to_ktime(ns);
-					ts->syststamp = cvm_oct_ptp_to_ktime(ns);
+					// ts->syststamp = cvm_oct_ptp_to_ktime(ns);
 					__skb_pull(skb, 8);
 				}
 				skb->protocol = eth_type_trans(skb, priv->netdev);
