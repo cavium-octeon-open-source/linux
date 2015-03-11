@@ -25,6 +25,11 @@
  * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
+#include <asm/octeon/cvmx-qlm.h>
+#include <asm/octeon/cvmx-gserx-defs.h>
+
+#if 0
+
 /**
  * @file
  *
@@ -950,6 +955,7 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 	}
 	return 0;
 }
+#endif
 
 static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 {
@@ -1161,6 +1167,8 @@ enum cvmx_qlm_mode cvmx_qlm_get_dlm_mode(int interface_type, int interface)
 		return CVMX_QLM_MODE_DISABLED;
 	}
 }
+
+#if 0
 
 static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
 {
@@ -1845,3 +1853,5 @@ void __cvmx_helper_errata_qlm_disable_2nd_order_cdr(int qlm)
 	}
 	cvmx_helper_qlm_jtag_update(qlm);
 }
+
+#endif
