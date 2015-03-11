@@ -29,6 +29,7 @@
 #include <asm/octeon/cvmx-gserx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-pemx-defs.h>
+#include <asm/octeon/cvmx-helper-jtag.h>
 
 #if 0
 
@@ -1817,6 +1818,7 @@ void cvmx_qlm_display_registers(int qlm)
 	}
 }
 
+#endif
 /**
  * Due to errata G-720, the 2nd order CDR circuit on CN52XX pass
  * 1 doesn't work properly. The following code disables 2nd order
@@ -1828,7 +1830,7 @@ void __cvmx_helper_errata_qlm_disable_2nd_order_cdr(int qlm)
 {
 	int lane;
 	/* Apply the workaround only once. */
-	cvmx_ciu_qlm_jtgd_t qlm_jtgd;
+	union cvmx_ciu_qlm_jtgd qlm_jtgd;
 	qlm_jtgd.u64 = cvmx_read_csr(CVMX_CIU_QLM_JTGD);
 	if (qlm_jtgd.s.select != 0)
 		return;
@@ -1856,4 +1858,3 @@ void __cvmx_helper_errata_qlm_disable_2nd_order_cdr(int qlm)
 	cvmx_helper_qlm_jtag_update(qlm);
 }
 
-#endif
