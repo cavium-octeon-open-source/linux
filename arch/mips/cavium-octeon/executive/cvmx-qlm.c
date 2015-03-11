@@ -27,6 +27,8 @@
 
 #include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-gserx-defs.h>
+#include <asm/octeon/cvmx-gmxx-defs.h>
+#include <asm/octeon/cvmx-pemx-defs.h>
 
 #if 0
 
