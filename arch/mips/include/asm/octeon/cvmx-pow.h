@@ -2684,6 +2684,7 @@ static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag,
 	cvmx_write_io(ptr.u64, tag_req.u64);
 }
 
+#if 0
 /**
  * This function sets the group mask for a core.  The group mask
  * indicates which groups each core will accept work from. There are
@@ -2706,6 +2707,7 @@ static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag,
  */
 static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
 {
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		const unsigned mask_set = 0;
 		cvmx_sso_ppx_sx_grpmskx_t grp_msk;
@@ -2743,7 +2745,9 @@ static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
 								    rix),
 					    grp_msk.u64);
 		}
-	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
+	} else
+#endif
+	if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		cvmx_sso_ppx_grp_msk_t grp_msk;
 		grp_msk.s.grp_msk = mask;
 		cvmx_write_csr(CVMX_SSO_PPX_GRP_MSK(core_num), grp_msk.u64);
@@ -3021,6 +3025,7 @@ static inline void cvmx_pow_set_priority(uint64_t core_num,
 		cvmx_write_csr(CVMX_POW_PP_GRP_MSKX(core_num), grp_msk.u64);
 	}
 }
+#endif
 
 /**
  * Performs a tag switch and then an immediate deschedule. This completes
@@ -3322,6 +3327,7 @@ static inline uint64_t cvmx_sso3_get_wqe_count(int node)
 	return cnt;
 }
 
+#if 0
 static inline uint64_t cvmx_sso_get_total_wqe_count(void)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
@@ -3340,6 +3346,7 @@ static inline uint64_t cvmx_sso_get_total_wqe_count(void)
 		return (pow_iq_com_cnt.s.iq_cnt);
 	}
 }
+#endif
 
 /**
  * Store the current POW internal state into the supplied
