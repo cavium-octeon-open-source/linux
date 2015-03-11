@@ -148,4 +148,7 @@
 	asm volatile ("rdhwr %[rt],$" CVMX_TMP_STR(regstr) : [rt] "=d" (result))
 #define CVMX_RDHWRNV(result, regstr) \
 	asm ("rdhwr %[rt],$" CVMX_TMP_STR(regstr) : [rt] "=d" (result))
+
+#define CVMX_MF_CHORD(dest)         CVMX_RDHWR(dest, 30)
+
 #endif /* __CVMX_ASM_H__ */
