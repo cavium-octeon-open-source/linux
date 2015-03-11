@@ -60,6 +60,7 @@
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
+#include <asm/octeon/cvmx-agl-defs.h>
 
 struct cvm_napi_wrapper {
 	struct napi_struct napi;
