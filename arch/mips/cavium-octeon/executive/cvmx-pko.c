@@ -34,8 +34,8 @@
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-hwpko.h>
-#include <asm/octeon/cvmx-pko3.h>
-#include <asm/octeon/cvmx-pko3-queue.h>
+// #include <asm/octeon/cvmx-pko3.h>
+// #include <asm/octeon/cvmx-pko3-queue.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-util.h>
@@ -139,9 +139,13 @@ EXPORT_SYMBOL(cvmx_pko_get_num_pko_ports);
 
 int cvmx_pko_get_base_queue(int port)
 {
+
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return cvmx_pko3_get_queue_base(port);
-	else if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+	else 
+#endif
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		return
 		    __cvmx_helper_cfg_pko_queue_base
 		    (cvmx_helper_cfg_ipd2pko_port_base(port));
@@ -164,8 +168,8 @@ EXPORT_SYMBOL(cvmx_pko_get_base_queue);
  */
 int cvmx_pko_get_base_queue_pkoid(int pko_port)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-		return cvmx_pko3_get_queue_base(pko_port);
+//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
+//		return cvmx_pko3_get_queue_base(pko_port);
 	return __cvmx_helper_cfg_pko_queue_base(pko_port);
 }
 
@@ -178,16 +182,19 @@ int cvmx_pko_get_base_queue_pkoid(int pko_port)
  */
 int cvmx_pko_get_num_queues_pkoid(int pko_port)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-		return cvmx_pko3_get_queue_num(pko_port);
+//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
+//		return cvmx_pko3_get_queue_num(pko_port);
 	return __cvmx_helper_cfg_pko_queue_num(pko_port);
 }
 
 int cvmx_pko_get_num_queues(int port)
 {
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return cvmx_pko3_get_queue_num(port);
-	else if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+	else 
+#endif
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		return
 		    __cvmx_helper_cfg_pko_queue_num
 		    (cvmx_helper_cfg_ipd2pko_port_base(port));
@@ -1054,15 +1061,18 @@ int cvmx_pko_rate_limit_bits(int port, uint64_t bits_s, int burst)
 void cvmx_pko_get_port_status(uint64_t ipd_port, uint64_t clear,
 			      cvmx_pko_port_status_t * status)
 {
-	cvmx_pko_reg_read_idx_t pko_reg_read_idx;
-	cvmx_pko_mem_count0_t pko_mem_count0;
-	cvmx_pko_mem_count1_t pko_mem_count1;
+	union cvmx_pko_reg_read_idx pko_reg_read_idx;
+	union cvmx_pko_mem_count0 pko_mem_count0;
+	union cvmx_pko_mem_count1 pko_mem_count1;
 	int pko_port, port_base, port_limit;
 
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_pko3_get_legacy_port_stats(ipd_port, clear, status);
 		return;
-	} else if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+	} else 
+#endif
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		int interface = cvmx_helper_get_interface_num(ipd_port);
 		int index = cvmx_helper_get_interface_index_num(ipd_port);
 		port_base = cvmx_helper_get_pko_port(interface, index);
@@ -1111,13 +1121,13 @@ void cvmx_pko_get_port_status(uint64_t ipd_port, uint64_t clear,
 	 * status->doorbell
 	 */
 	if (OCTEON_IS_MODEL(OCTEON_CN3XXX)) {
-		cvmx_pko_mem_debug9_t debug9;
+		union cvmx_pko_mem_debug9 debug9;
 		pko_reg_read_idx.s.index = cvmx_pko_get_base_queue(ipd_port);
 		cvmx_write_csr(CVMX_PKO_REG_READ_IDX, pko_reg_read_idx.u64);
 		debug9.u64 = cvmx_read_csr(CVMX_PKO_MEM_DEBUG9);
 		status->doorbell = debug9.cn38xx.doorbell;
 	} else {
-		cvmx_pko_mem_debug8_t debug8;
+		union cvmx_pko_mem_debug8 debug8;
 		pko_reg_read_idx.s.index = cvmx_pko_get_base_queue(ipd_port);
 		cvmx_write_csr(CVMX_PKO_REG_READ_IDX, pko_reg_read_idx.u64);
 		debug8.u64 = cvmx_read_csr(CVMX_PKO_MEM_DEBUG8);
@@ -1140,11 +1150,11 @@ int cvmx_pko_queue_pend_count(cvmx_cmd_queue_id_t queue)
 {
 	int count;
 
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		int node = cvmx_get_node_num();
-		count = cvmx_pko3_dq_query(node, queue);
-	} else {
+//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
+//		int node = cvmx_get_node_num();
+//		count = cvmx_pko3_dq_query(node, queue);
+//	} else {
 		count = cvmx_cmd_queue_length(CVMX_CMD_QUEUE_PKO(queue));
-	}
+//	}
 	return count;
 }
