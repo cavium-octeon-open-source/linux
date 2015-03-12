@@ -267,14 +267,16 @@ void cvmx_helper_ipd_set_wqe_no_ptr_mode(bool mode)
 
 void cvmx_helper_ipd_pkt_wqe_le_mode(bool mode)
 {
-	if (!octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//	if (!octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		cvmx_ipd_ctl_status_t ipd_ctl_status;
 		ipd_ctl_status.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 		ipd_ctl_status.s.pkt_lend = mode;
 		ipd_ctl_status.s.wqe_lend = mode;
 		cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_ctl_status.u64);
+#if 0
 	} else {
 		int node = cvmx_get_node_num();
 		cvmx_helper_pki_set_little_endian(node);
 	}
+#endif
 }
