@@ -173,6 +173,7 @@ static inline void cvmx_helper_free_pip_pkt_data(cvmx_wqe_t * work)
 	}
 }
 
+#if 0
 /**
  * Free the pki packet buffers contained in a work queue entry.
  * If first packet buffer contains wqe, wqe gets freed too so do not access
@@ -240,6 +241,7 @@ static inline void cvmx_wqe_pki_free(cvmx_wqe_t * work)
 
 	cvmx_fpa3_free(work, aura, 0);
 }
+#endif
 
 /**
  * Convert a interface mode into a human readable string
