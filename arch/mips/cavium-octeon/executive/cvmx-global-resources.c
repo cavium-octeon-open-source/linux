@@ -215,7 +215,7 @@ static inline void __cvmx_get_tagname(struct global_resource_tag *rtag,
 
 static uint64_t __cvmx_global_resources_init(void)
 {
-	cvmx_bootmem_named_block_desc_t *block_desc;
+	struct cvmx_bootmem_named_block_desc *block_desc;
 	int sz = sizeof(cvmx_global_resources_t) + CVMX_RESOURCES_ENTRIES_SIZE;
 	int64_t tmp_phys;
 	int count = 0;
@@ -223,7 +223,7 @@ static uint64_t __cvmx_global_resources_init(void)
 
 	cvmx_bootmem_lock();
 
-	block_desc = (cvmx_bootmem_named_block_desc_t *)
+	block_desc = (struct cvmx_bootmem_named_block_desc *)
 	    __cvmx_bootmem_find_named_block_flags
 	    (CVMX_GLOBAL_RESOURCES_DATA_NAME, CVMX_BOOTMEM_FLAG_NO_LOCKING);
 	if (!block_desc) {
