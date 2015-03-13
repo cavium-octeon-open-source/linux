@@ -705,12 +705,13 @@ EXPORT_SYMBOL(cvmx_ipd_enable);
 void cvmx_ipd_disable(void)
 {
 	cvmx_ipd_ctl_status_t ipd_reg;
-
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		unsigned int node = cvmx_get_node_num();
 		cvmx_pki_disable(node);
 		return;
 	}
+#endif
 	ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 	ipd_reg.s.ipd_en = 0;
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);
