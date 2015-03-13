@@ -14,7 +14,7 @@ CFLAGS_setup.o = -I$(src)/../../../scripts/dtc/libfdt
 
 obj-y := cpu.o setup.o octeon-platform.o octeon-irq.o csrc-octeon.o
 obj-y += dma-octeon.o
-obj-y += octeon-memcpy.o
+obj-y += octeon-memcpy.o octeon-hw-status.o
 obj-y += executive/
 obj-y += crypto/
 
