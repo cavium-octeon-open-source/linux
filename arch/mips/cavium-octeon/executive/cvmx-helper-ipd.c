@@ -37,7 +37,9 @@
 #include <asm/octeon/cvmx-fpa.h>
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-helper-pki.h>
+// #include <asm/octeon/cvmx-helper-pki.h>
+#include <asm/octeon/cvmx-helper-util.h>
+#include <asm/octeon/cvmx-helper-cfg.h>
 
 /** It allocate pools for packet and wqe pools
  * and sets up the FPA hardware
@@ -79,15 +81,15 @@ static int cvmx_helper_fcs_op(int interface, int nports, int has_fcs)
 	int pknd;
 	union cvmx_pip_sub_pkind_fcsx pkind_fcsx;
 	union cvmx_pip_prt_cfgx port_cfg;
-	struct cvmx_xiface xi = cvmx_helper_xiface_to_node_interface(interface);
+//	struct cvmx_xiface xi = cvmx_helper_xiface_to_node_interface(interface);
 
 	if (!octeon_has_feature(OCTEON_FEATURE_PKND))
 		return 0;
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		cvmx_helper_pki_set_fcs_op(xi.node, xi.interface, nports,
-					   has_fcs);
-		return 0;
-	}
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		cvmx_helper_pki_set_fcs_op(xi.node, xi.interface, nports,
+//					   has_fcs);
+//		return 0;
+//	}
 
 	port_bit = 0;
 	for (index = 0; index < nports; index++)
@@ -234,9 +236,9 @@ int __cvmx_helper_ipd_setup_interface(int xiface)
 	while (num_ports--) {
 		if (!cvmx_helper_is_port_valid(xiface, num_ports))
 			continue;
-		if (octeon_has_feature(OCTEON_FEATURE_PKI))
-			__cvmx_helper_pki_port_setup(xi.node, ipd_port);
-		else
+//		if (octeon_has_feature(OCTEON_FEATURE_PKI))
+//			__cvmx_helper_pki_port_setup(xi.node, ipd_port);
+//		else
 			__cvmx_helper_ipd_port_setup(ipd_port);
 		ipd_port += delta;
 	}
