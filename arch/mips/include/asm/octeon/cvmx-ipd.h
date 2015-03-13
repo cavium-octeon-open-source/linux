@@ -37,7 +37,7 @@
 
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-ipd-defs.h>
-#include <asm/octeon/cvmx-helper-pki.h>
+// #include <asm/octeon/cvmx-helper-pki.h>
 
 /* CSR typedefs have been moved to cvmx-ipd-defs.h */
 
@@ -71,8 +71,8 @@ typedef struct cvmx_ipd_config_struct {
 	uint64_t ipd_enable;
 	uint64_t enable_len_M8_fix;
 	uint64_t cache_mode;
-	cvmx_fpa_pool_config_t packet_pool;
-	cvmx_fpa_pool_config_t wqe_pool;
+	struct cvmx_fpa_pool_config packet_pool;
+	struct cvmx_fpa_pool_config wqe_pool;
 	cvmx_pip_port_config_t port_config;
 } cvmx_ipd_config_t;
 
