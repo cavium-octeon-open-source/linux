@@ -203,12 +203,14 @@ int cvm_oct_sgmii_stop(struct net_device *dev)
 static void cvm_oct_sgmii_link_change(struct octeon_ethernet *priv,
 				      cvmx_helper_link_info_t link_info)
 {
+#if 0
 	if (link_info.s.link_up)
 		octeon_error_tree_enable(CVMX_ERROR_GROUP_ETHERNET,
 					 priv->ipd_port);
 	else
 		octeon_error_tree_disable(CVMX_ERROR_GROUP_ETHERNET,
 					  priv->ipd_port);
+#endif
 }
 
 int cvm_oct_sgmii_init(struct net_device *dev)
@@ -224,8 +226,10 @@ int cvm_oct_sgmii_init(struct net_device *dev)
 
 void cvm_oct_sgmii_uninit(struct net_device *dev)
 {
+#if 0
 	struct octeon_ethernet *priv = netdev_priv(dev);
 
 	octeon_error_tree_disable(CVMX_ERROR_GROUP_ETHERNET,
 				  priv->ipd_port);
+#endif
 }
