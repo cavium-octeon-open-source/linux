@@ -247,8 +247,8 @@ CVM_OCT_XMIT
 	if (USE_HW_TCPUDP_CHECKSUM && (skb->ip_summed != CHECKSUM_NONE)) {
 		/* Use hardware checksum calc */
 		pko_command.s.ipoffp1 = sizeof(struct ethhdr) + 1;
-		if (unlikely(priv->imode == CVMX_HELPER_INTERFACE_MODE_SRIO))
-			pko_command.s.ipoffp1 += 8;
+//		if (unlikely(priv->imode == CVMX_HELPER_INTERFACE_MODE_SRIO))
+//			pko_command.s.ipoffp1 += 8;
 	}
 
 	if (USE_ASYNC_IOBDMA) {
