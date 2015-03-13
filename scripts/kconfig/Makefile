@@ -11,6 +11,42 @@ else
 Kconfig := Kconfig
 endif
 
+PHONY += scriptconfig iscriptconfig kconfiglibtestconfig
+
+ifneq ($(filter scriptconfig iscriptconfig,$(MAKECMDGOALS)),)
+PYTHONCMD ?= python
+endif
+
+ifneq ($(filter scriptconfig,$(MAKECMDGOALS)),)
+ifndef SCRIPT
+$(error Use "make scriptconfig SCRIPT=<path to script> [SCRIPT_ARG=<argument>]")
+endif
+endif
+
+scriptconfig:
+ifdef SCRIPT_ARG
+	$(Q)PYTHONPATH="$(srctree)/Kconfiglib:$$PYTHONPATH" \
+	  "$(PYTHONCMD)" "$(SCRIPT)" "$(srctree)/$(Kconfig)" "$(SCRIPT_ARG)"
+else
+	$(Q)PYTHONPATH="$(srctree)/Kconfiglib:$$PYTHONPATH" \
+	  "$(PYTHONCMD)" "$(SCRIPT)" "$(srctree)/$(Kconfig)"
+endif
+
+iscriptconfig:
+	$(Q)PYTHONPATH="$(srctree)/Kconfiglib:$$PYTHONPATH" "$(PYTHONCMD)" -i -c \
+	  "import kconfiglib; \
+	   import sys; \
+	   c = kconfiglib.Config(sys.argv[4 if \"$(PYTHONCMD)\".startswith(\"ipython\") else 1]); \
+	   print \"A Config instance 'c' for the architecture ({0}) has been created.\".format(c.get_arch())" \
+	  $(srctree)/$(Kconfig)
+
+# Used by testsuite.py to be able to compare output for nonsensical
+# arch/defconfig combinations, which has proven effective for finding obscure
+# bugs
+kconfiglibtestconfig: $(obj)/conf
+	$(Q)$< --defconfig=.config $(srctree)/$(Kconfig)
+
+
 # We need this, in case the user has it in its environment
 unexport CONFIG_
 
