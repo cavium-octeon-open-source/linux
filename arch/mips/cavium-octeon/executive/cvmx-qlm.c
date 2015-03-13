@@ -26,10 +26,13 @@
  ***********************license end**************************************/
 
 #include <asm/octeon/cvmx-qlm.h>
+#include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-gserx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-pemx-defs.h>
 #include <asm/octeon/cvmx-helper-jtag.h>
+#include <asm/octeon/cvmx-sriox-defs.h>
+#include <asm/octeon/cvmx-helper-util.h>
 
 #if 0
 
@@ -126,6 +129,8 @@ int cvmx_qlm_get_num(void)
 	return 0;
 }
 
+#endif
+
 /**
  * Return the qlm number based on the interface
  *
@@ -148,6 +153,7 @@ int cvmx_qlm_interface(int xiface)
 			cvmx_dprintf
 			    ("Warning: cvmx_qlm_interface: Invalid interface %d\n",
 			     xi.interface);
+#if 0
 	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
 		cvmx_bgxx_cmr_global_config_t gconfig;
 		cvmx_gserx_phy_ctl_t phy_ctl;
@@ -197,6 +203,7 @@ int cvmx_qlm_interface(int xiface)
 			}
 		}
 		return -1;
+#endif
 	} else if (OCTEON_IS_MODEL(OCTEON_CN73XX)) {
 		cvmx_gserx_phy_ctl_t phy_ctl;
 		cvmx_gserx_cfg_t gserx_cfg;
@@ -231,6 +238,8 @@ int cvmx_qlm_interface(int xiface)
 	return -1;
 }
 
+
+#if 0
 /**
  * Return number of lanes for a given qlm
  *
@@ -767,6 +776,8 @@ int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm)
 		}
 	}
 }
+#endif
+
 
 /**
  * Get the speed (Gbaud) of the QLM in Mhz.
@@ -816,7 +827,9 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 				return 0;	/* Disabled */
 			}
 		} else {
-			cvmx_sriox_status_reg_t status_reg;
+			return 0;
+#if 0
+			union cvmx_sriox_status_reg status_reg;
 			status_reg.u64 =
 			    cvmx_read_csr(CVMX_SRIOX_STATUS_REG(qlm));
 			if (status_reg.s.srio) {
@@ -869,9 +882,10 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 					}
 				}
 			}
+#endif
 		}
 	} else if (OCTEON_IS_OCTEON2()) {
-		cvmx_mio_qlmx_cfg_t qlm_cfg;
+		union cvmx_mio_qlmx_cfg qlm_cfg;
 
 		qlm_cfg.u64 = cvmx_read_csr(CVMX_MIO_QLMX_CFG(qlm));
 		switch (qlm_cfg.s.qlm_spd) {
@@ -922,8 +936,8 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 		freq = (freq + 500000) / 1000000;
 
 		return freq;
-	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
-		return cvmx_qlm_get_gbaud_mhz_node(cvmx_get_node_num(), qlm);
+//	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
+//		return cvmx_qlm_get_gbaud_mhz_node(cvmx_get_node_num(), qlm);
 	} else if (OCTEON_IS_MODEL(OCTEON_CN73XX)) {
 		cvmx_gserx_lane_mode_t lane_mode;
 		lane_mode.u64 = cvmx_read_csr(CVMX_GSERX_LANE_MODE(qlm));
@@ -958,7 +972,6 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 	}
 	return 0;
 }
-#endif
 
 static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 {
@@ -1171,11 +1184,9 @@ enum cvmx_qlm_mode cvmx_qlm_get_dlm_mode(int interface_type, int interface)
 	}
 }
 
-#if 0
-
 static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
 {
-	cvmx_mio_qlmx_cfg_t qlmx_cfg;
+	union cvmx_mio_qlmx_cfg qlmx_cfg;
 
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
 		qlmx_cfg.u64 = cvmx_read_csr(CVMX_MIO_QLMX_CFG(qlm));
@@ -1228,7 +1239,7 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
 			return CVMX_QLM_MODE_DISABLED;
 		}
 	} else if (OCTEON_IS_MODEL(OCTEON_CN63XX)) {
-		cvmx_sriox_status_reg_t status_reg;
+		union cvmx_sriox_status_reg status_reg;
 		/* For now skip qlm2 */
 		if (qlm == 2) {
 			cvmx_gmxx_inf_mode_t inf_mode;
@@ -1310,6 +1321,7 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
 	}
 	return CVMX_QLM_MODE_DISABLED;
 }
+#if 0
 
 /**
  * @INTERNAL
@@ -1633,6 +1645,7 @@ enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn73xx(int qlm)
 	}
 	return CVMX_QLM_MODE_DISABLED;
 }
+#endif
 
 /*
  * Read QLM and return mode.
@@ -1643,14 +1656,15 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode(int qlm)
 		return __cvmx_qlm_get_mode_cn6xxx(qlm);
 	else if (OCTEON_IS_MODEL(OCTEON_CN70XX))
 		return __cvmx_qlm_get_mode_cn70xx(qlm);
-	else if (OCTEON_IS_MODEL(OCTEON_CN78XX))
-		return cvmx_qlm_get_mode_cn78xx(cvmx_get_node_num(), qlm);
+//	else if (OCTEON_IS_MODEL(OCTEON_CN78XX))
+//		return cvmx_qlm_get_mode_cn78xx(cvmx_get_node_num(), qlm);
 	else if (OCTEON_IS_MODEL(OCTEON_CN73XX))
 		return __cvmx_qlm_get_mode_cn73xx(qlm);
 
 	return CVMX_QLM_MODE_DISABLED;
 }
 
+#if 0
 int cvmx_qlm_measure_clock_cn78xx(int node, int qlm)
 {
 	cvmx_gserx_cfg_t cfg;
@@ -1701,6 +1715,7 @@ int cvmx_qlm_measure_clock_cn78xx(int node, int qlm)
 		return 0;
 	}
 }
+#endif
 
 /**
  * Measure the reference clock of a QLM
@@ -1711,7 +1726,7 @@ int cvmx_qlm_measure_clock_cn78xx(int node, int qlm)
  *       */
 int cvmx_qlm_measure_clock(int qlm)
 {
-	cvmx_mio_ptp_clock_cfg_t ptp_clock;
+	union cvmx_mio_ptp_clock_cfg ptp_clock;
 	uint64_t count;
 	uint64_t start_cycle, stop_cycle;
 	int evcnt_offset = 0x10;
@@ -1723,8 +1738,8 @@ int cvmx_qlm_measure_clock(int qlm)
 	if (OCTEON_IS_MODEL(OCTEON_CN3XXX) || OCTEON_IS_MODEL(OCTEON_CN5XXX))
 		return -1;
 
-	if (OCTEON_IS_MODEL(OCTEON_CN78XX))
-		return cvmx_qlm_measure_clock_cn78xx(cvmx_get_node_num(), qlm);
+//	if (OCTEON_IS_MODEL(OCTEON_CN78XX))
+//		return cvmx_qlm_measure_clock_cn78xx(cvmx_get_node_num(), qlm);
 
 	/* Force the reference to 156.25Mhz when running in simulation.
 	   This supports the most speeds */
@@ -1779,6 +1794,7 @@ int cvmx_qlm_measure_clock(int qlm)
 	return ref_clock[qlm];
 }
 
+#if 0
 void cvmx_qlm_display_registers(int qlm)
 {
 	int num_lanes = cvmx_qlm_get_lanes(qlm);
