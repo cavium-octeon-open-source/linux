@@ -294,6 +294,7 @@ static int cvm_oct_check_rcv_error(cvmx_wqe_t *work)
 	return 0;
 }
 
+#if 0
 /**
  * cvm_oct_ptp_to_ktime - Convert a hardware PTP timestamp into a
  * kernel timestamp.
@@ -323,6 +324,7 @@ static ktime_t cvm_oct_ptp_to_ktime(u64 ptptime)
 
 	return ktime_sub_ns(ktimebase, ptpbase - ptptime);
 }
+#endif
 
 #undef CVM_OCT_NAPI_68
 #include "ethernet-napi.c"
