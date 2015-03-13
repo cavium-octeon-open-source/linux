@@ -38,13 +38,14 @@
 #include <asm/octeon/cvmx-dbg-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
 
+#include <asm/octeon/cvmx-fpa.h>
 #include <asm/octeon/cvmx-fpa1.h>
 #include <asm/octeon/cvmx-wqe.h>
 #include <asm/octeon/cvmx-ipd.h>
-#include <asm/octeon/cvmx-clock.h>
+// #include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-helper-errata.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-helper-pki.h>
+// #include <asm/octeon/cvmx-helper-pki.h>
 
 CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg = {.first_mbuf_skip = 184,
 	.ipd_enable = 1,
@@ -65,6 +66,7 @@ EXPORT_SYMBOL(cvmx_ipd_cfg);
 #define IPD_RED_AVG_DLY	1000
 #define IPD_RED_PRB_DLY	1000
 
+#if 0
 void cvmx_ipd_convert_to_newcfg(cvmx_ipd_config_t ipd_config)
 {
 	int pkind;
@@ -119,12 +121,13 @@ void cvmx_ipd_convert_to_newcfg(cvmx_ipd_config_t ipd_config)
 				      ipd_config.packet_pool.pool_num,
 				      ipd_config.packet_pool.buffer_count);
 }
+#endif
 
 int cvmx_ipd_set_config(cvmx_ipd_config_t ipd_config)
 {
 	cvmx_ipd_cfg = ipd_config;
-	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-		cvmx_ipd_convert_to_newcfg(ipd_config);
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI))
+//		cvmx_ipd_convert_to_newcfg(ipd_config);
 	return 0;
 }
 
@@ -141,6 +144,7 @@ void cvmx_ipd_set_packet_pool_buffer_count(uint64_t buffer_count)
 void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 				     uint64_t buffer_count)
 {
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		int node = cvmx_get_node_num();
 		int64_t aura = pool;
@@ -148,10 +152,11 @@ void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 					      buffer_count);
 		cvmx_helper_pki_set_dflt_aura(node, aura, pool, buffer_count);
 	} else {
+#endif
 		cvmx_ipd_cfg.packet_pool.pool_num = pool;
 		cvmx_ipd_cfg.packet_pool.buffer_size = buffer_size;
 		cvmx_ipd_cfg.packet_pool.buffer_count = buffer_count;
-	}
+//	}
 }
 
 EXPORT_SYMBOL(cvmx_ipd_set_packet_pool_config);
