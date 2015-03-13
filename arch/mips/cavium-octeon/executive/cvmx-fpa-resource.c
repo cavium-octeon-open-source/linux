@@ -35,6 +35,7 @@ static struct global_resource_tag get_fpa1_resource_tag(void)
 	return CVMX_GR_TAG_FPA;
 }
 
+#if 0
 static struct global_resource_tag get_fpa3_aura_resource_tag(int node)
 {
 	return cvmx_get_gr_tag('c', 'v', 'm', '_', 'a', 'u', 'r', 'a', '_',
@@ -46,24 +47,30 @@ static struct global_resource_tag get_fpa3_pool_resource_tag(int node)
 	return cvmx_get_gr_tag('c', 'v', 'm', '_', 'p', 'o', 'o', 'l', '_',
 			       node + '0', '.', '.', '.', '.', '.', '.');
 }
+#endif
 
 int cvmx_fpa_get_max_pools(void)
 {
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_FPA3))
 		return cvmx_fpa3_num_auras();
-	else if (OCTEON_IS_MODEL(OCTEON_CN68XX))
+	else 
+#endif
+	if (OCTEON_IS_MODEL(OCTEON_CN68XX))
 		/* 68xx pool 8 is not available via API */
 		return CVMX_FPA1_NUM_POOLS;
 	else
 		return CVMX_FPA1_NUM_POOLS;
 }
 
+#if 0
 uint64_t cvmx_fpa3_get_aura_owner(cvmx_fpa3_gaura_t aura)
 {
 	return
 	    cvmx_get_global_resource_owner(get_fpa3_aura_resource_tag
 					   (aura.node), aura.laura);
 }
+#endif
 
 uint64_t cvmx_fpa1_get_pool_owner(cvmx_fpa1_pool_t pool)
 {
@@ -72,14 +79,15 @@ uint64_t cvmx_fpa1_get_pool_owner(cvmx_fpa1_pool_t pool)
 
 uint64_t cvmx_fpa_get_pool_owner(int pool_num)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_FPA3))
-		return
-		    cvmx_fpa3_get_aura_owner(cvmx_fpa1_pool_to_fpa3_aura
-					     (pool_num));
-	else
+//	if (octeon_has_feature(OCTEON_FEATURE_FPA3))
+//		return
+//		    cvmx_fpa3_get_aura_owner(cvmx_fpa1_pool_to_fpa3_aura
+//					     (pool_num));
+//	else
 		return cvmx_fpa1_get_pool_owner(pool_num);
 }
 
+#if 0
 /**
  */
 cvmx_fpa3_gaura_t cvmx_fpa3_reserve_aura(int node, int desired_aura_num)
@@ -180,6 +188,7 @@ int cvmx_fpa3_release_pool(cvmx_fpa3_pool_t pool)
 
 	return cvmx_free_global_resource_range_multiple(tag, &lpool, 1);
 }
+#endif
 
 cvmx_fpa1_pool_t cvmx_fpa1_reserve_pool(int desired_pool_num)
 {
@@ -232,6 +241,7 @@ int cvmx_fpa1_is_pool_available(cvmx_fpa1_pool_t pool)
 	return 1;
 }
 
+#if 0
 /**
  * @INTERNAL
  *
@@ -267,6 +277,7 @@ int cvmx_fpa3_is_aura_available(int node, int laura)
 	cvmx_fpa3_release_aura(aura);
 	return 1;
 }
+#endif
 
 /**
  * Return if aura/pool is already reserved
@@ -277,15 +288,15 @@ int cvmx_fpa3_is_aura_available(int node, int laura)
  */
 int cvmx_fpa_is_pool_available(int pool_num)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_FPA3))
-		return cvmx_fpa3_is_aura_available(0, pool_num);
-	else
+//	if (octeon_has_feature(OCTEON_FEATURE_FPA3))
+//		return cvmx_fpa3_is_aura_available(0, pool_num);
+//	else
 		return cvmx_fpa1_is_pool_available(pool_num);
 }
 
-EXPORT_SYMBOL(cvmx_fpa3_reserve_aura);
-EXPORT_SYMBOL(cvmx_fpa3_release_aura);
-EXPORT_SYMBOL(cvmx_fpa3_reserve_pool);
-EXPORT_SYMBOL(cvmx_fpa3_release_pool);
+// EXPORT_SYMBOL(cvmx_fpa3_reserve_aura);
+// EXPORT_SYMBOL(cvmx_fpa3_release_aura);
+// EXPORT_SYMBOL(cvmx_fpa3_reserve_pool);
+// EXPORT_SYMBOL(cvmx_fpa3_release_pool);
 EXPORT_SYMBOL(cvmx_fpa1_reserve_pool);
 EXPORT_SYMBOL(cvmx_fpa1_release_pool);
