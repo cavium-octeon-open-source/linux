@@ -37,6 +37,8 @@
 
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-ipd-defs.h>
+#include <asm/octeon/cvmx-fpa.h>
+#include <asm/octeon/cvmx-csr-enums.h>
 // #include <asm/octeon/cvmx-helper-pki.h>
 
 /* CSR typedefs have been moved to cvmx-ipd-defs.h */
