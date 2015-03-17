@@ -28,6 +28,7 @@
 #ifndef __CVMX_H__
 #define __CVMX_H__
 
+#include <linux/delay.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
 
@@ -409,6 +410,13 @@ static inline void cvmx_wait(uint64_t cycles)
 	while (cvmx_get_cycle() < done)
 		; /* Spin */
 }
+
+/**
+ * Wait for the specified number of micro seconds
+ *
+ * @param usec   micro seconds to wait
+ */
+#define cvmx_wait_usec(usec) udelay(usec)
 
 /**
  * Reads a chip global cycle counter.  This counts CPU cycles since
