@@ -789,7 +789,6 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn78xx(int xiface)
 
 	return iface_node_ops[xi.node][xi.interface]->mode;
 }
-#endif
 
 /**
  * @INTERNAL
@@ -977,6 +976,7 @@ static cvmx_helper_interface_mode_t __cvmx_get_mode_cn75xx(int interface)
 
 	return iface_ops[interface]->mode;
 }
+#endif
 
 /**
  * @INTERNAL
@@ -1241,10 +1241,11 @@ cvmx_helper_interface_mode_t cvmx_helper_interface_get_mode(int xiface)
 		mode = __cvmx_get_mode_cn75xx(xiface);
 		return mode;
 	}
-#endif
 
 	if (OCTEON_IS_MODEL(OCTEON_CN73XX))
 		return __cvmx_get_mode_cn73xx(xiface);
+
+#endif
 
 	/*
 	 * Octeon II models
