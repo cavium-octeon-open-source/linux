@@ -75,7 +75,8 @@
 #ifndef __CVMX_CMD_QUEUE_H__
 #define __CVMX_CMD_QUEUE_H__
 
-#include "cvmx-atomic.h"
+// #include "cvmx-atomic.h"
+#include <asm/octeon/cvmx-config.h>
 
 /**
  * By default we disable the max depth support. Most programs
