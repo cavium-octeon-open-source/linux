@@ -31,7 +31,6 @@
  * Support library for the SPI
  *
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <linux/export.h>
 
 #include <asm/octeon/octeon.h>
@@ -41,13 +40,6 @@
 #include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-spi.h>
 #include <asm/octeon/cvmx-clock.h>
-#else
-#include "cvmx.h"
-#include "cvmx-sysinfo.h"
-#include "cvmx-hwpko.h"
-#include "cvmx-spi.h"
-#include "cvmx-clock.h"
-#endif
 
 #define INVOKE_CB(function_p, args...)		\
 	do {					\
