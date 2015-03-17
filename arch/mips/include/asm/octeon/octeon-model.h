@@ -1,10 +1,10 @@
 /***********************license start***************
- * Author: Cavium Networks
+ * Author: Cavium Inc.
  *
- * Contact: support@caviumnetworks.com
+ * Contact: support@cavium.com
  * This file is part of the OCTEON SDK
  *
- * Copyright (c) 2003-2010 Cavium Networks
+ * Copyright (c) 2003-2015 Cavium Inc.
  *
  * This file is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, as
@@ -22,7 +22,7 @@
  * or visit http://www.gnu.org/licenses/.
  *
  * This file may also be available under a different license from Cavium.
- * Contact Cavium Networks for more information
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 #ifndef __OCTEON_MODEL_H__
 #define __OCTEON_MODEL_H__
@@ -73,6 +73,10 @@
 /*
  * CN7XXX models with new revision encoding
  */
+
+#define OCTEON_CN75XX_PASS1_0   0x000d9800
+#define OCTEON_CN75XX           (OCTEON_CN75XX_PASS1_0 | OM_IGNORE_REVISION)
+#define OCTEON_CN75XX_PASS1_X   (OCTEON_CN75XX_PASS1_0 | OM_IGNORE_MINOR_REVISION)
 
 #define OCTEON_CN73XX_PASS1_0	0x000d9700
 #define OCTEON_CN73XX		(OCTEON_CN73XX_PASS1_0 | OM_IGNORE_REVISION)
