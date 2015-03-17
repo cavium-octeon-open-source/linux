@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -43,9 +31,7 @@
  * Functions for RGMII/GMII/MII initialization, configuration,
  * and monitoring.
  *
- * <hr>$Revision: 107037 $<hr>
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-helper.h>
@@ -56,24 +42,13 @@
 #include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
 
-#else
-
-#include "cvmx.h"
-#include "cvmx-sysinfo.h"
-#include "cvmx-mdio.h"
-#include "cvmx-hwpko.h"
-#include "cvmx-helper.h"
-#include "cvmx-helper-board.h"
-#endif
-
-
 /**
  * @INTERNAL
  * Probe RGMII ports and determine the number present
  *
- * @param xiface Interface to probe
+ * @xiface: Interface to probe
  *
- * @return Number of RGMII/GMII/MII ports (0-4).
+ * Returns Number of RGMII/GMII/MII ports (0-4).
  */
 int __cvmx_helper_rgmii_probe(int xiface)
 {
@@ -85,17 +60,19 @@ int __cvmx_helper_rgmii_probe(int xiface)
 	if (mode.s.type) {
 		if (OCTEON_IS_MODEL(OCTEON_CN38XX) ||
 		    OCTEON_IS_MODEL(OCTEON_CN58XX))
-			cvmx_dprintf("ERROR: RGMII initialize called in SPI interface\n");
-		else if (OCTEON_IS_MODEL(OCTEON_CN31XX) ||
-			 OCTEON_IS_MODEL(OCTEON_CN30XX) ||
-			 OCTEON_IS_MODEL(OCTEON_CN50XX))
+			cvmx_dprintf
+			    ("ERROR: RGMII initialize called in SPI interface\n");
+		else if (OCTEON_IS_MODEL(OCTEON_CN31XX)
+			 || OCTEON_IS_MODEL(OCTEON_CN30XX)
+			 || OCTEON_IS_MODEL(OCTEON_CN50XX))
 			/*
 			 * On these chips "type" says we're in
 			 * GMII/MII mode. This limits us to 2 ports
 			 */
 			num_ports = 2;
 		else
-			cvmx_dprintf("ERROR: Unsupported Octeon model in %s\n", __func__);
+			cvmx_dprintf("ERROR: Unsupported Octeon model in %s\n",
+				     __func__);
 	} else {
 		if (OCTEON_IS_MODEL(OCTEON_CN38XX) ||
 		    OCTEON_IS_MODEL(OCTEON_CN58XX))
@@ -105,7 +82,8 @@ int __cvmx_helper_rgmii_probe(int xiface)
 			 OCTEON_IS_MODEL(OCTEON_CN50XX))
 			num_ports = 3;
 		else
-			cvmx_dprintf("ERROR: Unsupported Octeon model in %s\n", __func__);
+			cvmx_dprintf("ERROR: Unsupported Octeon model in %s\n",
+				     __func__);
 	}
 	return num_ports;
 }
@@ -115,7 +93,7 @@ int __cvmx_helper_rgmii_probe(int xiface)
  * out will be received back again on the same port. Externally
  * received packets will echo back out.
  *
- * @param port   IPD port number to loop.
+ * @port:   IPD port number to loop.
  */
 void cvmx_helper_rgmii_internal_loopback(int port)
 {
@@ -147,9 +125,9 @@ void cvmx_helper_rgmii_internal_loopback(int port)
  * Configure all of the ASX, GMX, and PKO regsiters required
  * to get RGMII to function on the supplied interface.
  *
- * @param xiface PKO Interface to configure (0 or 1)
+ * @xiface: PKO Interface to configure (0 or 1)
  *
- * @return Zero on success
+ * Returns Zero on success
  */
 int __cvmx_helper_rgmii_enable(int xiface)
 {
@@ -188,10 +166,12 @@ int __cvmx_helper_rgmii_enable(int xiface)
 		 * checking. Pass 1 doesn't support this feature.
 		 */
 		union cvmx_gmxx_rxx_frm_ctl frm_ctl;
-		frm_ctl.u64 = cvmx_read_csr(CVMX_GMXX_RXX_FRM_CTL(port, interface));
+		frm_ctl.u64 =
+		    cvmx_read_csr(CVMX_GMXX_RXX_FRM_CTL(port, interface));
 		/* New field, so must be compile time */
 		frm_ctl.s.pre_free = 1;
-		cvmx_write_csr(CVMX_GMXX_RXX_FRM_CTL(port, interface), frm_ctl.u64);
+		cvmx_write_csr(CVMX_GMXX_RXX_FRM_CTL(port, interface),
+			       frm_ctl.u64);
 
 		/*
 		 * Each pause frame transmitted will ask for about 10M
@@ -200,15 +180,21 @@ int __cvmx_helper_rgmii_enable(int xiface)
 		 * pause frame (0 time) will be transmitted to restart
 		 * the flow.
 		 */
-		cvmx_write_csr(CVMX_GMXX_TXX_PAUSE_PKT_TIME(port, interface), 20000);
-		cvmx_write_csr(CVMX_GMXX_TXX_PAUSE_PKT_INTERVAL(port, interface), 19000);
+		cvmx_write_csr(CVMX_GMXX_TXX_PAUSE_PKT_TIME(port, interface),
+			       20000);
+		cvmx_write_csr(CVMX_GMXX_TXX_PAUSE_PKT_INTERVAL
+			       (port, interface), 19000);
 
 		if (OCTEON_IS_MODEL(OCTEON_CN50XX)) {
-			cvmx_write_csr(CVMX_ASXX_TX_CLK_SETX(port, interface), 16);
-			cvmx_write_csr(CVMX_ASXX_RX_CLK_SETX(port, interface), 16);
+			cvmx_write_csr(CVMX_ASXX_TX_CLK_SETX(port, interface),
+				       16);
+			cvmx_write_csr(CVMX_ASXX_RX_CLK_SETX(port, interface),
+				       16);
 		} else {
-			cvmx_write_csr(CVMX_ASXX_TX_CLK_SETX(port, interface), 24);
-			cvmx_write_csr(CVMX_ASXX_RX_CLK_SETX(port, interface), 24);
+			cvmx_write_csr(CVMX_ASXX_TX_CLK_SETX(port, interface),
+				       24);
+			cvmx_write_csr(CVMX_ASXX_RX_CLK_SETX(port, interface),
+				       24);
 		}
 	}
 
@@ -217,10 +203,13 @@ int __cvmx_helper_rgmii_enable(int xiface)
 	/* enable the ports now */
 	for (port = 0; port < num_ports; port++) {
 		union cvmx_gmxx_prtx_cfg gmx_cfg;
-		cvmx_helper_link_autoconf(cvmx_helper_get_ipd_port(interface, port));
-		gmx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(port, interface));
+		cvmx_helper_link_autoconf(cvmx_helper_get_ipd_port
+					  (interface, port));
+		gmx_cfg.u64 =
+		    cvmx_read_csr(CVMX_GMXX_PRTX_CFG(port, interface));
 		gmx_cfg.s.en = 1;
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(port, interface), gmx_cfg.u64);
+		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(port, interface),
+			       gmx_cfg.u64);
 	}
 	return 0;
 }
@@ -232,9 +221,9 @@ int __cvmx_helper_rgmii_enable(int xiface)
  * Octeon's link config if auto negotiation has changed since
  * the last call to cvmx_helper_link_set().
  *
- * @param ipd_port IPD/PKO port to query
+ * @ipd_port: IPD/PKO port to query
  *
- * @return Link state
+ * Returns Link state
  */
 cvmx_helper_link_info_t __cvmx_helper_rgmii_link_get(int ipd_port)
 {
@@ -263,9 +252,9 @@ cvmx_helper_link_info_t __cvmx_helper_rgmii_link_get(int ipd_port)
  * Octeon's link config if auto negotiation has changed since
  * the last call to cvmx_helper_link_set().
  *
- * @param ipd_port IPD/PKO port to query
+ * @ipd_port: IPD/PKO port to query
  *
- * @return Link state
+ * Returns Link state
  */
 cvmx_helper_link_info_t __cvmx_helper_gmii_link_get(int ipd_port)
 {
@@ -291,10 +280,10 @@ cvmx_helper_link_info_t __cvmx_helper_gmii_link_get(int ipd_port)
  * by cvmx_helper_link_get(). It is normally best to use
  * cvmx_helper_link_autoconf() instead.
  *
- * @param ipd_port  IPD/PKO port to configure
- * @param link_info The new link state
+ * @ipd_port:  IPD/PKO port to configure
+ * @link_info: The new link state
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 int __cvmx_helper_rgmii_link_set(int ipd_port,
 				 cvmx_helper_link_info_t link_info)
@@ -315,11 +304,14 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
 		return 0;
 
 	/* Read the current settings so we know the current enable state */
-	original_gmx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(index, interface));
+	original_gmx_cfg.u64 =
+	    cvmx_read_csr(CVMX_GMXX_PRTX_CFG(index, interface));
 	new_gmx_cfg = original_gmx_cfg;
 
 	/* Disable the lowest level RX */
-	cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface), cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(interface)) & ~(1 << index));
+	cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface),
+		       cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(interface)) & ~(1 <<
+									 index));
 
 	memset(pko_mem_queue_qos_save, 0, sizeof(pko_mem_queue_qos_save));
 	/* Disable all queues so that TX should become idle */
@@ -349,9 +341,12 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
 	 * change, but there is a slight chance that GMX will
 	 * lockup.
 	 */
-	cvmx_write_csr(CVMX_NPI_DBG_SELECT, interface * 0x800 + index * 0x100 + 0x880);
-	CVMX_WAIT_FOR_FIELD64(CVMX_DBG_DATA, cvmx_dbg_data_t, data & 7, ==, 0, 10000);
-	CVMX_WAIT_FOR_FIELD64(CVMX_DBG_DATA, cvmx_dbg_data_t, data & 0xf, ==, 0, 10000);
+	cvmx_write_csr(CVMX_NPI_DBG_SELECT,
+		       interface * 0x800 + index * 0x100 + 0x880);
+	CVMX_WAIT_FOR_FIELD64(CVMX_DBG_DATA, cvmx_dbg_data_t, data & 7, ==, 0,
+			      10000);
+	CVMX_WAIT_FOR_FIELD64(CVMX_DBG_DATA, cvmx_dbg_data_t, data & 0xf, ==, 0,
+			      10000);
 
 	/* Disable the port before we make any changes */
 	new_gmx_cfg.s.en = 0;
@@ -397,21 +392,22 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
 			cvmx_gmxx_inf_mode_t mode;
 			mode.u64 = cvmx_read_csr(CVMX_GMXX_INF_MODE(interface));
 
-	/*
-	 * Port  .en  .type  .p0mii  Configuration
-	 * ----  ---  -----  ------  -----------------------------------------
-	 *  X      0     X      X    All links are disabled.
-	 *  0      1     X      0    Port 0 is RGMII
-	 *  0      1     X      1    Port 0 is MII
-	 *  1      1     0      X    Ports 1 and 2 are configured as RGMII ports.
-	 *  1      1     1      X    Port 1: GMII/MII; Port 2: disabled. GMII or
-	 *                           MII port is selected by GMX_PRT1_CFG[SPEED].
-	 */
+			/*
+			 * Port  .en  .type  .p0mii  Configuration
+			 * ----  ---  -----  ------  -----------------------------------------
+			 *  X      0     X      X    All links are disabled.
+			 *  0      1     X      0    Port 0 is RGMII
+			 *  0      1     X      1    Port 0 is MII
+			 *  1      1     0      X    Ports 1 and 2 are configured as RGMII ports.
+			 *  1      1     1      X    Port 1: GMII/MII; Port 2: disabled. GMII or
+			 *                           MII port is selected by GMX_PRT1_CFG[SPEED].
+			 */
 
 			/* In MII mode, CLK_CNT = 1. */
 			if (((index == 0) && (mode.s.p0mii == 1)) ||
 			    ((index != 0) && (mode.s.type == 1))) {
-				cvmx_write_csr(CVMX_GMXX_TXX_CLK(index, interface), 1);
+				cvmx_write_csr(CVMX_GMXX_TXX_CLK
+					       (index, interface), 1);
 			}
 		}
 	}
@@ -424,13 +420,16 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
 
 	/* Enable the lowest level RX */
 	if (link_info.s.link_up)
-		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface), cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(interface)) | (1 << index));
+		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface),
+			       cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(interface)) |
+			       (1 << index));
 
 	/* Re-enable the TX path */
 	for (i = 0; i < cvmx_pko_get_num_queues(ipd_port); i++) {
 		int queue = cvmx_pko_get_base_queue(ipd_port) + i;
 		cvmx_write_csr(CVMX_PKO_REG_READ_IDX, queue);
-		cvmx_write_csr(CVMX_PKO_MEM_QUEUE_QOS, pko_mem_queue_qos_save[i].u64);
+		cvmx_write_csr(CVMX_PKO_MEM_QUEUE_QOS,
+			       pko_mem_queue_qos_save[i].u64);
 	}
 
 	/* Restore backpressure */
@@ -449,13 +448,13 @@ int __cvmx_helper_rgmii_link_set(int ipd_port,
  * causes packets sent by the port to be received by Octeon. External loopback
  * causes packets received from the wire to sent out again.
  *
- * @param ipd_port IPD/PKO port to loopback.
- * @param enable_internal
+ * @ipd_port: IPD/PKO port to loopback.
+ * @enable_internal:
  *                 Non zero if you want internal loopback
- * @param enable_external
+ * @enable_external:
  *                 Non zero if you want external loopback
  *
- * @return Zero on success, negative on failure.
+ * Returns Zero on success, negative on failure.
  */
 int __cvmx_helper_rgmii_configure_loopback(int ipd_port, int enable_internal,
 					   int enable_external)
@@ -498,9 +497,11 @@ int __cvmx_helper_rgmii_configure_loopback(int ipd_port, int enable_internal,
 	if (enable_internal) {
 		uint64_t tmp;
 		tmp = cvmx_read_csr(CVMX_ASXX_TX_PRT_EN(interface));
-		cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(interface), (1 << index) | tmp);
+		cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(interface),
+			       (1 << index) | tmp);
 		tmp = cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(interface));
-		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface), (1 << index) | tmp);
+		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(interface),
+			       (1 << index) | tmp);
 		original_enable = 1;
 	}
 

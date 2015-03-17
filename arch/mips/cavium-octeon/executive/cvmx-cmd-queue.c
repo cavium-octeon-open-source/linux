@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2013  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2013 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -43,9 +31,7 @@
  * Support functions for managing command queues used for
  * various hardware blocks.
  *
- * <hr>$Revision: 112009 $<hr>
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
@@ -55,25 +41,20 @@
 #include <asm/octeon/cvmx-pko-defs.h>
 #include <asm/octeon/cvmx-fpa.h>
 #include <asm/octeon/cvmx-cmd-queue.h>
-#else
-#include "cvmx.h"
-#include "cvmx-bootmem.h"
-#include "cvmx-fpa.h"
-#include "cvmx-cmd-queue.h"
-#endif
 
 /**
  * This application uses this pointer to access the global queue
  * state. It points to a bootmem named block.
  */
-CVMX_SHARED __cvmx_cmd_queue_all_state_t *__cvmx_cmd_queue_state_ptrs[CVMX_MAX_NODES];
+CVMX_SHARED __cvmx_cmd_queue_all_state_t
+    *__cvmx_cmd_queue_state_ptrs[CVMX_MAX_NODES];
 EXPORT_SYMBOL(__cvmx_cmd_queue_state_ptrs);
 
 /**
  * @INTERNAL
  * Initialize the Global queue state pointer.
  *
- * @return CVMX_CMD_QUEUE_SUCCESS or a failure code
+ * Returns CVMX_CMD_QUEUE_SUCCESS or a failure code
  */
 cvmx_cmd_queue_result_t __cvmx_cmd_queue_init_state_ptr(unsigned node)
 {
@@ -100,14 +81,13 @@ cvmx_cmd_queue_result_t __cvmx_cmd_queue_init_state_ptr(unsigned node)
 	block_desc = cvmx_bootmem_find_named_block(alloc_name);
 	if (block_desc) {
 		__cvmx_cmd_queue_state_ptrs[node] =
-			cvmx_phys_to_ptr(block_desc->base_addr);
+		    cvmx_phys_to_ptr(block_desc->base_addr);
 		return CVMX_CMD_QUEUE_SUCCESS;
 	}
 
 	size = sizeof(*__cvmx_cmd_queue_state_ptrs[node]);
 
 	/* Rest f the code is to allocate a new named block */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #if defined(CONFIG_CAVIUM_RESERVE32) && CONFIG_CAVIUM_RESERVE32
 	{
 		/* Special address range for SE-UM apps in 32-bit mode */
@@ -115,25 +95,25 @@ cvmx_cmd_queue_result_t __cvmx_cmd_queue_init_state_ptr(unsigned node)
 		if (octeon_reserve32_memory) {
 			paddr_min = octeon_reserve32_memory;
 			paddr_max = octeon_reserve32_memory +
-				(CONFIG_CAVIUM_RESERVE32 << 20) - 1;
+			    (CONFIG_CAVIUM_RESERVE32 << 20) - 1;
 		}
 	}
 #endif
-#endif
 
 	/* Atomically allocate named block once, and zero it by default */
-	ptr = cvmx_bootmem_alloc_named_range_once(size, paddr_min, paddr_max, 
-			128, alloc_name, NULL);
+	ptr = cvmx_bootmem_alloc_named_range_once(size, paddr_min, paddr_max,
+						  128, alloc_name, NULL);
 
 	if (ptr != NULL) {
 		__cvmx_cmd_queue_state_ptrs[node] = ptr;
 	} else {
-		cvmx_dprintf("ERROR: %s: Unable to get named block %s.\n", 
-			__func__, alloc_name);
+		cvmx_dprintf("ERROR: %s: Unable to get named block %s.\n",
+			     __func__, alloc_name);
 		return CVMX_CMD_QUEUE_NO_MEMORY;
 	}
 	return CVMX_CMD_QUEUE_SUCCESS;
 }
+
 EXPORT_SYMBOL(__cvmx_cmd_queue_init_state_ptr);
 
 /**
@@ -141,12 +121,12 @@ EXPORT_SYMBOL(__cvmx_cmd_queue_init_state_ptr);
  * allocated and the hardware unit is configured to point to the
  * new command queue.
  *
- * @param queue_id  Hardware command queue to initialize.
- * @param max_depth Maximum outstanding commands that can be queued.
- * @param fpa_pool  FPA pool the command queues should come from.
- * @param pool_size Size of each buffer in the FPA pool (bytes)
+ * @queue_id:  Hardware command queue to initialize.
+ * @max_depth: Maximum outstanding commands that can be queued.
+ * @fpa_pool:  FPA pool the command queues should come from.
+ * @pool_size: Size of each buffer in the FPA pool (bytes)
  *
- * @return CVMX_CMD_QUEUE_SUCCESS or a failure code
+ * Returns CVMX_CMD_QUEUE_SUCCESS or a failure code
  */
 cvmx_cmd_queue_result_t cvmx_cmd_queue_initialize(cvmx_cmd_queue_id_t queue_id,
 						  int max_depth, int fpa_pool,
@@ -161,9 +141,9 @@ cvmx_cmd_queue_result_t cvmx_cmd_queue_initialize(cvmx_cmd_queue_id_t queue_id,
 	node = __cvmx_cmd_queue_get_node(queue_id);
 
 	index = __cvmx_cmd_queue_get_index(queue_id);
-	if (index >= NUM_ELEMENTS(__cvmx_cmd_queue_state_ptrs[node]->state)){
+	if (index >= NUM_ELEMENTS(__cvmx_cmd_queue_state_ptrs[node]->state)) {
 		cvmx_printf("ERROR: %s: queue %#x out of range\n",
-			__func__, queue_id);
+			    __func__, queue_id);
 		return CVMX_CMD_QUEUE_INVALID_PARAM;
 	}
 
@@ -192,36 +172,36 @@ cvmx_cmd_queue_result_t cvmx_cmd_queue_initialize(cvmx_cmd_queue_id_t queue_id,
 	if ((fpa_pool < fpa_pool_min) || (fpa_pool >= fpa_pool_max))
 		return CVMX_CMD_QUEUE_INVALID_PARAM;
 
-	if ((pool_size < 128) || (pool_size > (1<<17)))
+	if ((pool_size < 128) || (pool_size > (1 << 17)))
 		return CVMX_CMD_QUEUE_INVALID_PARAM;
 
 	if (pool_size & 3)
 		cvmx_dprintf("WARNING: %s: pool_size %d not multiple of 8\n",
-			__func__, pool_size);
+			     __func__, pool_size);
 
 	/* See if someone else has already initialized the queue */
 	if (qstate->base_paddr) {
 		int depth;
-		static const char emsg[] = /* Common error message part */
-			"Queue already initialized with different ";
+		static const char emsg[] =	/* Common error message part */
+		    "Queue already initialized with different ";
 
 		depth = (max_depth + qstate->pool_size_m1 - 1) /
-			qstate->pool_size_m1;
+		    qstate->pool_size_m1;
 		if (depth != qstate->max_depth) {
 			depth = qstate->max_depth * qstate->pool_size_m1;
 			cvmx_dprintf("ERROR: %s: %s max_depth (%d).\n",
-				__func__, emsg, depth);
+				     __func__, emsg, depth);
 			return CVMX_CMD_QUEUE_INVALID_PARAM;
 		}
 		if (fpa_pool != qstate->fpa_pool) {
 			cvmx_dprintf("ERROR: %s: %s FPA pool (%u).\n",
-				__func__, emsg, qstate->fpa_pool);
+				     __func__, emsg, qstate->fpa_pool);
 			return CVMX_CMD_QUEUE_INVALID_PARAM;
 		}
 		if ((pool_size >> 3) - 1 != qstate->pool_size_m1) {
 			cvmx_dprintf("ERROR: %s: %s FPA pool size (%u).\n",
-				__func__, emsg,
-				(qstate->pool_size_m1 + 1) << 3);
+				     __func__, emsg,
+				     (qstate->pool_size_m1 + 1) << 3);
 			return CVMX_CMD_QUEUE_INVALID_PARAM;
 		}
 		return CVMX_CMD_QUEUE_ALREADY_SETUP;
@@ -233,20 +213,20 @@ cvmx_cmd_queue_result_t cvmx_cmd_queue_initialize(cvmx_cmd_queue_id_t queue_id,
 			status.u64 = cvmx_read_csr(CVMX_FPA_CTL_STATUS);
 			if (!status.s.enb) {
 				cvmx_dprintf("ERROR: %s: FPA is not enabled.\n",
-					__func__);
+					     __func__);
 				return CVMX_CMD_QUEUE_NO_MEMORY;
 			}
 		}
 		buffer = cvmx_fpa_alloc(fpa_pool);
 		if (buffer == NULL) {
 			cvmx_dprintf("ERROR: %s: allocating first buffer.\n",
-				__func__);
+				     __func__);
 			return CVMX_CMD_QUEUE_NO_MEMORY;
 		}
 
 		index = (pool_size >> 3) - 1;
 		qstate->pool_size_m1 = index;
-		qstate->max_depth = (max_depth + index -1) / index;
+		qstate->max_depth = (max_depth + index - 1) / index;
 		qstate->index = 0;
 		qstate->fpa_pool = fpa_pool;
 		qstate->base_paddr = cvmx_ptr_to_phys(buffer);
@@ -264,9 +244,9 @@ EXPORT_SYMBOL(cvmx_cmd_queue_initialize);
  * hardware connected to the queue must be stopped before this
  * function is called.
  *
- * @param queue_id Queue to shutdown
+ * @queue_id: Queue to shutdown
  *
- * @return CVMX_CMD_QUEUE_SUCCESS or a failure code
+ * Returns CVMX_CMD_QUEUE_SUCCESS or a failure code
  */
 cvmx_cmd_queue_result_t cvmx_cmd_queue_shutdown(cvmx_cmd_queue_id_t queue_id)
 {
@@ -274,35 +254,37 @@ cvmx_cmd_queue_result_t cvmx_cmd_queue_shutdown(cvmx_cmd_queue_id_t queue_id)
 
 	/* FIXME: This will not complain if the queue was never initialized */
 	if (qptr == NULL) {
-		cvmx_dprintf("ERROR: cvmx_cmd_queue_shutdown: Unable to get queue information.\n");
+		cvmx_dprintf
+		    ("ERROR: cvmx_cmd_queue_shutdown: Unable to get queue information.\n");
 		return CVMX_CMD_QUEUE_INVALID_PARAM;
 	}
 
 	if (cvmx_cmd_queue_length(queue_id) > 0) {
-		cvmx_dprintf("ERROR: cvmx_cmd_queue_shutdown: Queue still has data in it.\n");
+		cvmx_dprintf
+		    ("ERROR: cvmx_cmd_queue_shutdown: Queue still has data in it.\n");
 		return CVMX_CMD_QUEUE_FULL;
 	}
 
 	__cvmx_cmd_queue_lock(queue_id);
 	if (qptr->base_paddr) {
-		cvmx_fpa_free(cvmx_phys_to_ptr(
-				       (uint64_t) qptr->base_paddr),
-				       qptr->fpa_pool, 0);
+		cvmx_fpa_free(cvmx_phys_to_ptr((uint64_t) qptr->base_paddr),
+			      qptr->fpa_pool, 0);
 		qptr->base_paddr = 0;
 	}
 	__cvmx_cmd_queue_unlock(queue_id);
 
 	return CVMX_CMD_QUEUE_SUCCESS;
 }
+
 EXPORT_SYMBOL(cvmx_cmd_queue_shutdown);
 
 /**
  * Return the number of command words pending in the queue. This
  * function may be relatively slow for some hardware units.
  *
- * @param queue_id Hardware command queue to query
+ * @queue_id: Hardware command queue to query
  *
- * @return Number of outstanding commands
+ * Returns Number of outstanding commands
  */
 int cvmx_cmd_queue_length(cvmx_cmd_queue_id_t queue_id)
 {
@@ -345,11 +327,14 @@ int cvmx_cmd_queue_length(cvmx_cmd_queue_id_t queue_id)
 	case CVMX_CMD_QUEUE_DMA_BASE:
 		if (octeon_has_feature(OCTEON_FEATURE_NPEI)) {
 			union cvmx_npei_dmax_counts dmax_counts;
-			dmax_counts.u64 = cvmx_read_csr(CVMX_PEXP_NPEI_DMAX_COUNTS(queue_id & 0x7));
+			dmax_counts.u64 =
+			    cvmx_read_csr(CVMX_PEXP_NPEI_DMAX_COUNTS
+					  (queue_id & 0x7));
 			return dmax_counts.s.dbell;
 		} else {
 			union cvmx_dpi_dmax_counts dmax_counts;
-			dmax_counts.u64 = cvmx_read_csr(CVMX_DPI_DMAX_COUNTS(queue_id & 0x7));
+			dmax_counts.u64 =
+			    cvmx_read_csr(CVMX_DPI_DMAX_COUNTS(queue_id & 0x7));
 			return dmax_counts.s.dbell;
 		}
 	case CVMX_CMD_QUEUE_BCH:
@@ -367,9 +352,9 @@ int cvmx_cmd_queue_length(cvmx_cmd_queue_id_t queue_id)
  * for initial hardware setup. User applications should not call this
  * function directly.
  *
- * @param queue_id Command queue to query
+ * @queue_id: Command queue to query
  *
- * @return Command buffer or NULL on failure
+ * Returns Command buffer or NULL on failure
  */
 void *cvmx_cmd_queue_buffer(cvmx_cmd_queue_id_t queue_id)
 {
@@ -379,9 +364,10 @@ void *cvmx_cmd_queue_buffer(cvmx_cmd_queue_id_t queue_id)
 	else
 		return NULL;
 }
+
 EXPORT_SYMBOL(cvmx_cmd_queue_buffer);
 
-static uint64_t *__cvmx_cmd_queue_add_blk(__cvmx_cmd_queue_state_t *qptr)
+static uint64_t *__cvmx_cmd_queue_add_blk(__cvmx_cmd_queue_state_t * qptr)
 {
 	uint64_t *cmd_ptr;
 	uint64_t *new_buffer;
@@ -400,13 +386,13 @@ static uint64_t *__cvmx_cmd_queue_add_blk(__cvmx_cmd_queue_state_t *qptr)
 	/* Zero out the new block link pointer,
 	 * in case this block will be filled to the rim
 	 */
-	new_buffer[ qptr->pool_size_m1 ] = ~0ull;
+	new_buffer[qptr->pool_size_m1] = ~0ull;
 
 	/* Get physical address of the new buffer */
 	new_paddr = cvmx_ptr_to_phys(new_buffer);
 
 	/* Store the physical link address at the end of current full block */
-	cmd_ptr[ qptr->pool_size_m1] = new_paddr;
+	cmd_ptr[qptr->pool_size_m1] = new_paddr;
 
 	/* Store the physical address in the queue state structure */
 	qptr->base_paddr = new_paddr;
@@ -426,8 +412,8 @@ static uint64_t *__cvmx_cmd_queue_add_blk(__cvmx_cmd_queue_state_t *qptr)
  */
 cvmx_cmd_queue_result_t
 __cvmx_cmd_queue_write_raw(cvmx_cmd_queue_id_t queue_id,
-	__cvmx_cmd_queue_state_t *qptr,
-	int cmd_count, const uint64_t *cmds)
+			   __cvmx_cmd_queue_state_t * qptr,
+			   int cmd_count, const uint64_t * cmds)
 {
 	uint64_t *cmd_ptr;
 	unsigned index;
@@ -436,8 +422,7 @@ __cvmx_cmd_queue_write_raw(cvmx_cmd_queue_id_t queue_id,
 	index = qptr->index;
 
 	/* Enforce queue depth limit, if enabled, once per block */
-	if (CVMX_CMD_QUEUE_ENABLE_MAX_DEPTH &&
-	    cvmx_unlikely(qptr->max_depth)) {
+	if (CVMX_CMD_QUEUE_ENABLE_MAX_DEPTH && cvmx_unlikely(qptr->max_depth)) {
 		unsigned depth = cvmx_cmd_queue_length(queue_id);
 		depth /= qptr->pool_size_m1;
 
@@ -470,13 +455,14 @@ __cvmx_cmd_queue_write_raw(cvmx_cmd_queue_id_t queue_id,
 		if (cmd_count <= 0)
 			break;
 		/* Store commands into queue block while there is space */
-		cmd_ptr[ index ++ ] = *cmds++;
-		cmd_count --;
-	} /* while cmd_count */
+		cmd_ptr[index++] = *cmds++;
+		cmd_count--;
+	}			/* while cmd_count */
 
 	/* Commit added words if all is well */
 	qptr->index = index;
 
 	return CVMX_CMD_QUEUE_SUCCESS;
 }
+
 EXPORT_SYMBOL(__cvmx_cmd_queue_write_raw);

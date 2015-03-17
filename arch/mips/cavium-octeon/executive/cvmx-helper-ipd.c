@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2014  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2014 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -42,7 +30,6 @@
  *
  * IPD helper functions.
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-ipd-defs.h>
@@ -51,48 +38,20 @@
 #include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-pip.h>
 #include <asm/octeon/cvmx-helper-pki.h>
-#else
-#include "cvmx.h"
-#include "cvmx-version.h"
-#include "cvmx-error.h"
-#include "cvmx-fpa.h"
-#include "cvmx-ipd.h"
-#include "cvmx-pip.h"
-#include "cvmx-helper-pki.h"
-#endif
 
 /** It allocate pools for packet and wqe pools
  * and sets up the FPA hardware
  */
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-int __cvmx_helper_ipd_setup_fpa_pools(void)
-{
-	cvmx_fpa_global_initialize();
-	if (cvmx_ipd_cfg.packet_pool.buffer_count == 0)
-		return 0;
-	__cvmx_helper_initialize_fpa_pool(cvmx_ipd_cfg.packet_pool.pool_num, cvmx_ipd_cfg.packet_pool.buffer_size,
-					  cvmx_ipd_cfg.packet_pool.buffer_count, "Packet Buffers");
-	if (cvmx_ipd_cfg.wqe_pool.buffer_count == 0)
-		return 0;
-	__cvmx_helper_initialize_fpa_pool(cvmx_ipd_cfg.wqe_pool.pool_num, cvmx_ipd_cfg.wqe_pool.buffer_size,
-					  cvmx_ipd_cfg.wqe_pool.buffer_count, "WQE Buffers");
-	return 0;
-}
-#endif
 
 /**
  * @INTERNAL
  * Setup global setting for IPD/PIP not related to a specific
  * interface or port. This must be called before IPD is enabled.
  *
- * @return Zero on success, negative on failure.
+ * Returns Zero on success, negative on failure.
  */
 int __cvmx_helper_ipd_global_setup(void)
 {
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-	/* Setup the packet and wqe pools*/
-	__cvmx_helper_ipd_setup_fpa_pools();
-#endif
 	/* Setup the global packet input options */
 	cvmx_ipd_config(cvmx_ipd_cfg.packet_pool.buffer_size / 8,
 			cvmx_ipd_cfg.first_mbuf_skip / 8,
@@ -102,16 +61,16 @@ int __cvmx_helper_ipd_global_setup(void)
 			/* The +8 is to account for the next ptr */
 			(cvmx_ipd_cfg.not_first_mbuf_skip + 8) / 128,
 			cvmx_ipd_cfg.wqe_pool.pool_num,
-			(cvmx_ipd_mode_t)(cvmx_ipd_cfg.cache_mode), 1);
+			(cvmx_ipd_mode_t) (cvmx_ipd_cfg.cache_mode), 1);
 	return 0;
 }
 
 /**
  * Enable or disable FCS stripping for all the ports on an interface.
  *
- * @param interface
- * @param nports number of ports
- * @param has_fcs 0 for disable and !0 for enable
+ * @interface:
+ * @nports: number of ports
+ * @has_fcs: 0 for disable and !0 for enable
  */
 static int cvmx_helper_fcs_op(int interface, int nports, int has_fcs)
 {
@@ -125,13 +84,15 @@ static int cvmx_helper_fcs_op(int interface, int nports, int has_fcs)
 	if (!octeon_has_feature(OCTEON_FEATURE_PKND))
 		return 0;
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		cvmx_helper_pki_set_fcs_op(xi.node, xi.interface, nports, has_fcs);
+		cvmx_helper_pki_set_fcs_op(xi.node, xi.interface, nports,
+					   has_fcs);
 		return 0;
 	}
 
 	port_bit = 0;
 	for (index = 0; index < nports; index++)
-		port_bit |= ((uint64_t) 1 << cvmx_helper_get_pknd(interface, index));
+		port_bit |=
+		    ((uint64_t) 1 << cvmx_helper_get_pknd(interface, index));
 
 	pkind_fcsx.u64 = cvmx_read_csr(CVMX_PIP_SUB_PKIND_FCSX(0));
 	if (has_fcs)
@@ -158,10 +119,10 @@ static int cvmx_helper_fcs_op(int interface, int nports, int has_fcs)
  * contents for a port. The setup performed here is controlled by
  * the defines in executive-config.h.
  *
- * @param ipd_port Port/Port kind to configure. This follows the IPD numbering,
+ * @ipd_port: Port/Port kind to configure. This follows the IPD numbering,
  *                 not the per interface numbering
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 static int __cvmx_helper_ipd_port_setup(int ipd_port)
 {
@@ -194,24 +155,41 @@ static int __cvmx_helper_ipd_port_setup(int ipd_port)
 	}
 
 	/* Process the headers and place the IP header in the work queue */
-	port_config.s.mode = (cvmx_pip_port_parse_mode_t)cvmx_ipd_cfg.port_config.parse_mode;
+	port_config.s.mode =
+	    (cvmx_pip_port_parse_mode_t) cvmx_ipd_cfg.port_config.parse_mode;
 
-	tag_config.s.ip6_src_flag  = cvmx_ipd_cfg.port_config.tag_fields.ipv6_src_ip;
-	tag_config.s.ip6_dst_flag  = cvmx_ipd_cfg.port_config.tag_fields.ipv6_dst_ip;
-	tag_config.s.ip6_sprt_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv6_src_port;
-	tag_config.s.ip6_dprt_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv6_dst_port;
-	tag_config.s.ip6_nxth_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv6_next_header;
-	tag_config.s.ip4_src_flag  = cvmx_ipd_cfg.port_config.tag_fields.ipv4_src_ip;
-	tag_config.s.ip4_dst_flag  = cvmx_ipd_cfg.port_config.tag_fields.ipv4_dst_ip;
-	tag_config.s.ip4_sprt_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv4_src_port;
-	tag_config.s.ip4_dprt_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv4_dst_port;
-	tag_config.s.ip4_pctl_flag = cvmx_ipd_cfg.port_config.tag_fields.ipv4_protocol;
-	tag_config.s.inc_prt_flag  = cvmx_ipd_cfg.port_config.tag_fields.input_port;
-	tag_config.s.tcp6_tag_type = (cvmx_pow_tag_type_t)cvmx_ipd_cfg.port_config.tag_type;
-	tag_config.s.tcp4_tag_type = (cvmx_pow_tag_type_t)cvmx_ipd_cfg.port_config.tag_type;
-	tag_config.s.ip6_tag_type  = (cvmx_pow_tag_type_t)cvmx_ipd_cfg.port_config.tag_type;
-	tag_config.s.ip4_tag_type  = (cvmx_pow_tag_type_t)cvmx_ipd_cfg.port_config.tag_type;
-	tag_config.s.non_tag_type  = (cvmx_pow_tag_type_t)cvmx_ipd_cfg.port_config.tag_type;
+	tag_config.s.ip6_src_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv6_src_ip;
+	tag_config.s.ip6_dst_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv6_dst_ip;
+	tag_config.s.ip6_sprt_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv6_src_port;
+	tag_config.s.ip6_dprt_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv6_dst_port;
+	tag_config.s.ip6_nxth_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv6_next_header;
+	tag_config.s.ip4_src_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv4_src_ip;
+	tag_config.s.ip4_dst_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv4_dst_ip;
+	tag_config.s.ip4_sprt_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv4_src_port;
+	tag_config.s.ip4_dprt_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv4_dst_port;
+	tag_config.s.ip4_pctl_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.ipv4_protocol;
+	tag_config.s.inc_prt_flag =
+	    cvmx_ipd_cfg.port_config.tag_fields.input_port;
+	tag_config.s.tcp6_tag_type =
+	    (cvmx_pow_tag_type_t) cvmx_ipd_cfg.port_config.tag_type;
+	tag_config.s.tcp4_tag_type =
+	    (cvmx_pow_tag_type_t) cvmx_ipd_cfg.port_config.tag_type;
+	tag_config.s.ip6_tag_type =
+	    (cvmx_pow_tag_type_t) cvmx_ipd_cfg.port_config.tag_type;
+	tag_config.s.ip4_tag_type =
+	    (cvmx_pow_tag_type_t) cvmx_ipd_cfg.port_config.tag_type;
+	tag_config.s.non_tag_type =
+	    (cvmx_pow_tag_type_t) cvmx_ipd_cfg.port_config.tag_type;
 
 	/* Put all packets in group 0. Other groups can be used by the app */
 	tag_config.s.grp = 0;
@@ -232,9 +210,9 @@ static int __cvmx_helper_ipd_port_setup(int ipd_port)
  * interface. The number of ports on the interface must already
  * have been probed.
  *
- * @param interface Interface to setup IPD/PIP for
+ * @interface: Interface to setup IPD/PIP for
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 int __cvmx_helper_ipd_setup_interface(int xiface)
 {
@@ -270,7 +248,7 @@ int __cvmx_helper_ipd_setup_interface(int xiface)
 	mode = cvmx_helper_interface_get_mode(xiface);
 
 	if (mode == CVMX_HELPER_INTERFACE_MODE_LOOP)
-			__cvmx_helper_loop_enable(xiface);
+		__cvmx_helper_loop_enable(xiface);
 
 	return 0;
 }

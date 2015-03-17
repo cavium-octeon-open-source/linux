@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -45,9 +33,7 @@
  * chip errata. For the most part, code doesn't need to call
  * these functions directly.
  *
- * <hr>$Revision: 95626 $<hr>
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-jtag.h>
@@ -55,27 +41,12 @@
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-ipd.h>
-#else
-
-#include "cvmx.h"
-
-#include "cvmx-fpa.h"
-#include "cvmx-pip.h"
-#include "cvmx-hwpko.h"
-#include "cvmx-ipd.h"
-#include "cvmx-spi.h"
-#include "cvmx-pow.h"
-#include "cvmx-sysinfo.h"
-#include "cvmx-helper.h"
-#include "cvmx-helper-jtag.h"
-#endif
-
 
 /**
  * @INTERNAL
  * Function to adjust internal IPD pointer alignments
  *
- * @return 0 on success
+ * Returns 0 on success
  *         !0 on failure
  */
 int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
@@ -99,13 +70,20 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 	cvmx_helper_link_info_t link_info;
 	int wqe_pool = (int)cvmx_fpa_get_wqe_pool();
 
-
 	/* Save values for restore at end */
-	uint64_t prtx_cfg = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
-	uint64_t tx_ptr_en = cvmx_read_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)));
-	uint64_t rx_ptr_en = cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)));
-	uint64_t rxx_jabber = cvmx_read_csr(CVMX_GMXX_RXX_JABBER(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
-	uint64_t frame_max = cvmx_read_csr(CVMX_GMXX_RXX_FRM_MAX(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
+	uint64_t prtx_cfg =
+	    cvmx_read_csr(CVMX_GMXX_PRTX_CFG
+			  (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
+	uint64_t tx_ptr_en =
+	    cvmx_read_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)));
+	uint64_t rx_ptr_en =
+	    cvmx_read_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)));
+	uint64_t rxx_jabber =
+	    cvmx_read_csr(CVMX_GMXX_RXX_JABBER
+			  (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
+	uint64_t frame_max =
+	    cvmx_read_csr(CVMX_GMXX_RXX_FRM_MAX
+			  (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
 
 	/* Configure port to gig FDX as required for loopback mode */
 	cvmx_helper_rgmii_internal_loopback(FIX_IPD_OUTPORT);
@@ -131,15 +109,20 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 
 		num_segs += 1;
 
-		size = FIX_IPD_FIRST_BUFF_PAYLOAD_BYTES + ((num_segs - 1) * FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES) - (FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES / 2);
+		size =
+		    FIX_IPD_FIRST_BUFF_PAYLOAD_BYTES +
+		    ((num_segs - 1) * FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES) -
+		    (FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES / 2);
 
-		cvmx_write_csr(CVMX_ASXX_PRT_LOOP(INTERFACE(FIX_IPD_OUTPORT)), 1 << INDEX(FIX_IPD_OUTPORT));
+		cvmx_write_csr(CVMX_ASXX_PRT_LOOP(INTERFACE(FIX_IPD_OUTPORT)),
+			       1 << INDEX(FIX_IPD_OUTPORT));
 		CVMX_SYNC;
 
 		g_buffer.u64 = 0;
 		g_buffer.s.addr = cvmx_ptr_to_phys(cvmx_fpa1_alloc(wqe_pool));
 		if (g_buffer.s.addr == 0) {
-			cvmx_dprintf("WARNING: FIX_IPD_PTR_ALIGNMENT buffer allocation failure.\n");
+			cvmx_dprintf
+			    ("WARNING: FIX_IPD_PTR_ALIGNMENT buffer allocation failure.\n");
 			goto fix_ipd_exit;
 		}
 
@@ -147,9 +130,12 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 		g_buffer.s.size = num_segs;
 
 		pkt_buffer.u64 = 0;
-		pkt_buffer.s.addr = cvmx_ptr_to_phys(cvmx_fpa1_alloc(cvmx_fpa_get_packet_pool()));
+		pkt_buffer.s.addr =
+		    cvmx_ptr_to_phys(cvmx_fpa1_alloc
+				     (cvmx_fpa_get_packet_pool()));
 		if (pkt_buffer.s.addr == 0) {
-			cvmx_dprintf("WARNING: FIX_IPD_PTR_ALIGNMENT buffer allocation failure.\n");
+			cvmx_dprintf
+			    ("WARNING: FIX_IPD_PTR_ALIGNMENT buffer allocation failure.\n");
 			goto fix_ipd_exit;
 		}
 		pkt_buffer.s.i = 1;
@@ -164,12 +150,14 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 
 		for (i = 0; i < num_segs; i++) {
 			if (i > 0)
-				pkt_buffer.s.size = FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES;
+				pkt_buffer.s.size =
+				    FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES;
 
 			if (i == (num_segs - 1))
 				pkt_buffer.s.i = 0;
 
-			*(uint64_t *) cvmx_phys_to_ptr(g_buffer.s.addr + 8 * i) = pkt_buffer.u64;
+			*(uint64_t *) cvmx_phys_to_ptr(g_buffer.s.addr +
+						       8 * i) = pkt_buffer.u64;
 		}
 
 		/* Build the PKO command */
@@ -179,17 +167,35 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 		pko_command.s.dontfree = 0;
 		pko_command.s.gather = 1;
 
-		gmx_cfg.u64 = cvmx_read_csr(CVMX_GMXX_PRTX_CFG(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)));
+		gmx_cfg.u64 =
+		    cvmx_read_csr(CVMX_GMXX_PRTX_CFG
+				  (INDEX(FIX_IPD_OUTPORT),
+				   INTERFACE(FIX_IPD_OUTPORT)));
 		gmx_cfg.s.en = 1;
-		cvmx_write_csr(CVMX_GMXX_PRTX_CFG(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), gmx_cfg.u64);
-		cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)), 1 << INDEX(FIX_IPD_OUTPORT));
-		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)), 1 << INDEX(FIX_IPD_OUTPORT));
+		cvmx_write_csr(CVMX_GMXX_PRTX_CFG
+			       (INDEX(FIX_IPD_OUTPORT),
+				INTERFACE(FIX_IPD_OUTPORT)), gmx_cfg.u64);
+		cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)),
+			       1 << INDEX(FIX_IPD_OUTPORT));
+		cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)),
+			       1 << INDEX(FIX_IPD_OUTPORT));
 
-		cvmx_write_csr(CVMX_GMXX_RXX_JABBER(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), 65392 - 14 - 4);
-		cvmx_write_csr(CVMX_GMXX_RXX_FRM_MAX(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), 65392 - 14 - 4);
+		cvmx_write_csr(CVMX_GMXX_RXX_JABBER
+			       (INDEX(FIX_IPD_OUTPORT),
+				INTERFACE(FIX_IPD_OUTPORT)), 65392 - 14 - 4);
+		cvmx_write_csr(CVMX_GMXX_RXX_FRM_MAX
+			       (INDEX(FIX_IPD_OUTPORT),
+				INTERFACE(FIX_IPD_OUTPORT)), 65392 - 14 - 4);
 
-		cvmx_pko_send_packet_prepare(FIX_IPD_OUTPORT, cvmx_pko_get_base_queue(FIX_IPD_OUTPORT), CVMX_PKO_LOCK_CMD_QUEUE);
-		cvmx_hwpko_send_packet_finish(FIX_IPD_OUTPORT, cvmx_pko_get_base_queue(FIX_IPD_OUTPORT), pko_command, g_buffer, CVMX_PKO_LOCK_CMD_QUEUE);
+		cvmx_pko_send_packet_prepare(FIX_IPD_OUTPORT,
+					     cvmx_pko_get_base_queue
+					     (FIX_IPD_OUTPORT),
+					     CVMX_PKO_LOCK_CMD_QUEUE);
+		cvmx_hwpko_send_packet_finish(FIX_IPD_OUTPORT,
+					      cvmx_pko_get_base_queue
+					      (FIX_IPD_OUTPORT), pko_command,
+					      g_buffer,
+					      CVMX_PKO_LOCK_CMD_QUEUE);
 
 		CVMX_SYNC;
 
@@ -199,7 +205,8 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 		} while ((work == NULL) && (retry_cnt > 0));
 
 		if (!retry_cnt)
-			cvmx_dprintf("WARNING: FIX_IPD_PTR_ALIGNMENT get_work() timeout occurred.\n");
+			cvmx_dprintf
+			    ("WARNING: FIX_IPD_PTR_ALIGNMENT get_work() timeout occurred.\n");
 
 		/* Free packet */
 		if (work)
@@ -209,11 +216,19 @@ int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 fix_ipd_exit:
 
 	/* Return CSR configs to saved values */
-	cvmx_write_csr(CVMX_GMXX_PRTX_CFG(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), prtx_cfg);
-	cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)), tx_ptr_en);
-	cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)), rx_ptr_en);
-	cvmx_write_csr(CVMX_GMXX_RXX_JABBER(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), rxx_jabber);
-	cvmx_write_csr(CVMX_GMXX_RXX_FRM_MAX(INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)), frame_max);
+	cvmx_write_csr(CVMX_GMXX_PRTX_CFG
+		       (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)),
+		       prtx_cfg);
+	cvmx_write_csr(CVMX_ASXX_TX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)),
+		       tx_ptr_en);
+	cvmx_write_csr(CVMX_ASXX_RX_PRT_EN(INTERFACE(FIX_IPD_OUTPORT)),
+		       rx_ptr_en);
+	cvmx_write_csr(CVMX_GMXX_RXX_JABBER
+		       (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)),
+		       rxx_jabber);
+	cvmx_write_csr(CVMX_GMXX_RXX_FRM_MAX
+		       (INDEX(FIX_IPD_OUTPORT), INTERFACE(FIX_IPD_OUTPORT)),
+		       frame_max);
 	cvmx_write_csr(CVMX_ASXX_PRT_LOOP(INTERFACE(FIX_IPD_OUTPORT)), 0);
 	/* Set link to down so autonegotiation will set it up again */
 	link_info.u64 = 0;
@@ -245,8 +260,8 @@ fix_ipd_exit:
  *      - the next buffer pointer (which precedes the packet data
  *        in each buffer).
  *
- * @param work   Work queue entry to fix
- * @return Zero on success. Negative on failure
+ * @work:   Work queue entry to fix
+ * Returns Zero on success. Negative on failure
  */
 int cvmx_helper_fix_ipd_packet_chain(cvmx_wqe_t * work)
 {
@@ -256,8 +271,12 @@ int cvmx_helper_fix_ipd_packet_chain(cvmx_wqe_t * work)
 	if (number_buffers) {
 		cvmx_buf_ptr_t buffer_ptr = work->packet_ptr;
 		/* Check for errata PKI-100 */
-		if ((buffer_ptr.s.pool == 0) && (((uint64_t) buffer_ptr.s.size + ((uint64_t) buffer_ptr.s.back << 7) + ((uint64_t) buffer_ptr.s.addr & 0x7F))
-				   != (uint64_t)(cvmx_fpa_get_packet_pool_block_size() + 8))) {
+		if ((buffer_ptr.s.pool == 0)
+		    &&
+		    (((uint64_t) buffer_ptr.s.size +
+		      ((uint64_t) buffer_ptr.s.back << 7) +
+		      ((uint64_t) buffer_ptr.s.addr & 0x7F))
+		     != (uint64_t) (cvmx_fpa_get_packet_pool_block_size() + 8))) {
 			/* fix is not needed */
 			return 0;
 		}
@@ -271,7 +290,9 @@ int cvmx_helper_fix_ipd_packet_chain(cvmx_wqe_t * work)
 		 */
 		while (--number_buffers) {
 			/* Chain pointers are 8 bytes before the data */
-			cvmx_buf_ptr_t *ptr = (cvmx_buf_ptr_t *) cvmx_phys_to_ptr(buffer_ptr.s.addr - 8);
+			cvmx_buf_ptr_t *ptr =
+			    (cvmx_buf_ptr_t *) cvmx_phys_to_ptr(buffer_ptr.s.
+								addr - 8);
 			buffer_ptr = *ptr;
 			buffer_ptr.s.size -= 8;
 			*ptr = buffer_ptr;
@@ -284,5 +305,3 @@ int cvmx_helper_fix_ipd_packet_chain(cvmx_wqe_t * work)
 	CVMX_SYNCWS;
 	return 0;
 }
-
-

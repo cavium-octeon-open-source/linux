@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -43,7 +31,6 @@
  * IPD Support.
  *
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
@@ -58,31 +45,21 @@
 #include <asm/octeon/cvmx-helper-errata.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-pki.h>
-#else
-#include "cvmx.h"
-#include "cvmx-sysinfo.h"
-#include "cvmx-bootmem.h"
-#include "cvmx-version.h"
-#include "cvmx-error.h"
-#include "cvmx-fpa1.h"
-#include "cvmx-wqe.h"
-#include "cvmx-ipd.h"
-#include "cvmx-helper-pki.h"
-#include "cvmx-helper-errata.h"
-#include "cvmx-helper-cfg.h"
-#endif
 
 CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg = {.first_mbuf_skip = 184,
-						.ipd_enable = 1,
-						.cache_mode = CVMX_IPD_OPC_MODE_STT,
-						.packet_pool = {0, 2048, 0},
-						.wqe_pool = {1, 128, 0},
-						.port_config = { CVMX_PIP_PORT_CFG_MODE_SKIPL2,
-								CVMX_POW_TAG_TYPE_ORDERED,
-								CVMX_PIP_TAG_MODE_TUPLE,
-								.tag_fields = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 }
-						}
-					};
+	.ipd_enable = 1,
+	.cache_mode = CVMX_IPD_OPC_MODE_STT,
+	.packet_pool = {0, 2048, 0}
+	,
+	.wqe_pool = {1, 128, 0}
+	,
+	.port_config = {CVMX_PIP_PORT_CFG_MODE_SKIPL2,
+			CVMX_POW_TAG_TYPE_ORDERED,
+			CVMX_PIP_TAG_MODE_TUPLE,
+			.tag_fields = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+			}
+};
+
 EXPORT_SYMBOL(cvmx_ipd_cfg);
 
 #define IPD_RED_AVG_DLY	1000
@@ -93,43 +70,55 @@ void cvmx_ipd_convert_to_newcfg(cvmx_ipd_config_t ipd_config)
 	int pkind;
 	unsigned int node = cvmx_get_node_num();
 
-	/*Set all the styles to same parameters since old config does not have per port config*/
+	/*Set all the styles to same parameters since old config does not have per port config */
 	pki_dflt_style[node].parm_cfg.cache_mode = ipd_config.cache_mode;
 	pki_dflt_style[node].parm_cfg.first_skip = ipd_config.first_mbuf_skip;
-	pki_dflt_style[node].parm_cfg.later_skip = ipd_config.not_first_mbuf_skip;
-	pki_dflt_style[node].parm_cfg.mbuff_size = ipd_config.packet_pool.buffer_size;
-	pki_dflt_style[node].parm_cfg.tag_type = ipd_config.port_config.tag_type;
+	pki_dflt_style[node].parm_cfg.later_skip =
+	    ipd_config.not_first_mbuf_skip;
+	pki_dflt_style[node].parm_cfg.mbuff_size =
+	    ipd_config.packet_pool.buffer_size;
+	pki_dflt_style[node].parm_cfg.tag_type =
+	    ipd_config.port_config.tag_type;
 
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_src = ipd_config.port_config.tag_fields.ipv6_src_ip |
-			ipd_config.port_config.tag_fields.ipv4_src_ip;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_dst = ipd_config.port_config.tag_fields.ipv6_dst_ip |
-			ipd_config.port_config.tag_fields.ipv4_dst_ip;
-	pki_dflt_style[node].tag_cfg.tag_fields.ip_prot_nexthdr = ipd_config.port_config.tag_fields.ipv6_next_header |
-			ipd_config.port_config.tag_fields.ipv4_protocol;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_src = ipd_config.port_config.tag_fields.ipv6_src_port |
-			ipd_config.port_config.tag_fields.ipv4_src_port;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_dst = ipd_config.port_config.tag_fields.ipv6_dst_port |
-			ipd_config.port_config.tag_fields.ipv4_dst_port;
-	pki_dflt_style[node].tag_cfg.tag_fields.input_port = ipd_config.port_config.tag_fields.input_port;
+	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_src =
+	    ipd_config.port_config.tag_fields.ipv6_src_ip | ipd_config.
+	    port_config.tag_fields.ipv4_src_ip;
+	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_dst =
+	    ipd_config.port_config.tag_fields.ipv6_dst_ip | ipd_config.
+	    port_config.tag_fields.ipv4_dst_ip;
+	pki_dflt_style[node].tag_cfg.tag_fields.ip_prot_nexthdr =
+	    ipd_config.port_config.tag_fields.ipv6_next_header | ipd_config.
+	    port_config.tag_fields.ipv4_protocol;
+	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_src =
+	    ipd_config.port_config.tag_fields.ipv6_src_port | ipd_config.
+	    port_config.tag_fields.ipv4_src_port;
+	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_dst =
+	    ipd_config.port_config.tag_fields.ipv6_dst_port | ipd_config.
+	    port_config.tag_fields.ipv4_dst_port;
+	pki_dflt_style[node].tag_cfg.tag_fields.input_port =
+	    ipd_config.port_config.tag_fields.input_port;
 
 	if (ipd_config.port_config.parse_mode == 0x1)
-		pki_dflt_pkind[node].initial_parse_mode = CVMX_PKI_PARSE_LA_TO_LG;
+		pki_dflt_pkind[node].initial_parse_mode =
+		    CVMX_PKI_PARSE_LA_TO_LG;
 	else if (ipd_config.port_config.parse_mode == 0x2)
-		pki_dflt_pkind[node].initial_parse_mode = CVMX_PKI_PARSE_LC_TO_LG;
+		pki_dflt_pkind[node].initial_parse_mode =
+		    CVMX_PKI_PARSE_LC_TO_LG;
 	else
-		pki_dflt_pkind[node].initial_parse_mode = CVMX_PKI_PARSE_NOTHING;
+		pki_dflt_pkind[node].initial_parse_mode =
+		    CVMX_PKI_PARSE_NOTHING;
 
 	/* For compatibility make style = pkind so old software can modify style */
 	for (pkind = 0; pkind < CVMX_PKI_NUM_PKIND; pkind++)
 		pkind_style_map[node][pkind] = pkind;
-	/*setup packet pool*/
+	/*setup packet pool */
 	cvmx_helper_pki_set_dflt_pool(node, ipd_config.packet_pool.pool_num,
-					 ipd_config.packet_pool.buffer_size, ipd_config.packet_pool.buffer_count);
+				      ipd_config.packet_pool.buffer_size,
+				      ipd_config.packet_pool.buffer_count);
 	cvmx_helper_pki_set_dflt_aura(node, ipd_config.packet_pool.pool_num,
-					 ipd_config.packet_pool.pool_num, ipd_config.packet_pool.buffer_count);
+				      ipd_config.packet_pool.pool_num,
+				      ipd_config.packet_pool.buffer_count);
 }
-
-
 
 int cvmx_ipd_set_config(cvmx_ipd_config_t ipd_config)
 {
@@ -139,7 +128,7 @@ int cvmx_ipd_set_config(cvmx_ipd_config_t ipd_config)
 	return 0;
 }
 
-void cvmx_ipd_get_config(cvmx_ipd_config_t *ipd_config)
+void cvmx_ipd_get_config(cvmx_ipd_config_t * ipd_config)
 {
 	*ipd_config = cvmx_ipd_cfg;
 }
@@ -155,7 +144,8 @@ void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		int node = cvmx_get_node_num();
 		int64_t aura = pool;
-		cvmx_helper_pki_set_dflt_pool(node, pool, buffer_size, buffer_count);
+		cvmx_helper_pki_set_dflt_pool(node, pool, buffer_size,
+					      buffer_count);
 		cvmx_helper_pki_set_dflt_aura(node, aura, pool, buffer_count);
 	} else {
 		cvmx_ipd_cfg.packet_pool.pool_num = pool;
@@ -163,6 +153,7 @@ void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 		cvmx_ipd_cfg.packet_pool.buffer_count = buffer_count;
 	}
 }
+
 EXPORT_SYMBOL(cvmx_ipd_set_packet_pool_config);
 
 void cvmx_ipd_set_wqe_pool_buffer_count(uint64_t buffer_count)
@@ -171,12 +162,13 @@ void cvmx_ipd_set_wqe_pool_buffer_count(uint64_t buffer_count)
 }
 
 void cvmx_ipd_set_wqe_pool_config(int64_t pool, uint64_t buffer_size,
-				       uint64_t buffer_count)
+				  uint64_t buffer_count)
 {
 	cvmx_ipd_cfg.wqe_pool.pool_num = pool;
 	cvmx_ipd_cfg.wqe_pool.buffer_size = buffer_size;
 	cvmx_ipd_cfg.wqe_pool.buffer_count = buffer_count;
 }
+
 EXPORT_SYMBOL(cvmx_ipd_set_wqe_pool_config);
 
 static void __cvmx_ipd_free_ptr_v1(void)
@@ -205,8 +197,9 @@ static void __cvmx_ipd_free_ptr_v1(void)
 	if (ptr_count.s.wqev_cnt) {
 		union cvmx_ipd_wqe_ptr_valid wqe_ptr_valid;
 		wqe_ptr_valid.u64 = cvmx_read_csr(CVMX_IPD_WQE_PTR_VALID);
-		cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)wqe_ptr_valid.s.ptr << 7),
-			      wqe_pool, 0);
+		cvmx_fpa1_free(cvmx_phys_to_ptr
+			       ((uint64_t) wqe_ptr_valid.s.ptr << 7), wqe_pool,
+			       0);
 	}
 
 	/* Free all WQE in the fifo */
@@ -216,11 +209,14 @@ static void __cvmx_ipd_free_ptr_v1(void)
 		pwp_fifo.u64 = cvmx_read_csr(CVMX_IPD_PWP_PTR_FIFO_CTL);
 		for (i = 0; i < ptr_count.s.wqe_pcnt; i++) {
 			pwp_fifo.s.cena = 0;
-			pwp_fifo.s.raddr = pwp_fifo.s.max_cnts + (pwp_fifo.s.wraddr + i) % pwp_fifo.s.max_cnts;
+			pwp_fifo.s.raddr =
+			    pwp_fifo.s.max_cnts + (pwp_fifo.s.wraddr +
+						   i) % pwp_fifo.s.max_cnts;
 			cvmx_write_csr(CVMX_IPD_PWP_PTR_FIFO_CTL, pwp_fifo.u64);
 			pwp_fifo.u64 = cvmx_read_csr(CVMX_IPD_PWP_PTR_FIFO_CTL);
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)pwp_fifo.s.ptr << 7),
-				      wqe_pool, 0);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) pwp_fifo.s.ptr << 7),
+				       wqe_pool, 0);
 		}
 		pwp_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_PWP_PTR_FIFO_CTL, pwp_fifo.u64);
@@ -230,8 +226,9 @@ static void __cvmx_ipd_free_ptr_v1(void)
 	if (ptr_count.s.pktv_cnt) {
 		union cvmx_ipd_pkt_ptr_valid pkt_ptr_valid;
 		pkt_ptr_valid.u64 = cvmx_read_csr(CVMX_IPD_PKT_PTR_VALID);
-		cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)pkt_ptr_valid.s.ptr << 7),
-			      packet_pool, 0);
+		cvmx_fpa1_free(cvmx_phys_to_ptr
+			       ((uint64_t) pkt_ptr_valid.s.ptr << 7),
+			       packet_pool, 0);
 	}
 
 	/* Free the per port prefetched packets */
@@ -242,9 +239,11 @@ static void __cvmx_ipd_free_ptr_v1(void)
 		prc_port_fifo.s.raddr = i % prc_port_fifo.s.max_pkt;
 		cvmx_write_csr(CVMX_IPD_PRC_PORT_PTR_FIFO_CTL,
 			       prc_port_fifo.u64);
-		prc_port_fifo.u64 = cvmx_read_csr(CVMX_IPD_PRC_PORT_PTR_FIFO_CTL);
-		cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)prc_port_fifo.s.ptr << 7),
-			      packet_pool, 0);
+		prc_port_fifo.u64 =
+		    cvmx_read_csr(CVMX_IPD_PRC_PORT_PTR_FIFO_CTL);
+		cvmx_fpa1_free(cvmx_phys_to_ptr
+			       ((uint64_t) prc_port_fifo.s.ptr << 7),
+			       packet_pool, 0);
 	}
 	prc_port_fifo.s.cena = 1;
 	cvmx_write_csr(CVMX_IPD_PRC_PORT_PTR_FIFO_CTL, prc_port_fifo.u64);
@@ -254,16 +253,21 @@ static void __cvmx_ipd_free_ptr_v1(void)
 		int i;
 		union cvmx_ipd_prc_hold_ptr_fifo_ctl prc_hold_fifo;
 
-		prc_hold_fifo.u64 = cvmx_read_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL);
+		prc_hold_fifo.u64 =
+		    cvmx_read_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL);
 
 		for (i = 0; i < ptr_count.s.pfif_cnt; i++) {
 			prc_hold_fifo.s.cena = 0;
-			prc_hold_fifo.s.raddr = (prc_hold_fifo.s.praddr + i) % prc_hold_fifo.s.max_pkt;
+			prc_hold_fifo.s.raddr =
+			    (prc_hold_fifo.s.praddr +
+			     i) % prc_hold_fifo.s.max_pkt;
 			cvmx_write_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL,
 				       prc_hold_fifo.u64);
-			prc_hold_fifo.u64 = cvmx_read_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL);
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)prc_hold_fifo.s.ptr << 7),
-				      packet_pool, 0);
+			prc_hold_fifo.u64 =
+			    cvmx_read_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) prc_hold_fifo.s.ptr << 7),
+				       packet_pool, 0);
 		}
 		prc_hold_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_PRC_HOLD_PTR_FIFO_CTL,
@@ -278,11 +282,13 @@ static void __cvmx_ipd_free_ptr_v1(void)
 
 		for (i = 0; i < ptr_count.s.pkt_pcnt; i++) {
 			pwp_fifo.s.cena = 0;
-			pwp_fifo.s.raddr = (pwp_fifo.s.praddr + i) % pwp_fifo.s.max_cnts;
+			pwp_fifo.s.raddr =
+			    (pwp_fifo.s.praddr + i) % pwp_fifo.s.max_cnts;
 			cvmx_write_csr(CVMX_IPD_PWP_PTR_FIFO_CTL, pwp_fifo.u64);
 			pwp_fifo.u64 = cvmx_read_csr(CVMX_IPD_PWP_PTR_FIFO_CTL);
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)pwp_fifo.s.ptr << 7),
-				      packet_pool, 0);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) pwp_fifo.s.ptr << 7),
+				       packet_pool, 0);
 		}
 		pwp_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_PWP_PTR_FIFO_CTL, pwp_fifo.u64);
@@ -312,11 +318,13 @@ static void __cvmx_ipd_free_ptr_v2(void)
 		union cvmx_ipd_next_wqe_ptr next_wqe_ptr;
 		next_wqe_ptr.u64 = cvmx_read_csr(CVMX_IPD_NEXT_WQE_PTR);
 		if (no_wptr)
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)next_wqe_ptr.s.ptr << 7),
-				      packet_pool, 0);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) next_wqe_ptr.s.ptr << 7),
+				       packet_pool, 0);
 		else
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)next_wqe_ptr.s.ptr << 7),
-				      wqe_pool, 0);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) next_wqe_ptr.s.ptr << 7),
+				       wqe_pool, 0);
 	}
 
 	/* Free all WQE in the fifo */
@@ -326,17 +334,23 @@ static void __cvmx_ipd_free_ptr_v2(void)
 		free_fifo.u64 = cvmx_read_csr(CVMX_IPD_FREE_PTR_FIFO_CTL);
 		for (i = 0; i < ptr_count.s.wqe_pcnt; i++) {
 			free_fifo.s.cena = 0;
-			free_fifo.s.raddr = free_fifo.s.max_cnts + (free_fifo.s.wraddr + i) % free_fifo.s.max_cnts;
+			free_fifo.s.raddr =
+			    free_fifo.s.max_cnts + (free_fifo.s.wraddr +
+						    i) % free_fifo.s.max_cnts;
 			cvmx_write_csr(CVMX_IPD_FREE_PTR_FIFO_CTL,
 				       free_fifo.u64);
-			free_fifo.u64 = cvmx_read_csr(CVMX_IPD_FREE_PTR_FIFO_CTL);
-			free_ptr_value.u64 = cvmx_read_csr(CVMX_IPD_FREE_PTR_VALUE);
+			free_fifo.u64 =
+			    cvmx_read_csr(CVMX_IPD_FREE_PTR_FIFO_CTL);
+			free_ptr_value.u64 =
+			    cvmx_read_csr(CVMX_IPD_FREE_PTR_VALUE);
 			if (no_wptr)
-				cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)free_ptr_value.s.ptr << 7),
-					      packet_pool, 0);
+				cvmx_fpa1_free(cvmx_phys_to_ptr
+					       ((uint64_t) free_ptr_value.s.
+						ptr << 7), packet_pool, 0);
 			else
-				cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)free_ptr_value.s.ptr << 7),
-					      wqe_pool, 0);
+				cvmx_fpa1_free(cvmx_phys_to_ptr
+					       ((uint64_t) free_ptr_value.s.
+						ptr << 7), wqe_pool, 0);
 		}
 		free_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_FREE_PTR_FIFO_CTL, free_fifo.u64);
@@ -346,8 +360,9 @@ static void __cvmx_ipd_free_ptr_v2(void)
 	if (ptr_count.s.pktv_cnt) {
 		union cvmx_ipd_next_pkt_ptr next_pkt_ptr;
 		next_pkt_ptr.u64 = cvmx_read_csr(CVMX_IPD_NEXT_PKT_PTR);
-		cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)next_pkt_ptr.s.ptr << 7),
-			      packet_pool, 0);
+		cvmx_fpa1_free(cvmx_phys_to_ptr
+			       ((uint64_t) next_pkt_ptr.s.ptr << 7),
+			       packet_pool, 0);
 	}
 
 	/* Free the per port prefetched packets */
@@ -358,8 +373,9 @@ static void __cvmx_ipd_free_ptr_v2(void)
 		port_ptr_fifo.s.raddr = i % port_ptr_fifo.s.max_pkt;
 		cvmx_write_csr(CVMX_IPD_PORT_PTR_FIFO_CTL, port_ptr_fifo.u64);
 		port_ptr_fifo.u64 = cvmx_read_csr(CVMX_IPD_PORT_PTR_FIFO_CTL);
-		cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)port_ptr_fifo.s.ptr << 7),
-			      packet_pool, 0);
+		cvmx_fpa1_free(cvmx_phys_to_ptr
+			       ((uint64_t) port_ptr_fifo.s.ptr << 7),
+			       packet_pool, 0);
 	}
 	port_ptr_fifo.s.cena = 1;
 	cvmx_write_csr(CVMX_IPD_PORT_PTR_FIFO_CTL, port_ptr_fifo.u64);
@@ -372,12 +388,16 @@ static void __cvmx_ipd_free_ptr_v2(void)
 
 		for (i = 0; i < ptr_count.s.pfif_cnt; i++) {
 			hold_ptr_fifo.s.cena = 0;
-			hold_ptr_fifo.s.raddr = (hold_ptr_fifo.s.praddr + i) % hold_ptr_fifo.s.max_pkt;
+			hold_ptr_fifo.s.raddr =
+			    (hold_ptr_fifo.s.praddr +
+			     i) % hold_ptr_fifo.s.max_pkt;
 			cvmx_write_csr(CVMX_IPD_HOLD_PTR_FIFO_CTL,
 				       hold_ptr_fifo.u64);
-			hold_ptr_fifo.u64 = cvmx_read_csr(CVMX_IPD_HOLD_PTR_FIFO_CTL);
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)hold_ptr_fifo.s.ptr << 7),
-				      packet_pool, 0);
+			hold_ptr_fifo.u64 =
+			    cvmx_read_csr(CVMX_IPD_HOLD_PTR_FIFO_CTL);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) hold_ptr_fifo.s.ptr << 7),
+				       packet_pool, 0);
 		}
 		hold_ptr_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_HOLD_PTR_FIFO_CTL, hold_ptr_fifo.u64);
@@ -391,13 +411,17 @@ static void __cvmx_ipd_free_ptr_v2(void)
 
 		for (i = 0; i < ptr_count.s.pkt_pcnt; i++) {
 			free_fifo.s.cena = 0;
-			free_fifo.s.raddr = (free_fifo.s.praddr + i) % free_fifo.s.max_cnts;
+			free_fifo.s.raddr =
+			    (free_fifo.s.praddr + i) % free_fifo.s.max_cnts;
 			cvmx_write_csr(CVMX_IPD_FREE_PTR_FIFO_CTL,
 				       free_fifo.u64);
-			free_fifo.u64 = cvmx_read_csr(CVMX_IPD_FREE_PTR_FIFO_CTL);
-			free_ptr_value.u64 = cvmx_read_csr(CVMX_IPD_FREE_PTR_VALUE);
-			cvmx_fpa1_free(cvmx_phys_to_ptr((uint64_t)free_ptr_value.s.ptr << 7),
-				      packet_pool, 0);
+			free_fifo.u64 =
+			    cvmx_read_csr(CVMX_IPD_FREE_PTR_FIFO_CTL);
+			free_ptr_value.u64 =
+			    cvmx_read_csr(CVMX_IPD_FREE_PTR_VALUE);
+			cvmx_fpa1_free(cvmx_phys_to_ptr
+				       ((uint64_t) free_ptr_value.s.ptr << 7),
+				       packet_pool, 0);
 		}
 		free_fifo.s.cena = 1;
 		cvmx_write_csr(CVMX_IPD_FREE_PTR_FIFO_CTL, free_fifo.u64);
@@ -477,18 +501,17 @@ void cvmx_ipd_config(uint64_t mbuff_size,
 	/* Note: the example RED code is below */
 }
 
-
 /**
  * Setup Random Early Drop on a specific input queue
  *
- * @param queue  Input queue to setup RED on (0-7)
- * @param pass_thresh
+ * @queue:  Input queue to setup RED on (0-7)
+ * @pass_thresh:
  *               Packets will begin slowly dropping when there are less than
  *               this many packet buffers free in FPA 0.
- * @param drop_thresh
+ * @drop_thresh:
  *               All incomming packets will be dropped when there are less
  *               than this many free packet buffers in FPA 0.
- * @return Zero on success. Negative on failure
+ * Returns Zero on success. Negative on failure
  */
 int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
 {
@@ -507,7 +530,8 @@ int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
 
 	/* Use the actual queue 0 counter, not the average */
 	red_param.u64 = 0;
-	red_param.s.prb_con = (255ul << 24) / (red_marks.s.pass - red_marks.s.drop);
+	red_param.s.prb_con =
+	    (255ul << 24) / (red_marks.s.pass - red_marks.s.drop);
 	red_param.s.avg_con = 1;
 	red_param.s.new_con = 255;
 	red_param.s.use_pcnt = 1;
@@ -518,13 +542,13 @@ int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
 /**
  * Setup Random Early Drop to automatically begin dropping packets.
  *
- * @param pass_thresh
+ * @pass_thresh:
  *               Packets will begin slowly dropping when there are less than
  *               this many packet buffers free in FPA 0.
- * @param drop_thresh
+ * @drop_thresh:
  *               All incomming packets will be dropped when there are less
  *               than this many free packet buffers in FPA 0.
- * @return Zero on success. Negative on failure
+ * Returns Zero on success. Negative on failure
  */
 int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 {
@@ -539,18 +563,22 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 	 */
 	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		int bpid;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
+		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
+		     interface++) {
 			int num_ports;
 
 			num_ports = cvmx_helper_ports_on_interface(interface);
 			for (port = 0; port < num_ports; port++) {
 				bpid = cvmx_helper_get_bpid(interface, port);
 				if (bpid == CVMX_INVALID_BPID)
-					cvmx_dprintf("setup_red: cvmx_helper_get_bpid(%d, %d) = %d\n",
-						     interface, port,
-						     cvmx_helper_get_bpid(interface, port));
+					cvmx_dprintf
+					    ("setup_red: cvmx_helper_get_bpid(%d, %d) = %d\n",
+					     interface, port,
+					     cvmx_helper_get_bpid(interface,
+								  port));
 				else
-					cvmx_write_csr(CVMX_IPD_BPIDX_MBUF_TH(bpid), 0);
+					cvmx_write_csr(CVMX_IPD_BPIDX_MBUF_TH
+						       (bpid), 0);
 			}
 		}
 	} else {
@@ -559,9 +587,13 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 		page_cnt.u64 = 0;
 		page_cnt.s.bp_enb = 0;
 		page_cnt.s.page_cnt = 100;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
-			for (port = cvmx_helper_get_first_ipd_port(interface); port < cvmx_helper_get_last_ipd_port(interface); port++)
-				cvmx_write_csr(CVMX_IPD_PORTX_BP_PAGE_CNT(port), page_cnt.u64);
+		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
+		     interface++) {
+			for (port = cvmx_helper_get_first_ipd_port(interface);
+			     port < cvmx_helper_get_last_ipd_port(interface);
+			     port++)
+				cvmx_write_csr(CVMX_IPD_PORTX_BP_PAGE_CNT(port),
+					       page_cnt.u64);
 		}
 	}
 
@@ -593,12 +625,17 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 		 * Only enable the gmx ports
 		 */
 		red_bpid_enable.u64 = 0;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
-			int num_ports = cvmx_helper_ports_on_interface(interface);
+		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
+		     interface++) {
+			int num_ports =
+			    cvmx_helper_ports_on_interface(interface);
 			for (port = 0; port < num_ports; port++)
-				red_bpid_enable.u64 |= (((uint64_t) 1) << cvmx_helper_get_bpid(interface, port));
+				red_bpid_enable.u64 |=
+				    (((uint64_t) 1) <<
+				     cvmx_helper_get_bpid(interface, port));
 		}
-		cvmx_write_csr(CVMX_IPD_RED_BPID_ENABLEX(0), red_bpid_enable.u64);
+		cvmx_write_csr(CVMX_IPD_RED_BPID_ENABLEX(0),
+			       red_bpid_enable.u64);
 	} else {
 		union cvmx_ipd_red_port_enable red_port_enable;
 
@@ -615,12 +652,14 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 			union cvmx_ipd_red_port_enable2 red_port_enable2;
 			red_port_enable2.u64 = 0;
 			red_port_enable2.s.prt_enb = 0xf0;
-			cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE2, red_port_enable2.u64);
+			cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE2,
+				       red_port_enable2.u64);
 		}
 	}
 
 	return 0;
 }
+
 EXPORT_SYMBOL(cvmx_ipd_setup_red);
 
 /**
@@ -640,7 +679,8 @@ void cvmx_ipd_enable(void)
 			ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 
 	if (ipd_reg.s.ipd_en)
-		cvmx_dprintf("Warning: Enabling IPD when IPD already enabled.\n");
+		cvmx_dprintf
+		    ("Warning: Enabling IPD when IPD already enabled.\n");
 
 	ipd_reg.s.ipd_en = 1;
 
@@ -651,6 +691,7 @@ void cvmx_ipd_enable(void)
 
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);
 }
+
 EXPORT_SYMBOL(cvmx_ipd_enable);
 
 /**
@@ -669,4 +710,5 @@ void cvmx_ipd_disable(void)
 	ipd_reg.s.ipd_en = 0;
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);
 }
+
 EXPORT_SYMBOL(cvmx_ipd_disable);

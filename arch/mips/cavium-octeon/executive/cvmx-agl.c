@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2013  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2013 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -44,7 +32,6 @@
  * and monitoring.
  *
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-helper.h>
@@ -52,17 +39,10 @@
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-agl-defs.h>
 #include <asm/octeon/cvmx-agl.h>
-#else
-#include "cvmx.h"
-#include "cvmx-agl.h"
-#include "cvmx-helper-board.h"
-#include "cvmx-agl-defs.h"
-#include "cvmx-helper-cfg.h"
-#endif
 /*
- * @param port port to enable
+ * @port: port to enable
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 int cvmx_agl_enable(int port)
 {
@@ -126,10 +106,10 @@ cvmx_helper_link_info_t cvmx_agl_link_get(int port)
 /*
  * Set MII/RGMII link based on mode.
  *
- * @param port   interface port to set the link.
- * @param link_info  Link status
+ * @port:   interface port to set the link.
+ * @link_info:  Link status
  *
- * @return       0 on success and 1 on failure
+ * Returns       0 on success and 1 on failure
  */
 int cvmx_agl_link_set(int port, cvmx_helper_link_info_t link_info)
 {
@@ -151,7 +131,9 @@ int cvmx_agl_link_set(int port, cvmx_helper_link_info_t link_info)
 		    || CVMX_WAIT_FOR_FIELD64(CVMX_AGL_GMX_PRTX_CFG(port),
 					     cvmx_agl_gmx_prtx_cfg_t, tx_idle,
 					     ==, 1, one_second)) {
-			cvmx_dprintf("AGL%d: Timeout waiting for GMX to be idle\n", port);
+			cvmx_dprintf
+			    ("AGL%d: Timeout waiting for GMX to be idle\n",
+			     port);
 			return -1;
 		}
 	}

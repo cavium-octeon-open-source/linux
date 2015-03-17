@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2011-2015  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2011-2015 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -42,9 +30,7 @@
  *
  * Helper utilities for qlm.
  *
- * <hr>$Revision: 113180 $<hr>
  */
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
 #include <asm/octeon/cvmx-helper-jtag.h>
@@ -58,24 +44,6 @@
 #include <asm/octeon/cvmx-sriomaintx-defs.h>
 #include <asm/octeon/cvmx-pciercx-defs.h>
 #include <asm/octeon/cvmx-pemx-defs.h>
-#elif defined(CVMX_BUILD_FOR_UBOOT)
-#include <common.h>
-#include <asm/arch/cvmx.h>
-#include <asm/arch/cvmx-bootmem.h>
-#include <asm/arch/cvmx-helper-jtag.h>
-#include <asm/arch/cvmx-helper-util.h>
-#include <asm/arch/cvmx-qlm.h>
-#else
-#include "cvmx.h"
-#include "cvmx-bootmem.h"
-#include "cvmx-helper-jtag.h"
-#include "cvmx-helper-util.h"
-#include "cvmx-qlm.h"
-#endif
-
-#ifdef CVMX_BUILD_FOR_UBOOT
-DECLARE_GLOBAL_DATA_PTR;
-#endif
 
 /* Their is a copy of this in bootloader qlm configuration, make sure
    to update both the places till i figure out */
@@ -116,19 +84,13 @@ extern const __cvmx_qlm_jtag_field_t __cvmx_qlm_jtag_field_cn66xx[];
 extern const __cvmx_qlm_jtag_field_t __cvmx_qlm_jtag_field_cn68xx[];
 
 #define CVMX_QLM_JTAG_UINT32 40
-#ifdef CVMX_BUILD_FOR_LINUX_HOST
-extern void octeon_remote_read_mem(void *buffer, uint64_t physical_address, int length);
-extern void octeon_remote_write_mem(uint64_t physical_address, const void *buffer, int length);
-uint32_t __cvmx_qlm_jtag_xor_ref[5][CVMX_QLM_JTAG_UINT32*8];
-#else
-typedef uint32_t qlm_jtag_uint32_t[CVMX_QLM_JTAG_UINT32*8];
+typedef uint32_t qlm_jtag_uint32_t[CVMX_QLM_JTAG_UINT32 * 8];
 CVMX_SHARED qlm_jtag_uint32_t *__cvmx_qlm_jtag_xor_ref;
-#endif
 
 /**
  * Return the number of QLMs supported by the chip
  *
- * @return  Number of QLMs
+ * Returns  Number of QLMs
  */
 int cvmx_qlm_get_num(void)
 {
@@ -159,22 +121,25 @@ int cvmx_qlm_get_num(void)
 /**
  * Return the qlm number based on the interface
  *
- * @param xiface  interface to look up
+ * @xiface:  interface to look up
  *
- * @return 0 on success other on failure
+ * Returns 0 on success other on failure
  */
 int cvmx_qlm_interface(int xiface)
 {
 	struct cvmx_xiface xi = cvmx_helper_xiface_to_node_interface(xiface);
 	if (OCTEON_IS_MODEL(OCTEON_CN61XX)) {
 		return (xi.interface == 0) ? 2 : 0;
-	} else if (OCTEON_IS_MODEL(OCTEON_CN63XX) || OCTEON_IS_MODEL(OCTEON_CN66XX)) {
+	} else if (OCTEON_IS_MODEL(OCTEON_CN63XX)
+		   || OCTEON_IS_MODEL(OCTEON_CN66XX)) {
 		return 2 - xi.interface;
 	} else if (OCTEON_IS_MODEL(OCTEON_CNF71XX)) {
 		if (xi.interface == 0)
 			return 0;
 		else
-			cvmx_dprintf("Warning: cvmx_qlm_interface: Invalid interface %d\n", xi.interface);
+			cvmx_dprintf
+			    ("Warning: cvmx_qlm_interface: Invalid interface %d\n",
+			     xi.interface);
 	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
 		cvmx_bgxx_cmr_global_config_t gconfig;
 		cvmx_gserx_phy_ctl_t phy_ctl;
@@ -183,32 +148,42 @@ int cvmx_qlm_interface(int xiface)
 
 		if (xi.interface < 6) {
 			if (xi.interface < 2) {
-				gconfig.u64 = cvmx_read_csr_node(xi.node, CVMX_BGXX_CMR_GLOBAL_CONFIG(xi.interface));
+				gconfig.u64 =
+				    cvmx_read_csr_node(xi.node,
+						       CVMX_BGXX_CMR_GLOBAL_CONFIG
+						       (xi.interface));
 				if (gconfig.s.pmux_sds_sel)
-					qlm = xi.interface + 2; /* QLM 2 or 3 */
+					qlm = xi.interface + 2;	/* QLM 2 or 3 */
 				else
-					qlm = xi.interface; /* QLM 0 or 1 */
+					qlm = xi.interface;	/* QLM 0 or 1 */
 			} else
-				qlm = xi.interface + 2; /* QLM 4-7 */
+				qlm = xi.interface + 2;	/* QLM 4-7 */
 
 			/* make sure the QLM is powered up and out of reset */
-			phy_ctl.u64 = cvmx_read_csr_node(xi.node, CVMX_GSERX_PHY_CTL(qlm));
+			phy_ctl.u64 =
+			    cvmx_read_csr_node(xi.node,
+					       CVMX_GSERX_PHY_CTL(qlm));
 			if (phy_ctl.s.phy_pd || phy_ctl.s.phy_reset)
 				return -1;
-			gserx_cfg.u64 = cvmx_read_csr_node(xi.node, CVMX_GSERX_CFG(qlm));
+			gserx_cfg.u64 =
+			    cvmx_read_csr_node(xi.node, CVMX_GSERX_CFG(qlm));
 			if (gserx_cfg.s.bgx)
 				return qlm;
 			else
 				return -1;
-		} else if (xi.interface <= 7) { /* ILK */
+		} else if (xi.interface <= 7) {	/* ILK */
 			int qlm;
 			for (qlm = 4; qlm < 8; qlm++) {
 				/* Make sure the QLM is powered and out of reset */
-				phy_ctl.u64 = cvmx_read_csr_node(xi.node, CVMX_GSERX_PHY_CTL(qlm));
+				phy_ctl.u64 =
+				    cvmx_read_csr_node(xi.node,
+						       CVMX_GSERX_PHY_CTL(qlm));
 				if (phy_ctl.s.phy_pd || phy_ctl.s.phy_reset)
 					continue;
 				/* Make sure the QLM is in ILK mode */
-				gserx_cfg.u64 = cvmx_read_csr_node(xi.node, CVMX_GSERX_CFG(qlm));
+				gserx_cfg.u64 =
+				    cvmx_read_csr_node(xi.node,
+						       CVMX_GSERX_CFG(qlm));
 				if (gserx_cfg.s.ila)
 					return qlm;
 			}
@@ -251,9 +226,9 @@ int cvmx_qlm_interface(int xiface)
 /**
  * Return number of lanes for a given qlm
  *
- * @param qlm    QLM to examine
+ * @qlm:    QLM to examine
  *
- * @return  Number of lanes
+ * Returns  Number of lanes
  */
 int cvmx_qlm_get_lanes(int qlm)
 {
@@ -268,7 +243,7 @@ int cvmx_qlm_get_lanes(int qlm)
 /**
  * Get the QLM JTAG fields based on Octeon model on the supported chips.
  *
- * @return  qlm_jtag_field_t structure
+ * Returns  qlm_jtag_field_t structure
  */
 const __cvmx_qlm_jtag_field_t *cvmx_qlm_jtag_get_field(void)
 {
@@ -297,7 +272,7 @@ const __cvmx_qlm_jtag_field_t *cvmx_qlm_jtag_get_field(void)
  * Get the QLM JTAG length by going through qlm_jtag_field for each
  * Octeon model that is supported
  *
- * @return return the length.
+ * Returns return the length.
  */
 int cvmx_qlm_jtag_get_length(void)
 {
@@ -328,48 +303,40 @@ void cvmx_qlm_init(void)
 	if (OCTEON_IS_OCTEON3())
 		return;
 
-#ifndef CVMX_BUILD_FOR_LINUX_HOST
 	/* Skip actual JTAG accesses on simulator */
 	if (cvmx_sysinfo_get()->board_type == CVMX_BOARD_TYPE_SIM)
 		return;
-#endif
 
 	qlm_jtag_length = cvmx_qlm_jtag_get_length();
 
-	if (sizeof(uint32_t) * qlm_jtag_length > (int)sizeof(__cvmx_qlm_jtag_xor_ref[0]) * 8) {
-		cvmx_dprintf("ERROR: cvmx_qlm_init: JTAG chain larger than XOR ref size\n");
+	if (sizeof(uint32_t) * qlm_jtag_length >
+	    (int)sizeof(__cvmx_qlm_jtag_xor_ref[0]) * 8) {
+		cvmx_dprintf
+		    ("ERROR: cvmx_qlm_init: JTAG chain larger than XOR ref size\n");
 		return;
 	}
 
 	/* No need to initialize the initial JTAG state if cvmx_qlm_jtag
 	   named block is already created. */
 	if ((desc = cvmx_bootmem_find_named_block(qlm_jtag_name)) != NULL) {
-#ifdef CVMX_BUILD_FOR_LINUX_HOST
-		char buffer[qlm_jtag_size];
-
-		octeon_remote_read_mem(buffer, desc->base_addr, qlm_jtag_size);
-		memcpy(__cvmx_qlm_jtag_xor_ref, buffer, qlm_jtag_size);
-#else
 		__cvmx_qlm_jtag_xor_ref = cvmx_phys_to_ptr(desc->base_addr);
-#endif
 		/* Initialize the internal JTAG */
 		cvmx_helper_qlm_jtag_init();
 		return;
 	}
 
 	/* Create named block to store the initial JTAG state. */
-	qlm_base = cvmx_bootmem_phy_named_block_alloc(qlm_jtag_size,
-		0, 1ull<<29, 128,	/* KSEG0 addresable */
-		qlm_jtag_name,
-		CVMX_BOOTMEM_FLAG_END_ALLOC);
+	qlm_base = cvmx_bootmem_phy_named_block_alloc(qlm_jtag_size, 0, 1ull << 29, 128,	/* KSEG0 addresable */
+						      qlm_jtag_name,
+						      CVMX_BOOTMEM_FLAG_END_ALLOC);
 
 	if (qlm_base == -1ull) {
-		cvmx_dprintf("ERROR: cvmx_qlm_init: Error in creating %s named block\n", qlm_jtag_name);
+		cvmx_dprintf
+		    ("ERROR: cvmx_qlm_init: Error in creating %s named block\n",
+		     qlm_jtag_name);
 		return;
 	}
-#ifndef CVMX_BUILD_FOR_LINUX_HOST
 	__cvmx_qlm_jtag_xor_ref = cvmx_phys_to_ptr(qlm_base);
-#endif
 	memset(__cvmx_qlm_jtag_xor_ref, 0, qlm_jtag_size);
 
 	/* Initialize the internal JTAG */
@@ -381,7 +348,8 @@ void cvmx_qlm_init(void)
 		int num_lanes = cvmx_qlm_get_lanes(qlm);
 		/* Shift all zeros in the chain to make sure all fields are at
 		   reset defaults */
-		cvmx_helper_qlm_jtag_shift_zeros(qlm, qlm_jtag_length * num_lanes);
+		cvmx_helper_qlm_jtag_shift_zeros(qlm,
+						 qlm_jtag_length * num_lanes);
 		cvmx_helper_qlm_jtag_update(qlm);
 
 		/* Capture the reset defaults */
@@ -389,18 +357,9 @@ void cvmx_qlm_init(void)
 		/* Save the reset defaults. This will shift out too much data, but
 		   the extra zeros don't hurt anything */
 		for (i = 0; i < CVMX_QLM_JTAG_UINT32; i++)
-			__cvmx_qlm_jtag_xor_ref[qlm][i] = cvmx_helper_qlm_jtag_shift(qlm, 32, 0);
+			__cvmx_qlm_jtag_xor_ref[qlm][i] =
+			    cvmx_helper_qlm_jtag_shift(qlm, 32, 0);
 	}
-
-#ifdef CVMX_BUILD_FOR_LINUX_HOST
-	/* Update the initial state for oct-remote utils. */
-	{
-		char buffer[qlm_jtag_size];
-
-		memcpy(buffer, &__cvmx_qlm_jtag_xor_ref, qlm_jtag_size);
-		octeon_remote_write_mem(qlm_base, buffer, qlm_jtag_size);
-	}
-#endif
 
 	/* Apply all QLM errata workarounds. */
 	__cvmx_qlm_speed_tweak();
@@ -410,9 +369,9 @@ void cvmx_qlm_init(void)
 /**
  * Lookup the bit information for a JTAG field name
  *
- * @param name   Name to lookup
+ * @name:   Name to lookup
  *
- * @return Field info, or NULL on failure
+ * Returns Field info, or NULL on failure
  */
 static const __cvmx_qlm_jtag_field_t *__cvmx_qlm_lookup_field(const char *name)
 {
@@ -429,11 +388,11 @@ static const __cvmx_qlm_jtag_field_t *__cvmx_qlm_lookup_field(const char *name)
 /**
  * Get a field in a QLM JTAG chain
  *
- * @param qlm    QLM to get
- * @param lane   Lane in QLM to get
- * @param name   String name of field
+ * @qlm:    QLM to get
+ * @lane:   Lane in QLM to get
+ * @name:   String name of field
  *
- * @return JTAG field value
+ * Returns JTAG field value
  */
 uint64_t cvmx_qlm_jtag_get(int qlm, int lane, const char *name)
 {
@@ -453,16 +412,18 @@ uint64_t cvmx_qlm_jtag_get(int qlm, int lane, const char *name)
 		cvmx_helper_qlm_jtag_shift_zeros(qlm, qlm_jtag_length * (num_lanes - 1 - lane));	/* Shift to the start of the field */
 	cvmx_helper_qlm_jtag_shift_zeros(qlm, field->start_bit);
 	/* Shift out the value and return it */
-	return cvmx_helper_qlm_jtag_shift(qlm, field->stop_bit - field->start_bit + 1, 0);
+	return cvmx_helper_qlm_jtag_shift(qlm,
+					  field->stop_bit - field->start_bit +
+					  1, 0);
 }
 
 /**
  * Set a field in a QLM JTAG chain
  *
- * @param qlm    QLM to set
- * @param lane   Lane in QLM to set, or -1 for all lanes
- * @param name   String name of field
- * @param value  Value of the field
+ * @qlm:    QLM to set
+ * @lane:   Lane in QLM to set, or -1 for all lanes
+ * @name:   String name of field
+ * @value:  Value of the field
  */
 void cvmx_qlm_jtag_set(int qlm, int lane, const char *name, uint64_t value)
 {
@@ -496,7 +457,8 @@ void cvmx_qlm_jtag_set(int qlm, int lane, const char *name, uint64_t value)
 		else
 			adj_lanes = (num_lanes - 1 - l) * qlm_jtag_length;
 
-		for (bits = field->start_bit + adj_lanes; bits <= field->stop_bit + adj_lanes; bits++) {
+		for (bits = field->start_bit + adj_lanes;
+		     bits <= field->stop_bit + adj_lanes; bits++) {
 			if (new_value & 1)
 				shift_values[bits / 32] |= 1 << (bits & 31);
 			else
@@ -507,7 +469,9 @@ void cvmx_qlm_jtag_set(int qlm, int lane, const char *name, uint64_t value)
 
 	/* Shift out data and xor with reference */
 	while (bits < total_length) {
-		uint32_t shift = shift_values[bits / 32] ^ __cvmx_qlm_jtag_xor_ref[qlm][bits / 32];
+		uint32_t shift =
+		    shift_values[bits /
+				 32] ^ __cvmx_qlm_jtag_xor_ref[qlm][bits / 32];
 		int width = total_length - bits;
 		if (width > 32)
 			width = 32;
@@ -541,7 +505,9 @@ void __cvmx_qlm_speed_tweak(void)
 			/* This workaround only applies to QLMs running at 6.25Ghz */
 			if (cvmx_qlm_get_gbaud_mhz(qlm) == 6250) {
 #ifdef CVMX_QLM_DUMP_STATE
-				cvmx_dprintf("%s:%d: QLM%d: Applying workaround for Errata G-16467\n", __func__, __LINE__, qlm);
+				cvmx_dprintf
+				    ("%s:%d: QLM%d: Applying workaround for Errata G-16467\n",
+				     __func__, __LINE__, qlm);
 				cvmx_qlm_display_registers(qlm);
 				cvmx_dprintf("\n");
 #endif
@@ -550,19 +516,27 @@ void __cvmx_qlm_speed_tweak(void)
 				cvmx_qlm_jtag_set(qlm, -1, "cfg_rst_n_set", 0);
 				cvmx_qlm_jtag_set(qlm, -1, "cfg_rst_n_clr", 1);
 				/* Forcfe TX to be idle */
-				cvmx_qlm_jtag_set(qlm, -1, "cfg_tx_idle_clr", 0);
-				cvmx_qlm_jtag_set(qlm, -1, "cfg_tx_idle_set", 1);
+				cvmx_qlm_jtag_set(qlm, -1, "cfg_tx_idle_clr",
+						  0);
+				cvmx_qlm_jtag_set(qlm, -1, "cfg_tx_idle_set",
+						  1);
 				if (OCTEON_IS_MODEL(OCTEON_CN68XX_PASS2_0)) {
-					ir50dac = cvmx_qlm_jtag_get(qlm, 0, "ir50dac");
+					ir50dac =
+					    cvmx_qlm_jtag_get(qlm, 0,
+							      "ir50dac");
 					while (++ir50dac <= 31)
-						cvmx_qlm_jtag_set(qlm, -1, "ir50dac", ir50dac);
+						cvmx_qlm_jtag_set(qlm, -1,
+								  "ir50dac",
+								  ir50dac);
 				}
 				cvmx_qlm_jtag_set(qlm, -1, "div4_byp", 0);
 				cvmx_qlm_jtag_set(qlm, -1, "clkf_byp", 16);
 				cvmx_qlm_jtag_set(qlm, -1, "serdes_pll_byp", 1);
 				cvmx_qlm_jtag_set(qlm, -1, "spdsel_byp", 1);
 #ifdef CVMX_QLM_DUMP_STATE
-				cvmx_dprintf("%s:%d: QLM%d: Done applying workaround for Errata G-16467\n", __func__, __LINE__, qlm);
+				cvmx_dprintf
+				    ("%s:%d: QLM%d: Done applying workaround for Errata G-16467\n",
+				     __func__, __LINE__, qlm);
 				cvmx_qlm_display_registers(qlm);
 				cvmx_dprintf("\n\n");
 #endif
@@ -570,47 +544,61 @@ void __cvmx_qlm_speed_tweak(void)
 			}
 		}
 
-#ifndef CVMX_BUILD_FOR_LINUX_HOST
 		/* These QLM tuning parameters are specific to EBB6800
 		   eval boards using Cavium QLM cables. These should be
 		   removed or tunned based on customer boards. */
 		if (cvmx_sysinfo_get()->board_type == CVMX_BOARD_TYPE_EBB6800) {
 			for (qlm = 0; qlm < num_qlms; qlm++) {
 #ifdef CVMX_QLM_DUMP_STATE
-				cvmx_dprintf("Setting tunning parameters for QLM%d\n", qlm);
+				cvmx_dprintf
+				    ("Setting tunning parameters for QLM%d\n",
+				     qlm);
 #endif
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hs_ls_byp", 12);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hf_byp", 12);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_ls_byp", 12);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_byp", 12);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hs_ls_byp",
+						  12);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hf_byp",
+						  12);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_ls_byp",
+						  12);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_byp",
+						  12);
 				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_byp", 15);
-				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_ls_byp", 15);
-				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_ls_byp", 15);
+				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_ls_byp",
+						  15);
+				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_ls_byp",
+						  15);
 				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_byp", 15);
 				cvmx_qlm_jtag_set(qlm, -1, "rx_cap_gen2", 0);
 				cvmx_qlm_jtag_set(qlm, -1, "rx_eq_gen2", 11);
 				cvmx_qlm_jtag_set(qlm, -1, "serdes_tx_byp", 1);
 			}
-		}
-		else if (cvmx_sysinfo_get()->board_type == CVMX_BOARD_TYPE_NIC68_4) {
+		} else if (cvmx_sysinfo_get()->board_type ==
+			   CVMX_BOARD_TYPE_NIC68_4) {
 			for (qlm = 0; qlm < num_qlms; qlm++) {
 #ifdef CVMX_QLM_DUMP_STATE
-				cvmx_dprintf("Setting tunning parameters for QLM%d\n", qlm);
+				cvmx_dprintf
+				    ("Setting tunning parameters for QLM%d\n",
+				     qlm);
 #endif
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hs_ls_byp", 30);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hf_byp", 30);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_ls_byp", 30);
-				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_byp", 30);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hs_ls_byp",
+						  30);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_hf_byp",
+						  30);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_ls_byp",
+						  30);
+				cvmx_qlm_jtag_set(qlm, -1, "biasdrv_lf_byp",
+						  30);
 				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_byp", 0);
-				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_ls_byp", 0);
-				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_ls_byp", 0);
+				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_hf_ls_byp",
+						  0);
+				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_ls_byp",
+						  0);
 				cvmx_qlm_jtag_set(qlm, -1, "tcoeff_lf_byp", 0);
 				cvmx_qlm_jtag_set(qlm, -1, "rx_cap_gen2", 1);
 				cvmx_qlm_jtag_set(qlm, -1, "rx_eq_gen2", 8);
 				cvmx_qlm_jtag_set(qlm, -1, "serdes_tx_byp", 1);
 			}
 		}
-#endif
 	}
 
 	/* G-16094 QLM Gen2 Equalizer Default Setting Change */
@@ -622,7 +610,11 @@ void __cvmx_qlm_speed_tweak(void)
 			qlm_cfg.u64 = cvmx_read_csr(CVMX_MIO_QLMX_CFG(qlm));
 
 			/* If the QLM is at 6.25Ghz or 5Ghz then program JTAG */
-			if ((qlm_cfg.s.qlm_spd == 5) || (qlm_cfg.s.qlm_spd == 12) || (qlm_cfg.s.qlm_spd == 0) || (qlm_cfg.s.qlm_spd == 6) || (qlm_cfg.s.qlm_spd == 11)) {
+			if ((qlm_cfg.s.qlm_spd == 5)
+			    || (qlm_cfg.s.qlm_spd == 12)
+			    || (qlm_cfg.s.qlm_spd == 0)
+			    || (qlm_cfg.s.qlm_spd == 6)
+			    || (qlm_cfg.s.qlm_spd == 11)) {
 				cvmx_qlm_jtag_set(qlm, -1, "rx_cap_gen2", 0x1);
 				cvmx_qlm_jtag_set(qlm, -1, "rx_eq_gen2", 0x8);
 			}
@@ -664,10 +656,10 @@ void __cvmx_qlm_pcie_cfg_rxd_set_tweak(int qlm, int lane)
 /**
  * Get the speed (Gbaud) of the QLM in Mhz for a given node.
  *
- * @param node   node of the QLM
- * @param qlm    QLM to examine
+ * @node:   node of the QLM
+ * @qlm:    QLM to examine
  *
- * @return Speed in Mhz
+ * Returns Speed in Mhz
  */
 int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm)
 {
@@ -686,34 +678,37 @@ int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm)
 	if (cfg.s.pcie) {
 		int pem = 0;
 		cvmx_pemx_cfg_t pemx_cfg;
-		switch(qlm) {
-		case 0: /* Either PEM0 x4 of PEM0 x8 */
+		switch (qlm) {
+		case 0:	/* Either PEM0 x4 of PEM0 x8 */
 			pem = 0;
 			break;
-		case 1: /* Either PEM0 x4 of PEM1 x4 */
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(0));
+		case 1:	/* Either PEM0 x4 of PEM1 x4 */
+			pemx_cfg.u64 =
+			    cvmx_read_csr_node(node, CVMX_PEMX_CFG(0));
 			if (pemx_cfg.cn78xx.lanes8)
 				pem = 0;
 			else
 				pem = 1;
 			break;
-		case 2: /* Either PEM2 x4 of PEM2 x8 */
+		case 2:	/* Either PEM2 x4 of PEM2 x8 */
 			pem = 2;
 			break;
-		case 3: /* Either PEM2 x8 of PEM3 x4 or x8 */
+		case 3:	/* Either PEM2 x8 of PEM3 x4 or x8 */
 			/* Can be last 4 lanes of PEM2 */
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
+			pemx_cfg.u64 =
+			    cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
 			if (pemx_cfg.cn78xx.lanes8)
 				pem = 2;
 			else {
-				pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
 				if (pemx_cfg.cn78xx.lanes8)
 					pem = 3;
 				else
 					pem = 2;
 			}
 			break;
-		case 4: /* Either PEM3 x8 of PEM3 x4 */
+		case 4:	/* Either PEM3 x8 of PEM3 x4 */
 			pem = 3;
 			break;
 		default:
@@ -721,18 +716,19 @@ int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm)
 			break;
 		}
 		pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(pem));
-		switch(pemx_cfg.s.md) {
-			case 0: /* Gen1 */
-				return 2500;
-			case 1: /* Gen2 */
-				return 5000;
-			case 2: /* Gen3 */
-				return 8000;
-			default:
-				return 0;
+		switch (pemx_cfg.s.md) {
+		case 0:	/* Gen1 */
+			return 2500;
+		case 1:	/* Gen2 */
+			return 5000;
+		case 2:	/* Gen3 */
+			return 8000;
+		default:
+			return 0;
 		}
 	} else {
-		lane_mode.u64 = cvmx_read_csr_node(node, CVMX_GSERX_LANE_MODE(qlm));
+		lane_mode.u64 =
+		    cvmx_read_csr_node(node, CVMX_GSERX_LANE_MODE(qlm));
 		switch (lane_mode.s.lmode) {
 		case R_25G_REFCLK100:
 			return 2500;
@@ -767,9 +763,9 @@ int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm)
 /**
  * Get the speed (Gbaud) of the QLM in Mhz.
  *
- * @param qlm    QLM to examine
+ * @qlm:    QLM to examine
  *
- * @return Speed in Mhz
+ * Returns Speed in Mhz
  */
 int cvmx_qlm_get_gbaud_mhz(int qlm)
 {
@@ -813,10 +809,14 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 			}
 		} else {
 			cvmx_sriox_status_reg_t status_reg;
-			status_reg.u64 = cvmx_read_csr(CVMX_SRIOX_STATUS_REG(qlm));
+			status_reg.u64 =
+			    cvmx_read_csr(CVMX_SRIOX_STATUS_REG(qlm));
 			if (status_reg.s.srio) {
-				cvmx_sriomaintx_port_0_ctl2_t sriomaintx_port_0_ctl2;
-				sriomaintx_port_0_ctl2.u32 = cvmx_read_csr(CVMX_SRIOMAINTX_PORT_0_CTL2(qlm));
+				cvmx_sriomaintx_port_0_ctl2_t
+				    sriomaintx_port_0_ctl2;
+				sriomaintx_port_0_ctl2.u32 =
+				    cvmx_read_csr(CVMX_SRIOMAINTX_PORT_0_CTL2
+						  (qlm));
 				switch (sriomaintx_port_0_ctl2.s.sel_baud) {
 				case 1:
 					return 1250;	/* 1.25  Gbaud */
@@ -833,7 +833,8 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 				}
 			} else {
 				cvmx_pciercx_cfg032_t pciercx_cfg032;
-				pciercx_cfg032.u32 = cvmx_read_csr(CVMX_PCIERCX_CFG032(qlm));
+				pciercx_cfg032.u32 =
+				    cvmx_read_csr(CVMX_PCIERCX_CFG032(qlm));
 				switch (pciercx_cfg032.s.ls) {
 				case 1:
 					return 2500;
@@ -843,11 +844,18 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 					return 8000;
 				default:
 					{
-						cvmx_mio_rst_boot_t mio_rst_boot;
-						mio_rst_boot.u64 = cvmx_read_csr(CVMX_MIO_RST_BOOT);
-						if ((qlm == 0) && mio_rst_boot.s.qlm0_spd == 0xf)
+						cvmx_mio_rst_boot_t
+						    mio_rst_boot;
+						mio_rst_boot.u64 =
+						    cvmx_read_csr
+						    (CVMX_MIO_RST_BOOT);
+						if ((qlm == 0)
+						    && mio_rst_boot.s.
+						    qlm0_spd == 0xf)
 							return 0;
-						if ((qlm == 1) && mio_rst_boot.s.qlm1_spd == 0xf)
+						if ((qlm == 1)
+						    && mio_rst_boot.s.
+						    qlm1_spd == 0xf)
 							return 0;
 						return 5000;	/* Best guess I can make */
 					}
@@ -900,7 +908,8 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 		/* Measure the reference clock */
 		meas_refclock = cvmx_qlm_measure_clock(qlm);
 		/* Multiply to get the final frequency */
-		mpll_multiplier.u64 = cvmx_read_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0));
+		mpll_multiplier.u64 =
+		    cvmx_read_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0));
 		freq = meas_refclock * mpll_multiplier.s.mpll_multiplier;
 		freq = (freq + 500000) / 1000000;
 
@@ -944,19 +953,18 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 
 static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 {
-#ifndef CVMX_BUILD_FOR_LINUX_HOST
 	if (cvmx_sysinfo_get()->board_type != CVMX_BOARD_TYPE_SIM) {
 		union cvmx_gserx_dlmx_phy_reset phy_reset;
 
-		phy_reset.u64 = cvmx_read_csr(CVMX_GSERX_DLMX_PHY_RESET(qlm, 0));
+		phy_reset.u64 =
+		    cvmx_read_csr(CVMX_GSERX_DLMX_PHY_RESET(qlm, 0));
 		if (phy_reset.s.phy_reset)
 			return CVMX_QLM_MODE_DISABLED;
 
 	}
-#endif
 
-	switch(qlm) {
-	case 0: /* DLM0/DLM1 - SGMII/QSGMII/RXAUI */
+	switch (qlm) {
+	case 0:		/* DLM0/DLM1 - SGMII/QSGMII/RXAUI */
 		{
 			union cvmx_gmxx_inf_mode inf_mode0, inf_mode1;
 
@@ -996,7 +1004,7 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 				}
 			}
 		}
-	case 1:  /* Sata / pem0 */
+	case 1:		/* Sata / pem0 */
 		{
 			union cvmx_gserx_sata_cfg sata_cfg;
 			union cvmx_pemx_cfg pem0_cfg;
@@ -1004,7 +1012,7 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 			sata_cfg.u64 = cvmx_read_csr(CVMX_GSERX_SATA_CFG(0));
 			pem0_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(0));
 
-			switch(pem0_cfg.cn70xx.md) {
+			switch (pem0_cfg.cn70xx.md) {
 			case CVMX_PEM_MD_GEN2_2LANE:
 			case CVMX_PEM_MD_GEN1_2LANE:
 				return CVMX_QLM_MODE_PCIE_1X2;
@@ -1045,7 +1053,8 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 			if (pem1_cfg.cn70xx.md == CVMX_PEM_MD_GEN2_1LANE
 			    || pem1_cfg.cn70xx.md == CVMX_PEM_MD_GEN1_1LANE) {
 				if (pem2_cfg.cn70xx.md == CVMX_PEM_MD_GEN2_1LANE
-				    || pem2_cfg.cn70xx.md == CVMX_PEM_MD_GEN1_1LANE) {
+				    || pem2_cfg.cn70xx.md ==
+				    CVMX_PEM_MD_GEN1_1LANE) {
 					return CVMX_QLM_MODE_PCIE_2X1;
 				} else
 					return CVMX_QLM_MODE_PCIE_1X1;
@@ -1065,85 +1074,89 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn70xx(int qlm)
 /*
  * Get the DLM mode for the interface based on the interface type.
  *
- * @param interface_type   0 - SGMII/QSGMII/RXAUI interface
+ * @interface_type:   0 - SGMII/QSGMII/RXAUI interface
  *                         1 - PCIe
  *                         2 - SATA
- * @param interface        interface to use
- * @return  the qlm mode the interface is
+ * @interface:        interface to use
+ * Returns  the qlm mode the interface is
  */
 enum cvmx_qlm_mode cvmx_qlm_get_dlm_mode(int interface_type, int interface)
 {
 	switch (interface_type) {
-	case 0:  /* SGMII/QSGMII/RXAUI */
-	{
-		enum cvmx_qlm_mode qlm_mode = __cvmx_qlm_get_mode_cn70xx(0);
-		switch (interface) {
-		case 0:
-			switch (qlm_mode) {
-			case CVMX_QLM_MODE_SGMII_SGMII:
-			case CVMX_QLM_MODE_SGMII_DISABLED:
-			case CVMX_QLM_MODE_SGMII_QSGMII:
-				return CVMX_QLM_MODE_SGMII;
-			case CVMX_QLM_MODE_QSGMII_QSGMII:
-			case CVMX_QLM_MODE_QSGMII_DISABLED:
-			case CVMX_QLM_MODE_QSGMII_SGMII:
-				return CVMX_QLM_MODE_QSGMII;
-			case CVMX_QLM_MODE_RXAUI_1X2:
-				return CVMX_QLM_MODE_RXAUI;
+	case 0:		/* SGMII/QSGMII/RXAUI */
+		{
+			enum cvmx_qlm_mode qlm_mode =
+			    __cvmx_qlm_get_mode_cn70xx(0);
+			switch (interface) {
+			case 0:
+				switch (qlm_mode) {
+				case CVMX_QLM_MODE_SGMII_SGMII:
+				case CVMX_QLM_MODE_SGMII_DISABLED:
+				case CVMX_QLM_MODE_SGMII_QSGMII:
+					return CVMX_QLM_MODE_SGMII;
+				case CVMX_QLM_MODE_QSGMII_QSGMII:
+				case CVMX_QLM_MODE_QSGMII_DISABLED:
+				case CVMX_QLM_MODE_QSGMII_SGMII:
+					return CVMX_QLM_MODE_QSGMII;
+				case CVMX_QLM_MODE_RXAUI_1X2:
+					return CVMX_QLM_MODE_RXAUI;
+				default:
+					return CVMX_QLM_MODE_DISABLED;
+				}
+			case 1:
+				switch (qlm_mode) {
+				case CVMX_QLM_MODE_SGMII_SGMII:
+				case CVMX_QLM_MODE_DISABLED_SGMII:
+				case CVMX_QLM_MODE_QSGMII_SGMII:
+					return CVMX_QLM_MODE_SGMII;
+				case CVMX_QLM_MODE_QSGMII_QSGMII:
+				case CVMX_QLM_MODE_DISABLED_QSGMII:
+				case CVMX_QLM_MODE_SGMII_QSGMII:
+					return CVMX_QLM_MODE_QSGMII;
+				default:
+					return CVMX_QLM_MODE_DISABLED;
+				}
+			default:
+				return qlm_mode;
+			}
+		}
+	case 1:		/* PCIe */
+		{
+			enum cvmx_qlm_mode qlm_mode1 =
+			    __cvmx_qlm_get_mode_cn70xx(1);
+			enum cvmx_qlm_mode qlm_mode2 =
+			    __cvmx_qlm_get_mode_cn70xx(2);
+
+			switch (interface) {
+			case 0:	/* PCIe0 can be DLM1 with 1, 2 or 4 lanes */
+				return qlm_mode1;
+			case 1:	/* PCIe1 can be in DLM1 1 lane(1), DLM2 1 lane(0) or 2 lanes(0-1) */
+				if (qlm_mode1 == CVMX_QLM_MODE_PCIE_2X1)
+					return CVMX_QLM_MODE_PCIE_2X1;
+				else if (qlm_mode2 == CVMX_QLM_MODE_PCIE_1X2 ||
+					 qlm_mode2 == CVMX_QLM_MODE_PCIE_2X1)
+					return qlm_mode2;
+				else
+					return CVMX_QLM_MODE_DISABLED;
+			case 2:	/* PCIe2 can be DLM2 1 lanes(1) */
+				if (qlm_mode2 == CVMX_QLM_MODE_PCIE_2X1)
+					return qlm_mode2;
+				else
+					return CVMX_QLM_MODE_DISABLED;
 			default:
 				return CVMX_QLM_MODE_DISABLED;
 			}
-		case 1:
-			switch (qlm_mode) {
-			case CVMX_QLM_MODE_SGMII_SGMII:
-			case CVMX_QLM_MODE_DISABLED_SGMII:
-			case CVMX_QLM_MODE_QSGMII_SGMII:
-				return CVMX_QLM_MODE_SGMII;
-			case CVMX_QLM_MODE_QSGMII_QSGMII:
-			case CVMX_QLM_MODE_DISABLED_QSGMII:
-			case CVMX_QLM_MODE_SGMII_QSGMII:
-				return CVMX_QLM_MODE_QSGMII;
-			default:
-				return CVMX_QLM_MODE_DISABLED;
-			}
-		default:
-			return qlm_mode;
 		}
-	}
-	case 1:  /* PCIe */
-	{
-		enum cvmx_qlm_mode qlm_mode1 = __cvmx_qlm_get_mode_cn70xx(1);
-		enum cvmx_qlm_mode qlm_mode2 = __cvmx_qlm_get_mode_cn70xx(2);
+	case 2:		/* SATA */
+		{
+			enum cvmx_qlm_mode qlm_mode =
+			    __cvmx_qlm_get_mode_cn70xx(2);
 
-		switch (interface) {
-		case 0: /* PCIe0 can be DLM1 with 1, 2 or 4 lanes */
-			return qlm_mode1;
-		case 1: /* PCIe1 can be in DLM1 1 lane(1), DLM2 1 lane(0) or 2 lanes(0-1) */
-			if (qlm_mode1 == CVMX_QLM_MODE_PCIE_2X1)
-				return CVMX_QLM_MODE_PCIE_2X1;
-			else if (qlm_mode2 == CVMX_QLM_MODE_PCIE_1X2 ||
-				 qlm_mode2 == CVMX_QLM_MODE_PCIE_2X1)
-				return qlm_mode2;
+			if (qlm_mode == CVMX_QLM_MODE_SATA_2X1)
+				return CVMX_QLM_MODE_SATA_2X1;
 			else
 				return CVMX_QLM_MODE_DISABLED;
-		case 2: /* PCIe2 can be DLM2 1 lanes(1) */
-			if (qlm_mode2 == CVMX_QLM_MODE_PCIE_2X1)
-				return qlm_mode2;
-			else
-				return CVMX_QLM_MODE_DISABLED;
-		default:
-			return CVMX_QLM_MODE_DISABLED;
 		}
-	}
-	case 2:  /* SATA */
-	{
-		enum cvmx_qlm_mode qlm_mode = __cvmx_qlm_get_mode_cn70xx(2);
-
-		if (qlm_mode == CVMX_QLM_MODE_SATA_2X1)
-			return CVMX_QLM_MODE_SATA_2X1;
-		else
-			return CVMX_QLM_MODE_DISABLED;
-	}
 	default:
 		return CVMX_QLM_MODE_DISABLED;
 	}
@@ -1199,7 +1212,7 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
 		case 0x7:	/* SRIO 4x1 long */
 			if (!OCTEON_IS_MODEL(OCTEON_CN66XX_PASS1_0))
 				return CVMX_QLM_MODE_SRIO_4X1;
-		/* fallthrough */
+			/* fallthrough */
 		default:
 			return CVMX_QLM_MODE_DISABLED;
 		}
@@ -1291,9 +1304,9 @@ static enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn6xxx(int qlm)
  * @INTERNAL
  * Decrement the MPLL Multiplier for the DLM as per Errata G-20669
  *
- * @param qlm            DLM to configure
- * @param baud_mhz       Speed of the DLM configured at
- * @param old_multiplier MPLL_MULTIPLIER value to decrement
+ * @qlm:            DLM to configure
+ * @baud_mhz:       Speed of the DLM configured at
+ * @old_multiplier: MPLL_MULTIPLIER value to decrement
  */
 void __cvmx_qlm_set_mult(int qlm, int baud_mhz, int old_multiplier)
 {
@@ -1312,28 +1325,21 @@ void __cvmx_qlm_set_mult(int qlm, int baud_mhz, int old_multiplier)
 		return;
 	}
 
-	mult = (uint64_t)baud_mhz * 1000000 + (meas_refclock/2);
+	mult = (uint64_t) baud_mhz *1000000 + (meas_refclock / 2);
 	mult /= meas_refclock;
 
-#ifdef CVMX_BUILD_FOR_UBOOT
-	/* For simulator just write the multiplier directly, to make it
-	   faster to boot. */
-	if (gd->arch.board_desc.board_type == CVMX_BOARD_TYPE_SIM) {
-		cvmx_write_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0), mult);
-		return;
-	}
-#endif
-
 	/* 6. Decrease MPLL_MULTIPLIER by one continually until it reaches
-	     the desired long-term setting, ensuring that each MPLL_MULTIPLIER
-	     value is constant for at least 1 msec before changing to the next
-	     value. The desired long-term setting is as indicated in HRM tables
-	     21-1, 21-2, and 21-3. This is not required with the HRM
-	     sequence. */
+	   the desired long-term setting, ensuring that each MPLL_MULTIPLIER
+	   value is constant for at least 1 msec before changing to the next
+	   value. The desired long-term setting is as indicated in HRM tables
+	   21-1, 21-2, and 21-3. This is not required with the HRM
+	   sequence. */
 	do {
-		mpll_multiplier.u64 = cvmx_read_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0));
+		mpll_multiplier.u64 =
+		    cvmx_read_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0));
 		mpll_multiplier.s.mpll_multiplier = --old_multiplier;
-		cvmx_write_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0), mpll_multiplier.u64);
+		cvmx_write_csr(CVMX_GSERX_DLMX_MPLL_MULTIPLIER(qlm, 0),
+			       mpll_multiplier.u64);
 		/* Wait for 1 ms */
 		cvmx_wait_usec(1000);
 	} while (old_multiplier > (int)mult);
@@ -1342,15 +1348,10 @@ void __cvmx_qlm_set_mult(int qlm, int baud_mhz, int old_multiplier)
 enum cvmx_qlm_mode cvmx_qlm_get_mode_cn78xx(int node, int qlm)
 {
 	cvmx_gserx_cfg_t gserx_cfg;
-#ifdef CVMX_BUILD_FOR_UBOOT
-	int qlm_mode[2][9] = {
-		{-1, -1, -1, -1, -1, -1, -1, -1},
-		{-1, -1, -1, -1, -1, -1, -1, -1}};
-#else
 	static int qlm_mode[2][9] = {
 		{-1, -1, -1, -1, -1, -1, -1, -1},
-		{-1, -1, -1, -1, -1, -1, -1, -1}};
-#endif
+		{-1, -1, -1, -1, -1, -1, -1, -1}
+	};
 
 	if (qlm >= 8)
 		return CVMX_QLM_MODE_OCI;
@@ -1361,52 +1362,57 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode_cn78xx(int node, int qlm)
 	gserx_cfg.u64 = cvmx_read_csr_node(node, CVMX_GSERX_CFG(qlm));
 	if (gserx_cfg.s.pcie) {
 		switch (qlm) {
-		case 0: /* Either PEM0 x4 or PEM0 x8 */
-		case 1: /* Either PEM0 x8 or PEM1 x4 */
-		{
-			cvmx_pemx_cfg_t pemx_cfg;
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(0));
-			if (pemx_cfg.cn78xx.lanes8)
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8; /* PEM0 x8 */
-			else
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;     /* PEM0 x4 */
-			break;
-		}
-		case 2: /* Either PEM2 x4 or PEM2 x8 */
-		{
-			cvmx_pemx_cfg_t pemx_cfg;
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
-			if (pemx_cfg.cn78xx.lanes8)
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;  /* PEM2 x8 */
-			else
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;      /* PEM2 x4 */
-			break;
-		}
-		case 3: /* Either PEM2 x8 or PEM3 x4 or PEM3 x8 */
-		{
-			cvmx_pemx_cfg_t pemx_cfg;
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
-			if (pemx_cfg.cn78xx.lanes8)
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;  /* PEM2 x8 */
+		case 0:	/* Either PEM0 x4 or PEM0 x8 */
+		case 1:	/* Either PEM0 x8 or PEM1 x4 */
+			{
+				cvmx_pemx_cfg_t pemx_cfg;
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(0));
+				if (pemx_cfg.cn78xx.lanes8)
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;	/* PEM0 x8 */
+				else
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;	/* PEM0 x4 */
+				break;
+			}
+		case 2:	/* Either PEM2 x4 or PEM2 x8 */
+			{
+				cvmx_pemx_cfg_t pemx_cfg;
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
+				if (pemx_cfg.cn78xx.lanes8)
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;	/* PEM2 x8 */
+				else
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;	/* PEM2 x4 */
+				break;
+			}
+		case 3:	/* Either PEM2 x8 or PEM3 x4 or PEM3 x8 */
+			{
+				cvmx_pemx_cfg_t pemx_cfg;
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(2));
+				if (pemx_cfg.cn78xx.lanes8)
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;	/* PEM2 x8 */
 
-			/* Can be first 4 lanes of PEM3 */
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
-			if (pemx_cfg.cn78xx.lanes8)
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;  /* PEM3 x8 */
-			else
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE; /* PEM2 x4 */
-			break;
-		}
-		case 4: /* Either PEM3 x8 or PEM3 x4 */
-		{
-			cvmx_pemx_cfg_t pemx_cfg;
-			pemx_cfg.u64 = cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
-			if (pemx_cfg.cn78xx.lanes8)
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8; /* PEM3 x8 */
-			else
-				qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE; /* PEM3 x4 */
-			break;
-		}
+				/* Can be first 4 lanes of PEM3 */
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
+				if (pemx_cfg.cn78xx.lanes8)
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;	/* PEM3 x8 */
+				else
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;	/* PEM2 x4 */
+				break;
+			}
+		case 4:	/* Either PEM3 x8 or PEM3 x4 */
+			{
+				cvmx_pemx_cfg_t pemx_cfg;
+				pemx_cfg.u64 =
+				    cvmx_read_csr_node(node, CVMX_PEMX_CFG(3));
+				if (pemx_cfg.cn78xx.lanes8)
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE_1X8;	/* PEM3 x8 */
+				else
+					qlm_mode[node][qlm] = CVMX_QLM_MODE_PCIE;	/* PEM3 x4 */
+				break;
+			}
 		default:
 			qlm_mode[node][qlm] = CVMX_QLM_MODE_DISABLED;
 			break;
@@ -1418,13 +1424,22 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode_cn78xx(int node, int qlm)
 		cvmx_bgxx_spux_br_pmd_control_t pmd_control;
 		int bgx = (qlm < 2) ? qlm : qlm - 2;
 
-		cmr_config.u64 = cvmx_read_csr_node(node, CVMX_BGXX_CMRX_CONFIG(0, bgx));
-		pmd_control.u64 = cvmx_read_csr_node(node, CVMX_BGXX_SPUX_BR_PMD_CONTROL(0, bgx));
+		cmr_config.u64 =
+		    cvmx_read_csr_node(node, CVMX_BGXX_CMRX_CONFIG(0, bgx));
+		pmd_control.u64 =
+		    cvmx_read_csr_node(node,
+				       CVMX_BGXX_SPUX_BR_PMD_CONTROL(0, bgx));
 
-		switch(cmr_config.s.lmac_type) {
-		case 0: qlm_mode[node][qlm] = CVMX_QLM_MODE_SGMII; break;
-		case 1:	qlm_mode[node][qlm] = CVMX_QLM_MODE_XAUI; break;
-		case 2:	qlm_mode[node][qlm] = CVMX_QLM_MODE_RXAUI; break;
+		switch (cmr_config.s.lmac_type) {
+		case 0:
+			qlm_mode[node][qlm] = CVMX_QLM_MODE_SGMII;
+			break;
+		case 1:
+			qlm_mode[node][qlm] = CVMX_QLM_MODE_XAUI;
+			break;
+		case 2:
+			qlm_mode[node][qlm] = CVMX_QLM_MODE_RXAUI;
+			break;
 		case 3:
 			/* Use training to determine if we're in 10GBASE-KR or XFI */
 			if (pmd_control.s.train_en)
@@ -1432,8 +1447,10 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode_cn78xx(int node, int qlm)
 			else
 				qlm_mode[node][qlm] = CVMX_QLM_MODE_XFI;
 			pmd_control.s.train_en = 0;
-			cvmx_write_csr_node(node, 
-				CVMX_BGXX_SPUX_BR_PMD_CONTROL(0, bgx), pmd_control.u64);
+			cvmx_write_csr_node(node,
+					    CVMX_BGXX_SPUX_BR_PMD_CONTROL(0,
+									  bgx),
+					    pmd_control.u64);
 			break;
 		case 4:
 			/* Use training to determine if we're in 10GBASE-KR or XFI */
@@ -1442,8 +1459,10 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode_cn78xx(int node, int qlm)
 			else
 				qlm_mode[node][qlm] = CVMX_QLM_MODE_XLAUI;
 			pmd_control.s.train_en = 0;
-			cvmx_write_csr_node(node, 
-				CVMX_BGXX_SPUX_BR_PMD_CONTROL(0, bgx), pmd_control.u64);
+			cvmx_write_csr_node(node,
+					    CVMX_BGXX_SPUX_BR_PMD_CONTROL(0,
+									  bgx),
+					    pmd_control.u64);
 			break;
 		default:
 			qlm_mode[node][qlm] = CVMX_QLM_MODE_DISABLED;
@@ -1466,34 +1485,34 @@ enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn73xx(int qlm)
 	if (gserx_cfg.s.pcie) {
 		cvmx_pemx_cfg_t pemx_cfg;
 		switch (qlm) {
-		case 0: /* Either PEM0 x4 or PEM0 x8 */
-		case 1: /* Either PEM0 x8 or PEM1 x4 */
-		{
-			pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(0));
-			if (pemx_cfg.cn78xx.lanes8)
-				return CVMX_QLM_MODE_PCIE_1X8; /* PEM0 x8 */
-			else
-				return CVMX_QLM_MODE_PCIE;     /* PEM0/PEM1 x4 */
-		}
-		case 2: /* Either PEM2 x4 or PEM2 x8 */
-		{
-			pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(2));
-			if (pemx_cfg.cn78xx.lanes8)
-				return CVMX_QLM_MODE_PCIE_1X8;  /* PEM2 x8 */
-			else
-				return CVMX_QLM_MODE_PCIE;      /* PEM2 x4 */
-		}
+		case 0:	/* Either PEM0 x4 or PEM0 x8 */
+		case 1:	/* Either PEM0 x8 or PEM1 x4 */
+			{
+				pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(0));
+				if (pemx_cfg.cn78xx.lanes8)
+					return CVMX_QLM_MODE_PCIE_1X8;	/* PEM0 x8 */
+				else
+					return CVMX_QLM_MODE_PCIE;	/* PEM0/PEM1 x4 */
+			}
+		case 2:	/* Either PEM2 x4 or PEM2 x8 */
+			{
+				pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(2));
+				if (pemx_cfg.cn78xx.lanes8)
+					return CVMX_QLM_MODE_PCIE_1X8;	/* PEM2 x8 */
+				else
+					return CVMX_QLM_MODE_PCIE;	/* PEM2 x4 */
+			}
 		case 5:
 		case 6:	/* PEM3 x2 */
-			return CVMX_QLM_MODE_PCIE_1X2; /* PEM3 x2 */
-		case 3: /* Either PEM2 x8 or PEM3 x4 */
-		{
-			pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(2));
-			if (pemx_cfg.cn78xx.lanes8)
-				return CVMX_QLM_MODE_PCIE_1X8;  /* PEM2 x8 */
-			else
-				return CVMX_QLM_MODE_PCIE; /* PEM3 x4 */
-		}
+			return CVMX_QLM_MODE_PCIE_1X2;	/* PEM3 x2 */
+		case 3:	/* Either PEM2 x8 or PEM3 x4 */
+			{
+				pemx_cfg.u64 = cvmx_read_csr(CVMX_PEMX_CFG(2));
+				if (pemx_cfg.cn78xx.lanes8)
+					return CVMX_QLM_MODE_PCIE_1X8;	/* PEM2 x8 */
+				else
+					return CVMX_QLM_MODE_PCIE;	/* PEM3 x4 */
+			}
 		default:
 			return CVMX_QLM_MODE_DISABLED;
 		}
@@ -1509,16 +1528,22 @@ enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn73xx(int qlm)
 			bgx = 2;
 
 		for (index = 0; index < 4; index++) {
-			cmr_config.u64 = cvmx_read_csr(CVMX_BGXX_CMRX_CONFIG(index, bgx));
-			pmd_control.u64 = cvmx_read_csr(CVMX_BGXX_SPUX_BR_PMD_CONTROL(index, bgx));
+			cmr_config.u64 =
+			    cvmx_read_csr(CVMX_BGXX_CMRX_CONFIG(index, bgx));
+			pmd_control.u64 =
+			    cvmx_read_csr(CVMX_BGXX_SPUX_BR_PMD_CONTROL
+					  (index, bgx));
 			lane_mask |= (cmr_config.s.lmac_type << (index * 4));
 			train_mask |= (pmd_control.s.train_en << (index * 4));
 		}
 
-		switch(lane_mask) {
-		case 0:		return CVMX_QLM_MODE_SGMII;
-		case 0x1:	return CVMX_QLM_MODE_XAUI;
-		case 0x22:	return CVMX_QLM_MODE_RXAUI;
+		switch (lane_mask) {
+		case 0:
+			return CVMX_QLM_MODE_SGMII;
+		case 0x1:
+			return CVMX_QLM_MODE_XAUI;
+		case 0x22:
+			return CVMX_QLM_MODE_RXAUI;
 		case 0x3333:
 			/* Use training to determine if we're in 10GBASE-KR or XFI */
 			if (train_mask)
@@ -1531,55 +1556,68 @@ enum cvmx_qlm_mode __cvmx_qlm_get_mode_cn73xx(int qlm)
 				return CVMX_QLM_MODE_40G_KR4;
 			else
 				return CVMX_QLM_MODE_XLAUI;
-		case 0x0005:	return CVMX_QLM_MODE_RGMII_SGMII;
-		case 0x3335:	if (train_mask)
-					return CVMX_QLM_MODE_RGMII_10G_KR;
-				else
-					return CVMX_QLM_MODE_RGMII_XFI;
-		case 0x45:	if (train_mask)
-					return CVMX_QLM_MODE_RGMII_40G_KR4;
-				else
-					return CVMX_QLM_MODE_RGMII_XLAUI;
-		case 0x225:	return CVMX_QLM_MODE_RGMII_RXAUI;
-		case 0x15:	return CVMX_QLM_MODE_RGMII_XAUI;
-		case 0x3300:	if (qlm == 5)
-					return CVMX_QLM_MODE_SGMII;
-				if (train_mask)
-					return CVMX_QLM_MODE_10G_KR;
-				else
-					return CVMX_QLM_MODE_XFI;
-		case 0x200:	if (qlm == 5)
-					return CVMX_QLM_MODE_SGMII;
+		case 0x0005:
+			return CVMX_QLM_MODE_RGMII_SGMII;
+		case 0x3335:
+			if (train_mask)
+				return CVMX_QLM_MODE_RGMII_10G_KR;
+			else
+				return CVMX_QLM_MODE_RGMII_XFI;
+		case 0x45:
+			if (train_mask)
+				return CVMX_QLM_MODE_RGMII_40G_KR4;
+			else
+				return CVMX_QLM_MODE_RGMII_XLAUI;
+		case 0x225:
+			return CVMX_QLM_MODE_RGMII_RXAUI;
+		case 0x15:
+			return CVMX_QLM_MODE_RGMII_XAUI;
+		case 0x3300:
+			if (qlm == 5)
+				return CVMX_QLM_MODE_SGMII;
+			if (train_mask)
+				return CVMX_QLM_MODE_10G_KR;
+			else
+				return CVMX_QLM_MODE_XFI;
+		case 0x200:
+			if (qlm == 5)
+				return CVMX_QLM_MODE_SGMII;
+			return CVMX_QLM_MODE_RXAUI;
+		case 0x233:
+			if (qlm == 6)
 				return CVMX_QLM_MODE_RXAUI;
-		case 0x233:	if (qlm == 6)
-					return CVMX_QLM_MODE_RXAUI; 
-				if (train_mask)
-					return CVMX_QLM_MODE_10G_KR;
-				else
-					return CVMX_QLM_MODE_XFI;
-		case 0x3305:	if (qlm == 5)
-					return CVMX_QLM_MODE_RGMII_SGMII; 
-				if (train_mask)
-					return CVMX_QLM_MODE_10G_KR;
-				else
-					return CVMX_QLM_MODE_XFI;
-		case 0x205:	if (qlm == 5)
-					return CVMX_QLM_MODE_RGMII_SGMII;
-				else
-					return CVMX_QLM_MODE_RXAUI;
-		case 0x0035:	if (qlm == 6)
-					return CVMX_QLM_MODE_SGMII; 
-				if (train_mask)
-					return CVMX_QLM_MODE_RGMII_10G_KR;
-				else
-					return CVMX_QLM_MODE_RGMII_XFI;
-		case 0x235:	if (qlm == 6)
-					return CVMX_QLM_MODE_RXAUI;
-				if (train_mask)
-					return CVMX_QLM_MODE_RGMII_10G_KR;
-				else
-					return CVMX_QLM_MODE_RGMII_XFI;
-		default: return CVMX_QLM_MODE_DISABLED;
+			if (train_mask)
+				return CVMX_QLM_MODE_10G_KR;
+			else
+				return CVMX_QLM_MODE_XFI;
+		case 0x3305:
+			if (qlm == 5)
+				return CVMX_QLM_MODE_RGMII_SGMII;
+			if (train_mask)
+				return CVMX_QLM_MODE_10G_KR;
+			else
+				return CVMX_QLM_MODE_XFI;
+		case 0x205:
+			if (qlm == 5)
+				return CVMX_QLM_MODE_RGMII_SGMII;
+			else
+				return CVMX_QLM_MODE_RXAUI;
+		case 0x0035:
+			if (qlm == 6)
+				return CVMX_QLM_MODE_SGMII;
+			if (train_mask)
+				return CVMX_QLM_MODE_RGMII_10G_KR;
+			else
+				return CVMX_QLM_MODE_RGMII_XFI;
+		case 0x235:
+			if (qlm == 6)
+				return CVMX_QLM_MODE_RXAUI;
+			if (train_mask)
+				return CVMX_QLM_MODE_RGMII_10G_KR;
+			else
+				return CVMX_QLM_MODE_RGMII_XFI;
+		default:
+			return CVMX_QLM_MODE_DISABLED;
 		}
 	}
 	return CVMX_QLM_MODE_DISABLED;
@@ -1609,20 +1647,21 @@ int cvmx_qlm_measure_clock_cn78xx(int node, int qlm)
 	cvmx_gserx_lane_mode_t lane_mode;
 
 	if (qlm >= 8)
-		return -1; /* FIXME for OCI */
+		return -1;	/* FIXME for OCI */
 
 	cfg.u64 = cvmx_read_csr_node(node, CVMX_GSERX_CFG(qlm));
 
 	if (cfg.s.pcie) {
-		refclk_sel.u64 = cvmx_read_csr_node(node, CVMX_GSERX_REFCLK_SEL(qlm));
+		refclk_sel.u64 =
+		    cvmx_read_csr_node(node, CVMX_GSERX_REFCLK_SEL(qlm));
 		if (refclk_sel.s.pcie_refclk125)
-			return REF_125MHZ; /* Ref 125 Mhz */
+			return REF_125MHZ;	/* Ref 125 Mhz */
 		else
-			return REF_100MHZ; /* Ref 100Mhz */
+			return REF_100MHZ;	/* Ref 100Mhz */
 	}
 
 	lane_mode.u64 = cvmx_read_csr_node(node, CVMX_GSERX_LANE_MODE(qlm));
-	switch(lane_mode.s.lmode) {
+	switch (lane_mode.s.lmode) {
 	case R_25G_REFCLK100:
 		return REF_100MHZ;
 	case R_5G_REFCLK100:
@@ -1655,9 +1694,9 @@ int cvmx_qlm_measure_clock_cn78xx(int node, int qlm)
 /**
  * Measure the reference clock of a QLM
  *
- * @param qlm    QLM to measure
+ * @qlm:    QLM to measure
  *
- * @return Clock rate in Hz
+ * Returns Clock rate in Hz
  *       */
 int cvmx_qlm_measure_clock(int qlm)
 {
@@ -1665,11 +1704,7 @@ int cvmx_qlm_measure_clock(int qlm)
 	uint64_t count;
 	uint64_t start_cycle, stop_cycle;
 	int evcnt_offset = 0x10;
-#ifdef CVMX_BUILD_FOR_UBOOT
-	int ref_clock[16] = {0};
-#else
-	static int ref_clock[16] = {0};
-#endif
+	static int ref_clock[16] = { 0 };
 
 	if (ref_clock[qlm])
 		return ref_clock[qlm];
@@ -1682,13 +1717,8 @@ int cvmx_qlm_measure_clock(int qlm)
 
 	/* Force the reference to 156.25Mhz when running in simulation.
 	   This supports the most speeds */
-#ifdef CVMX_BUILD_FOR_UBOOT
-	if (gd->arch.board_desc.board_type == CVMX_BOARD_TYPE_SIM)
-		return 156250000;
-#elif !defined(CVMX_BUILD_FOR_LINUX_HOST)
 	if (cvmx_sysinfo_get()->board_type == CVMX_BOARD_TYPE_SIM)
 		return 156250000;
-#endif
 	/* Fix reference clock for OCI QLMs */
 
 	/* Disable the PTP event counter while we configure it */
@@ -1726,12 +1756,15 @@ int cvmx_qlm_measure_clock(int qlm)
 	if (OCTEON_IS_MODEL(OCTEON_CN70XX)) {
 		cvmx_gserx_dlmx_ref_clkdiv2_t ref_clkdiv2;
 
-		ref_clkdiv2.u64 = cvmx_read_csr(CVMX_GSERX_DLMX_REF_CLKDIV2(qlm, 0));
+		ref_clkdiv2.u64 =
+		    cvmx_read_csr(CVMX_GSERX_DLMX_REF_CLKDIV2(qlm, 0));
 		if (ref_clkdiv2.s.ref_clkdiv2)
 			count *= 2;
 	}
 	/* Return the rate */
-	ref_clock[qlm] = count * cvmx_clock_get_rate(CVMX_CLOCK_CORE) / (stop_cycle - start_cycle);
+	ref_clock[qlm] =
+	    count * cvmx_clock_get_rate(CVMX_CLOCK_CORE) / (stop_cycle -
+							    start_cycle);
 	return ref_clock[qlm];
 }
 
@@ -1747,22 +1780,27 @@ void cvmx_qlm_display_registers(int qlm)
 	cvmx_dprintf("\n");
 
 	while (ptr != NULL && ptr->name) {
-		cvmx_dprintf("%20s[%3d:%3d]", ptr->name, ptr->stop_bit, ptr->start_bit);
+		cvmx_dprintf("%20s[%3d:%3d]", ptr->name, ptr->stop_bit,
+			     ptr->start_bit);
 		for (lane = 0; lane < num_lanes; lane++) {
 			uint64_t val;
 			int tx_byp = 0;
 			/* Make sure serdes_tx_byp is set for displaying
 			   TX amplitude and TX demphasis field values. */
 			if (strncmp(ptr->name, "biasdrv_", 8) == 0 ||
-				strncmp(ptr->name, "tcoeff_", 7) == 0) {
-				tx_byp = cvmx_qlm_jtag_get(qlm, lane, "serdes_tx_byp");
+			    strncmp(ptr->name, "tcoeff_", 7) == 0) {
+				tx_byp =
+				    cvmx_qlm_jtag_get(qlm, lane,
+						      "serdes_tx_byp");
 				if (tx_byp == 0) {
 					cvmx_dprintf("\t \t");
 					continue;
 				}
 			}
 			val = cvmx_qlm_jtag_get(qlm, lane, ptr->name);
-			cvmx_dprintf("\t%4llu (0x%04llx)", (unsigned long long)val, (unsigned long long)val);
+			cvmx_dprintf("\t%4llu (0x%04llx)",
+				     (unsigned long long)val,
+				     (unsigned long long)val);
 		}
 		cvmx_dprintf("\n");
 		ptr++;
@@ -1774,7 +1812,7 @@ void cvmx_qlm_display_registers(int qlm)
  * 1 doesn't work properly. The following code disables 2nd order
  * CDR for the specified QLM.
  *
- * @param qlm    QLM to disable 2nd order CDR for.
+ * @qlm:    QLM to disable 2nd order CDR for.
  */
 void __cvmx_helper_errata_qlm_disable_2nd_order_cdr(int qlm)
 {
