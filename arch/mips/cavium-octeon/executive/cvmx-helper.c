@@ -70,6 +70,7 @@
 #include <asm/octeon/cvmx-helper-pko.h>
 // #include <asm/octeon/cvmx-helper-pko3.h>
 #include <asm/octeon/cvmx-helper-ipd.h>
+#include <asm/octeon/octeon.h>
 
 /**
  * @INTERNAL
