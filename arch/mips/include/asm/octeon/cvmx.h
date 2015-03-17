@@ -53,6 +53,7 @@
 #define cvmx_printf printk
 #define CVMX_SHARED
 
+#include <asm/octeon/cvmx-csr-enums.h>
 #include <asm/octeon/cvmx-address.h>
 #include <asm/octeon/cvmx-asm.h>
 #include <asm/octeon/cvmx-packet.h>
