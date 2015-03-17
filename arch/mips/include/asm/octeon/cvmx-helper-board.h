@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -43,16 +31,9 @@
  * Helper functions to abstract board specific data about
  * network ports from the rest of the cvmx-helper files.
  *
- * <hr>$Revision: 109826 $<hr>
  */
 #ifndef __CVMX_HELPER_BOARD_H__
 #define __CVMX_HELPER_BOARD_H__
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 typedef enum {
 	USB_CLOCK_TYPE_REF_12,
@@ -68,7 +49,7 @@ typedef enum cvmx_phy_type {
 	AQUANTIA_PHY,
 	GENERIC_8023_C22_PHY,
 	GENERIC_8023_C45_PHY,
- 	INBAND_PHY,
+	INBAND_PHY,
 	QUALCOMM_S17,	/** Qualcomm QCA833X switch */
 } cvmx_phy_type_t;
 
@@ -100,24 +81,6 @@ typedef enum {
  * this board a very complex operation involving writing to the TWSI mux,
  * followed by the MDIO mux device.
  */
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-/** Maximum number of GPIO devices used to control the MDIO mux */
-#define CVMX_PHY_MUX_MAX_GPIO	2
-/** Type of MDIO mux device, currently OTHER isn't supported */
-typedef enum {
-	SN74CBTLV3253,	/** SN74CBTLV3253 I2C device */
-	OTHER		/** Unknown/other */
-} cvmx_phy_mux_type_t;
-
-/** Type of GPIO line controlling MDIO mux */
-typedef enum {
-	GPIO_OCTEON,	/** Native OCTEON */
-	GPIO_PCA8574	/** TWSI mux device */
-} cvmx_phy_gpio_type_t;
-
-struct cvmx_phy_device;
-struct cvmx_phy_info;
-#endif
 
 /**
  * @INTERNAL
@@ -131,30 +94,9 @@ typedef struct cvmx_phy_info {
 	int phy_addr;			/** MDIO address of PHY */
 	int phy_sub_addr;		/** Sub-address (i.e. slice), used by Cortina */
 	int ipd_port;			/** IPD port number for the PHY */
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-	/** MDIO bus PHY connected to (even if behind mux) */
-	int mdio_unit;
-	int direct_connect;		/** 1 if PHY is directly connected */
-	int gpio[CVMX_PHY_MUX_MAX_GPIO]; /** GPIOs used to control mux, -1 if not used */
-
-	/** Type of GPIO.  It can be a local OCTEON GPIO or a TWSI GPIO */
-	cvmx_phy_gpio_type_t gpio_type[CVMX_PHY_MUX_MAX_GPIO];
-
-	/** Address of TWSI GPIO */
-	int cvmx_gpio_twsi[CVMX_PHY_MUX_MAX_GPIO];
-
-	/** Value to put into the GPIO lines to select MDIO bus */
-	int gpio_value;
-	int gpio_parent_mux_twsi;	/** -1 if not used, parent TWSI mux for ebb6600 */
-	int gpio_parent_mux_select;	/** selector to use on parent TWSI mux */
-	cvmx_phy_type_t phy_type;	/** Type of PHY */
-	cvmx_phy_mux_type_t mux_type;	/** Type of MDIO mux */
-	int mux_twsi_addr;		/** Address of the MDIO mux */
-	cvmx_phy_host_mode_t host_mode;	/** Used by Cortina PHY */
-	struct cvmx_phy_device *phydev;	/** Pointer to parent phy device */
-#endif
 	/** Pointer to function to return link information */
-	cvmx_helper_link_info_t (*link_function)(struct cvmx_phy_info *phy_info);
+	 cvmx_helper_link_info_t(*link_function) (struct cvmx_phy_info *
+						  phy_info);
 } cvmx_phy_info_t;
 
 /* Fake IPD port, the RGMII/MII interface may use different PHY, use this
@@ -169,7 +111,8 @@ typedef struct cvmx_phy_info {
  * this pointer to a function before calling any cvmx-helper
  * operations.
  */
-extern CVMX_SHARED cvmx_helper_link_info_t(*cvmx_override_board_link_get) (int ipd_port);
+extern CVMX_SHARED cvmx_helper_link_info_t(*cvmx_override_board_link_get) (int
+									   ipd_port);
 
 /**
  * Return the MII PHY address associated with the given IPD
@@ -183,9 +126,9 @@ extern CVMX_SHARED cvmx_helper_link_info_t(*cvmx_override_board_link_get) (int i
  * fact that every Octeon board receives a unique board type
  * enumeration from the bootloader.
  *
- * @param ipd_port Octeon IPD port to get the MII address for.
+ * @ipd_port: Octeon IPD port to get the MII address for.
  *
- * @return MII PHY address and bus number or -1.
+ * Returns MII PHY address and bus number or -1.
  */
 extern int cvmx_helper_board_get_mii_address(int ipd_port);
 
@@ -195,16 +138,19 @@ extern int cvmx_helper_board_get_mii_address(int ipd_port);
  * not Octeon. This can be used to force Octeon's links to
  * specific settings.
  *
- * @param phy_addr  The address of the PHY to program
- * @param link_flags
+ * @phy_addr:  The address of the PHY to program
+ * @link_flags:
  *                  Flags to control autonegotiation.  Bit 0 is autonegotiation
  *                  enable/disable to maintain backward compatibility.
- * @param link_info Link speed to program. If the speed is zero and autonegotiation
+ * @link_info: Link speed to program. If the speed is zero and autonegotiation
  *                  is enabled, all possible negotiation speeds are advertised.
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
-int cvmx_helper_board_link_set_phy(int phy_addr, cvmx_helper_board_set_phy_link_flags_types_t link_flags, cvmx_helper_link_info_t link_info);
+int cvmx_helper_board_link_set_phy(int phy_addr,
+				   cvmx_helper_board_set_phy_link_flags_types_t
+				   link_flags,
+				   cvmx_helper_link_info_t link_info);
 
 /**
  * @INTERNAL
@@ -219,10 +165,10 @@ int cvmx_helper_board_link_set_phy(int phy_addr, cvmx_helper_board_set_phy_link_
  * fact that every Octeon board receives a unique board type
  * enumeration from the bootloader.
  *
- * @param ipd_port IPD input port associated with the port we want to get link
+ * @ipd_port: IPD input port associated with the port we want to get link
  *                 status for.
  *
- * @return The ports link status. If the link isn't fully resolved, this must
+ * Returns The ports link status. If the link isn't fully resolved, this must
  *         return zero.
  */
 extern cvmx_helper_link_info_t __cvmx_helper_board_link_get(int ipd_port);
@@ -242,14 +188,15 @@ extern cvmx_helper_link_info_t __cvmx_helper_board_link_get(int ipd_port);
  * fact that every Octeon board receives a unique board type
  * enumeration from the bootloader.
  *
- * @param interface Interface to probe
- * @param supported_ports
+ * @interface: Interface to probe
+ * @supported_ports:
  *                  Number of ports Octeon supports.
  *
- * @return Number of ports the actual board supports. Many times this will
+ * Returns Number of ports the actual board supports. Many times this will
  *         simple be "support_ports".
  */
-extern int __cvmx_helper_board_interface_probe(int interface, int supported_ports);
+extern int __cvmx_helper_board_interface_probe(int interface,
+					       int supported_ports);
 
 /**
  * @INTERNAL
@@ -258,9 +205,9 @@ extern int __cvmx_helper_board_interface_probe(int interface, int supported_port
  * perform board specific initialization. For most boards
  * nothing is needed.
  *
- * @param interface Interface to enable
+ * @interface: Interface to enable
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 extern int __cvmx_helper_board_hardware_enable(int interface);
 
@@ -269,74 +216,23 @@ extern int __cvmx_helper_board_hardware_enable(int interface);
  * Gets the clock type used for the USB block based on board type.
  * Used by the USB code for auto configuration of clock type.
  *
- * @return USB clock type enumeration
+ * Returns USB clock type enumeration
  */
-cvmx_helper_board_usb_clock_types_t __cvmx_helper_board_usb_get_clock_type(void);
+cvmx_helper_board_usb_clock_types_t
+__cvmx_helper_board_usb_get_clock_type(void);
 
 /**
  * @INTERNAL
  * Adjusts the number of available USB ports on Octeon based on board
  * specifics.
  *
- * @param supported_ports expected number of ports based on chip type;
+ * @supported_ports: expected number of ports based on chip type;
  *
  *
- * @return number of available usb ports, based on board specifics.
+ * Returns number of available usb ports, based on board specifics.
  *         Return value is supported_ports if function does not
  *         override.
  */
 int __cvmx_helper_board_usb_get_num_ports(int supported_ports);
 
-#if !defined(CVMX_BUILD_FOR_LINUX_KERNEL)
-/**
- * @INTERNAL
- * Returns if a port is present on an interface
- *
- * @param fdt_addr - address fo flat device tree
- * @param ipd_port - IPD port number
- *
- * @return 1 if port is present, 0 if not present, -1 if error
- */
-int __cvmx_helper_board_get_port_from_dt(void *fdt_addr, int ipd_port);
-
-/**
- * Return the host mode for the PHY.  Currently only the Cortina CS4321 PHY
- * needs this.
- *
- * @param ipd_port - ipd port number to get the host mode for
- *
- * @return host mode for phy
- */
-cvmx_phy_host_mode_t cvmx_helper_board_get_phy_host_mode(int ipd_port);
-
-/**
- * @INTERNAL
- * This function outputs the cvmx_phy_info_t data structure for the specified
- * port.
- *
- * @param[out] - phy_info - phy info data structure
- * @param ipd_port - port to get phy info for
- *
- * @return 0 for success, -1 if info not available
- *
- * NOTE: The phy_info data structure is subject to change.
- */
-int cvmx_helper_board_get_phy_info(cvmx_phy_info_t *phy_info, int ipd_port);
-
-/**
- * @INTERNAL
- * Parse the device tree and set whether a port is valid or not.
- *
- * @param fdt_addr	Pointer to device tree
- *
- * @return 0 for success, -1 on error.
- */
-int __cvmx_helper_parse_78xx_bgx_dt(void *fdt_addr);
-#endif
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 #endif /* __CVMX_HELPER_BOARD_H__ */

@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -71,7 +59,6 @@
 #ifndef __CVMX_HWPKO_H__
 #define __CVMX_HWPKO_H__
 
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include "cvmx-pko-defs.h"
 #include <asm/octeon/cvmx-hwfau.h>
 #include <asm/octeon/cvmx-fpa.h>
@@ -80,29 +67,11 @@
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-pko.h>
-#else
-#include "cvmx-hwfau.h"
-#include "cvmx-fpa.h"
-#include "cvmx-pow.h"
-#include "cvmx-pko3.h"	/* for back-comp */
-#include "cvmx-cmd-queue.h"
-#include "cvmx-helper.h"
-#include "cvmx-helper-util.h"
-#include "cvmx-helper-cfg.h"
-#include "cvmx-helper-pko.h"
-#endif
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 /* Adjust the command buffer size by 1 word so that in the case of using only
 ** two word PKO commands no command words stradle buffers.  The useful values
 ** for this are 0 and 1. */
 #define CVMX_PKO_COMMAND_BUFFER_SIZE_ADJUST (1)
-
 
 #define CVMX_PKO_MAX_OUTPUT_QUEUES_STATIC 256
 #define CVMX_PKO_MAX_OUTPUT_QUEUES      ((OCTEON_IS_MODEL(OCTEON_CN31XX) || \
@@ -265,15 +234,17 @@ extern void cvmx_pko_shutdown(void);
 /**
  * Configure a output port and the associated queues for use.
  *
- * @param port       Port to configure.
- * @param base_queue First queue number to associate with this port.
- * @param num_queues Number of queues t oassociate with this port
- * @param priority   Array of priority levels for each queue. Values are
+ * @port:       Port to configure.
+ * @base_queue: First queue number to associate with this port.
+ * @num_queues: Number of queues t oassociate with this port
+ * @priority:   Array of priority levels for each queue. Values are
  *                   allowed to be 1-8. A value of 8 get 8 times the traffic
  *                   of a value of 1. There must be num_queues elements in the
  *                   array.
  */
-extern cvmx_pko_return_value_t cvmx_pko_config_port(int port, int base_queue, int num_queues, const uint8_t priority[]);
+extern cvmx_pko_return_value_t cvmx_pko_config_port(int port, int base_queue,
+						    int num_queues,
+						    const uint8_t priority[]);
 
 /**
  * Ring the packet output doorbell. This tells the packet
@@ -286,11 +257,12 @@ extern cvmx_pko_return_value_t cvmx_pko_config_port(int port, int base_queue, in
  * cvmx_pko_doorbell_pkoid() directly if the PKO port identifier is
  * known.
  *
- * @param ipd_port   The IPD port corresponding the to pko port the packet is for
- * @param queue  Queue the packet is for
- * @param len    Length of the command in 64 bit words
+ * @ipd_port:   The IPD port corresponding the to pko port the packet is for
+ * @queue:  Queue the packet is for
+ * @len:    Length of the command in 64 bit words
  */
-static inline void cvmx_pko_doorbell(uint64_t ipd_port, uint64_t queue, uint64_t len)
+static inline void cvmx_pko_doorbell(uint64_t ipd_port, uint64_t queue,
+				     uint64_t len)
 {
 	cvmx_pko_doorbell_address_t ptr;
 	uint64_t pko_port;
@@ -336,13 +308,16 @@ static inline void cvmx_pko_doorbell(uint64_t ipd_port, uint64_t queue, uint64_t
  * NOTE: If atomic locking is used, the POW entry CANNOT be
  * descheduled, as it does not contain a valid WQE pointer.
  *
- * @param port   Port to send it on, this can be either IPD port or PKO
+ * @port:   Port to send it on, this can be either IPD port or PKO
  * 		 port.
- * @param queue  Queue to use
- * @param use_locking
+ * @queue:  Queue to use
+ * @use_locking:
  *               CVMX_PKO_LOCK_NONE, CVMX_PKO_LOCK_ATOMIC_TAG, or CVMX_PKO_LOCK_CMD_QUEUE
  */
-static inline void cvmx_pko_send_packet_prepare(uint64_t port __attribute__ ((unused)), uint64_t queue, cvmx_pko_lock_t use_locking)
+static inline void cvmx_pko_send_packet_prepare(uint64_t port
+						__attribute__ ((unused)),
+						uint64_t queue,
+						cvmx_pko_lock_t use_locking)
 {
 	if (use_locking == CVMX_PKO_LOCK_ATOMIC_TAG) {
 		/* Must do a full switch here to handle all cases.  We use a fake WQE pointer, as the POW does
@@ -350,8 +325,12 @@ static inline void cvmx_pko_send_packet_prepare(uint64_t port __attribute__ ((un
 		 ** which is not supported by the cvmx_pko_send_packet_prepare/cvmx_pko_send_packet_finish combination.
 		 ** Note that this is a special case in which these fake values can be used - this is not a general technique.
 		 */
-		uint32_t tag = CVMX_TAG_SW_BITS_INTERNAL << CVMX_TAG_SW_SHIFT | CVMX_TAG_SUBGROUP_PKO << CVMX_TAG_SUBGROUP_SHIFT | (CVMX_TAG_SUBGROUP_MASK & queue);
-		cvmx_pow_tag_sw_full((cvmx_wqe_t *) cvmx_phys_to_ptr(0x80), tag, CVMX_POW_TAG_TYPE_ATOMIC, 0);
+		uint32_t tag =
+		    CVMX_TAG_SW_BITS_INTERNAL << CVMX_TAG_SW_SHIFT |
+		    CVMX_TAG_SUBGROUP_PKO << CVMX_TAG_SUBGROUP_SHIFT |
+		    (CVMX_TAG_SUBGROUP_MASK & queue);
+		cvmx_pow_tag_sw_full((cvmx_wqe_t *) cvmx_phys_to_ptr(0x80), tag,
+				     CVMX_POW_TAG_TYPE_ATOMIC, 0);
 	}
 }
 
@@ -367,29 +346,41 @@ static inline void cvmx_pko_send_packet_prepare(uint64_t port __attribute__ ((un
  * cvmx_pko_send_packet_finish_pkoid() directly if the PKO port
  * identifier is known.
  *
- * @param ipd_port   The IPD port corresponding the to pko port the packet is for
- * @param queue  Queue to use
- * @param pko_command
+ * @ipd_port:   The IPD port corresponding the to pko port the packet is for
+ * @queue:  Queue to use
+ * @pko_command:
  *               PKO HW command word
- * @param packet Packet to send
- * @param use_locking
+ * @packet: Packet to send
+ * @use_locking:
  *               CVMX_PKO_LOCK_NONE, CVMX_PKO_LOCK_ATOMIC_TAG, or CVMX_PKO_LOCK_CMD_QUEUE
  *
- * @return returns CVMX_PKO_SUCCESS on success, or error code on failure of output
+ * Returns returns CVMX_PKO_SUCCESS on success, or error code on failure of output
  */
-static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish(uint64_t ipd_port, uint64_t queue,
-								    cvmx_pko_command_word0_t pko_command, cvmx_buf_ptr_t packet, cvmx_pko_lock_t use_locking)
+static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish(uint64_t
+								    ipd_port,
+								    uint64_t
+								    queue,
+								    cvmx_pko_command_word0_t
+								    pko_command,
+								    cvmx_buf_ptr_t
+								    packet,
+								    cvmx_pko_lock_t
+								    use_locking)
 {
 	cvmx_cmd_queue_result_t result;
 
 	if (use_locking == CVMX_PKO_LOCK_ATOMIC_TAG)
 		cvmx_pow_tag_sw_wait();
 
-	result = cvmx_cmd_queue_write2(CVMX_CMD_QUEUE_PKO(queue), (use_locking == CVMX_PKO_LOCK_CMD_QUEUE), pko_command.u64, packet.u64);
+	result =
+	    cvmx_cmd_queue_write2(CVMX_CMD_QUEUE_PKO(queue),
+				  (use_locking == CVMX_PKO_LOCK_CMD_QUEUE),
+				  pko_command.u64, packet.u64);
 	if (cvmx_likely(result == CVMX_CMD_QUEUE_SUCCESS)) {
 		cvmx_pko_doorbell(ipd_port, queue, 2);
 		return CVMX_PKO_SUCCESS;
-	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY) || (result == CVMX_CMD_QUEUE_FULL)) {
+	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY)
+		   || (result == CVMX_CMD_QUEUE_FULL)) {
 		return CVMX_PKO_NO_MEMORY;
 	} else {
 		return CVMX_PKO_INVALID_QUEUE;
@@ -406,29 +397,43 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish(uint64_t ipd
  * cvmx_pko_send_packet_finish3_pkoid() directly if the PKO port
  * identifier is known.
  *
- * @param ipd_port   The IPD port corresponding the to pko port the packet is for
- * @param queue  Queue to use
- * @param pko_command
+ * @ipd_port:   The IPD port corresponding the to pko port the packet is for
+ * @queue:  Queue to use
+ * @pko_command:
  *               PKO HW command word
- * @param packet Packet to send
- * @param addr   Plysical address of a work queue entry or physical address to zero on complete.
- * @param use_locking
+ * @packet: Packet to send
+ * @addr:   Plysical address of a work queue entry or physical address to zero on complete.
+ * @use_locking:
  *               CVMX_PKO_LOCK_NONE, CVMX_PKO_LOCK_ATOMIC_TAG, or CVMX_PKO_LOCK_CMD_QUEUE
  *
- * @return returns CVMX_PKO_SUCCESS on success, or error code on failure of output
+ * Returns returns CVMX_PKO_SUCCESS on success, or error code on failure of output
  */
-static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3(uint64_t ipd_port, uint64_t queue,
-							     cvmx_pko_command_word0_t pko_command, cvmx_buf_ptr_t packet, uint64_t addr, cvmx_pko_lock_t use_locking)
+static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3(uint64_t
+								     ipd_port,
+								     uint64_t
+								     queue,
+								     cvmx_pko_command_word0_t
+								     pko_command,
+								     cvmx_buf_ptr_t
+								     packet,
+								     uint64_t
+								     addr,
+								     cvmx_pko_lock_t
+								     use_locking)
 {
 	cvmx_cmd_queue_result_t result;
 	if (use_locking == CVMX_PKO_LOCK_ATOMIC_TAG)
 		cvmx_pow_tag_sw_wait();
 
-	result = cvmx_cmd_queue_write3(CVMX_CMD_QUEUE_PKO(queue), (use_locking == CVMX_PKO_LOCK_CMD_QUEUE), pko_command.u64, packet.u64, addr);
+	result =
+	    cvmx_cmd_queue_write3(CVMX_CMD_QUEUE_PKO(queue),
+				  (use_locking == CVMX_PKO_LOCK_CMD_QUEUE),
+				  pko_command.u64, packet.u64, addr);
 	if (cvmx_likely(result == CVMX_CMD_QUEUE_SUCCESS)) {
 		cvmx_pko_doorbell(ipd_port, queue, 3);
 		return CVMX_PKO_SUCCESS;
-	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY) || (result == CVMX_CMD_QUEUE_FULL)) {
+	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY)
+		   || (result == CVMX_CMD_QUEUE_FULL)) {
 		return CVMX_PKO_NO_MEMORY;
 	} else {
 		return CVMX_PKO_INVALID_QUEUE;
@@ -438,16 +443,16 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3(uint64_t ip
 /**
  * Get the first pko_port for the (interface, index)
  *
- * @param interface
- * @param index
+ * @interface:
+ * @index:
  */
 extern int cvmx_pko_get_base_pko_port(int interface, int index);
 
 /**
  * Get the number of pko_ports for the (interface, index)
  *
- * @param interface
- * @param index
+ * @interface:
+ * @index:
  */
 extern int cvmx_pko_get_num_pko_ports(int interface, int index);
 
@@ -455,37 +460,37 @@ extern int cvmx_pko_get_num_pko_ports(int interface, int index);
  * For a given port number, return the base pko output queue
  * for the port.
  *
- * @param port   IPD port number
- * @return Base output queue
+ * @port:   IPD port number
+ * Returns Base output queue
  */
 extern int cvmx_pko_get_base_queue(int port);
 
 /**
  * For a given port number, return the number of pko output queues.
  *
- * @param port   IPD port number
- * @return Number of output queues
+ * @port:   IPD port number
+ * Returns Number of output queues
  */
 extern int cvmx_pko_get_num_queues(int port);
 
 /**
  * Sets the internal FPA pool data structure for PKO comamnd queue.
- * @param pool	fpa pool number yo use
- * @param buffer_size	buffer size of pool
- * @param buffer_count	number of buufers to allocate to pool
+ * @pool:	fpa pool number yo use
+ * @buffer_size:	buffer size of pool
+ * @buffer_count:	number of buufers to allocate to pool
  *
  * @note the caller is responsable for setting up the pool with
  * an appropriate buffer size and sufficient buffer count.
  */
 void cvmx_pko_set_cmd_que_pool_config(int64_t pool, uint64_t buffer_size,
-					   uint64_t buffer_count);
+				      uint64_t buffer_count);
 
 /**
  * Get the status counters for a port.
  *
- * @param ipd_port Port number (ipd_port) to get statistics for.
- * @param clear    Set to 1 to clear the counters after they are read
- * @param status   Where to put the results.
+ * @ipd_port: Port number (ipd_port) to get statistics for.
+ * @clear:    Set to 1 to clear the counters after they are read
+ * @status:   Where to put the results.
  *
  * Note:
  *     - Only the doorbell for the base queue of the ipd_port is
@@ -495,18 +500,19 @@ void cvmx_pko_set_cmd_que_pool_config(int64_t pool, uint64_t buffer_size,
  *       order. It is not MP-safe and caller should guarantee
  *       atomicity.
  */
-void cvmx_pko_get_port_status(uint64_t ipd_port, uint64_t clear, cvmx_pko_port_status_t * status);
+void cvmx_pko_get_port_status(uint64_t ipd_port, uint64_t clear,
+			      cvmx_pko_port_status_t * status);
 
 /**
  * Rate limit a PKO port to a max packets/sec. This function is only
  * supported on CN57XX, CN56XX, CN55XX, and CN54XX.
  *
- * @param port      Port to rate limit
- * @param packets_s Maximum packet/sec
- * @param burst     Maximum number of packets to burst in a row before rate
+ * @port:      Port to rate limit
+ * @packets_s: Maximum packet/sec
+ * @burst:     Maximum number of packets to burst in a row before rate
  *                  limiting cuts in.
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 extern int cvmx_pko_rate_limit_packets(int port, int packets_s, int burst);
 
@@ -514,12 +520,12 @@ extern int cvmx_pko_rate_limit_packets(int port, int packets_s, int burst);
  * Rate limit a PKO port to a max bits/sec. This function is only
  * supported on CN57XX, CN56XX, CN55XX, and CN54XX.
  *
- * @param port   Port to rate limit
- * @param bits_s PKO rate limit in bits/sec
- * @param burst  Maximum number of bits to burst before rate
+ * @port:   Port to rate limit
+ * @bits_s: PKO rate limit in bits/sec
+ * @burst:  Maximum number of bits to burst before rate
  *               limiting cuts in.
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 extern int cvmx_pko_rate_limit_bits(int port, uint64_t bits_s, int burst);
 
@@ -528,10 +534,10 @@ extern int cvmx_pko_rate_limit_bits(int port, uint64_t bits_s, int burst);
  *
  * Retrieve the PKO pipe number for a port
  *
- * @param interface
- * @param index
+ * @interface:
+ * @index:
  *
- * @return negative on error.
+ * Returns negative on error.
  *
  * This applies only to the non-loopback interfaces.
  *
@@ -542,8 +548,8 @@ extern int __cvmx_pko_get_pipe(int interface, int index);
  * For a given PKO port number, return the base output queue
  * for the port.
  *
- * @param pko_port   PKO port number
- * @return           Base output queue
+ * @pko_port:   PKO port number
+ * Returns           Base output queue
  */
 extern int cvmx_pko_get_base_queue_pkoid(int pko_port);
 
@@ -551,8 +557,8 @@ extern int cvmx_pko_get_base_queue_pkoid(int pko_port);
  * For a given PKO port number, return the number of output queues
  * for the port.
  *
- * @param pko_port	PKO port number
- * @return		the number of output queues
+ * @pko_port:	PKO port number
+ * Returns		the number of output queues
  */
 extern int cvmx_pko_get_num_queues_pkoid(int pko_port);
 
@@ -562,11 +568,12 @@ extern int cvmx_pko_get_num_queues_pkoid(int pko_port);
  * to its pending list.  This command includes the required
  * CVMX_SYNCWS before the doorbell ring.
  *
- * @param pko_port   Port the packet is for
- * @param queue  Queue the packet is for
- * @param len    Length of the command in 64 bit words
+ * @pko_port:   Port the packet is for
+ * @queue:  Queue the packet is for
+ * @len:    Length of the command in 64 bit words
  */
-static inline void cvmx_pko_doorbell_pkoid(uint64_t pko_port, uint64_t queue, uint64_t len)
+static inline void cvmx_pko_doorbell_pkoid(uint64_t pko_port, uint64_t queue,
+					   uint64_t len)
 {
 	cvmx_pko_doorbell_address_t ptr;
 
@@ -585,28 +592,40 @@ static inline void cvmx_pko_doorbell_pkoid(uint64_t pko_port, uint64_t queue, ui
  * and the same parameters must be passed to both cvmx_pko_send_packet_prepare() and
  * cvmx_pko_send_packet_finish_pkoid().
  *
- * @param pko_port   Port to send it on
- * @param queue  Queue to use
- * @param pko_command
+ * @pko_port:   Port to send it on
+ * @queue:  Queue to use
+ * @pko_command:
  *               PKO HW command word
- * @param packet Packet to send
- * @param use_locking
+ * @packet: Packet to send
+ * @use_locking:
  *               CVMX_PKO_LOCK_NONE, CVMX_PKO_LOCK_ATOMIC_TAG, or CVMX_PKO_LOCK_CMD_QUEUE
  *
- * @return returns CVMX_PKO_SUCCESS on success, or error code on failure of output
+ * Returns returns CVMX_PKO_SUCCESS on success, or error code on failure of output
  */
-static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish_pkoid(int pko_port, uint64_t queue,
-								  cvmx_pko_command_word0_t pko_command, cvmx_buf_ptr_t packet, cvmx_pko_lock_t use_locking)
+static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish_pkoid(int
+									  pko_port,
+									  uint64_t
+									  queue,
+									  cvmx_pko_command_word0_t
+									  pko_command,
+									  cvmx_buf_ptr_t
+									  packet,
+									  cvmx_pko_lock_t
+									  use_locking)
 {
 	cvmx_cmd_queue_result_t result;
 	if (use_locking == CVMX_PKO_LOCK_ATOMIC_TAG)
 		cvmx_pow_tag_sw_wait();
 
-	result = cvmx_cmd_queue_write2(CVMX_CMD_QUEUE_PKO(queue), (use_locking == CVMX_PKO_LOCK_CMD_QUEUE), pko_command.u64, packet.u64);
+	result =
+	    cvmx_cmd_queue_write2(CVMX_CMD_QUEUE_PKO(queue),
+				  (use_locking == CVMX_PKO_LOCK_CMD_QUEUE),
+				  pko_command.u64, packet.u64);
 	if (cvmx_likely(result == CVMX_CMD_QUEUE_SUCCESS)) {
 		cvmx_pko_doorbell_pkoid(pko_port, queue, 2);
 		return CVMX_PKO_SUCCESS;
-	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY) || (result == CVMX_CMD_QUEUE_FULL)) {
+	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY)
+		   || (result == CVMX_CMD_QUEUE_FULL)) {
 		return CVMX_PKO_NO_MEMORY;
 	} else {
 		return CVMX_PKO_INVALID_QUEUE;
@@ -618,29 +637,36 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish_pkoid(int pk
  * and the same parameters must be passed to both cvmx_pko_send_packet_prepare() and
  * cvmx_pko_send_packet_finish_pkoid().
  *
- * @param pko_port   The PKO port the packet is for
- * @param queue  Queue to use
- * @param pko_command
+ * @pko_port:   The PKO port the packet is for
+ * @queue:  Queue to use
+ * @pko_command:
  *               PKO HW command word
- * @param packet Packet to send
- * @param addr   Plysical address of a work queue entry or physical address to zero on complete.
- * @param use_locking
+ * @packet: Packet to send
+ * @addr:   Plysical address of a work queue entry or physical address to zero on complete.
+ * @use_locking:
  *               CVMX_PKO_LOCK_NONE, CVMX_PKO_LOCK_ATOMIC_TAG, or CVMX_PKO_LOCK_CMD_QUEUE
  *
- * @return returns CVMX_PKO_SUCCESS on success, or error code on failure of output
+ * Returns returns CVMX_PKO_SUCCESS on success, or error code on failure of output
  */
-static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3_pkoid(uint64_t pko_port, uint64_t queue,
-								   cvmx_pko_command_word0_t pko_command, cvmx_buf_ptr_t packet, uint64_t addr, cvmx_pko_lock_t use_locking)
+static inline cvmx_pko_return_value_t
+cvmx_hwpko_send_packet_finish3_pkoid(uint64_t pko_port, uint64_t queue,
+				     cvmx_pko_command_word0_t pko_command,
+				     cvmx_buf_ptr_t packet, uint64_t addr,
+				     cvmx_pko_lock_t use_locking)
 {
 	cvmx_cmd_queue_result_t result;
 	if (use_locking == CVMX_PKO_LOCK_ATOMIC_TAG)
 		cvmx_pow_tag_sw_wait();
 
-	result = cvmx_cmd_queue_write3(CVMX_CMD_QUEUE_PKO(queue), (use_locking == CVMX_PKO_LOCK_CMD_QUEUE), pko_command.u64, packet.u64, addr);
+	result =
+	    cvmx_cmd_queue_write3(CVMX_CMD_QUEUE_PKO(queue),
+				  (use_locking == CVMX_PKO_LOCK_CMD_QUEUE),
+				  pko_command.u64, packet.u64, addr);
 	if (cvmx_likely(result == CVMX_CMD_QUEUE_SUCCESS)) {
 		cvmx_pko_doorbell_pkoid(pko_port, queue, 3);
 		return CVMX_PKO_SUCCESS;
-	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY) || (result == CVMX_CMD_QUEUE_FULL)) {
+	} else if ((result == CVMX_CMD_QUEUE_NO_MEMORY)
+		   || (result == CVMX_CMD_QUEUE_FULL)) {
 		return CVMX_PKO_NO_MEMORY;
 	} else {
 		return CVMX_PKO_INVALID_QUEUE;
@@ -650,17 +676,11 @@ static inline cvmx_pko_return_value_t cvmx_hwpko_send_packet_finish3_pkoid(uint6
 /*
  * Obtain the number of PKO commands pending in a queue
  *
- * @param queue is the queue identifier to be queried
- * @return the number of commands pending transmission or -1 on error
+ * @queue: is the queue identifier to be queried
+ * Returns the number of commands pending transmission or -1 on error
  */
-int cvmx_pko_queue_pend_count( cvmx_cmd_queue_id_t queue);
+int cvmx_pko_queue_pend_count(cvmx_cmd_queue_id_t queue);
 
 void cvmx_pko_set_cmd_queue_pool_buffer_count(uint64_t buffer_count);
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 
 #endif /* __CVMX_HWPKO_H__ */

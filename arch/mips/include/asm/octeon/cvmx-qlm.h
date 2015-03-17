@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2011-2014  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2011-2014 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -42,7 +30,6 @@
  *
  * Helper utilities for qlm.
  *
- * <hr>$Revision: 111541 $<hr>
  */
 
 #ifndef __CVMX_QLM_H__
@@ -75,31 +62,31 @@ typedef struct {
 
 /**
  * Return the number of QLMs supported by the chip
- * 
- * @return  Number of QLMs
+ *
+ * Returns  Number of QLMs
  */
 extern int cvmx_qlm_get_num(void);
 
 /**
  * Return the qlm number based on the interface
  *
- * @param xiface  Interface to look up
+ * @xiface:  Interface to look up
  */
 extern int cvmx_qlm_interface(int xiface);
 
 /**
  * Return number of lanes for a given qlm
- * 
- * @param qlm QLM block to query
  *
- * @return  Number of lanes
+ * @qlm: QLM block to query
+ *
+ * Returns  Number of lanes
  */
 extern int cvmx_qlm_get_lanes(int qlm);
 
 /**
- * Get the QLM JTAG fields based on Octeon model on the supported chips. 
+ * Get the QLM JTAG fields based on Octeon model on the supported chips.
  *
- * @return  qlm_jtag_field_t structure
+ * Returns  qlm_jtag_field_t structure
  */
 extern const __cvmx_qlm_jtag_field_t *cvmx_qlm_jtag_get_field(void);
 
@@ -107,7 +94,7 @@ extern const __cvmx_qlm_jtag_field_t *cvmx_qlm_jtag_get_field(void);
  * Get the QLM JTAG length by going through qlm_jtag_field for each
  * Octeon model that is supported
  *
- * @return return the length.
+ * Returns return the length.
  */
 extern int cvmx_qlm_jtag_get_length(void);
 
@@ -119,21 +106,21 @@ extern void cvmx_qlm_init(void);
 /**
  * Get a field in a QLM JTAG chain
  *
- * @param qlm    QLM to get
- * @param lane   Lane in QLM to get
- * @param name   String name of field
+ * @qlm:    QLM to get
+ * @lane:   Lane in QLM to get
+ * @name:   String name of field
  *
- * @return JTAG field value
+ * Returns JTAG field value
  */
 extern uint64_t cvmx_qlm_jtag_get(int qlm, int lane, const char *name);
 
 /**
  * Set a field in a QLM JTAG chain
  *
- * @param qlm    QLM to set
- * @param lane   Lane in QLM to set, or -1 for all lanes
- * @param name   String name of field
- * @param value  Value of the field
+ * @qlm:    QLM to set
+ * @lane:   Lane in QLM to set, or -1 for all lanes
+ * @name:   String name of field
+ * @value:  Value of the field
  */
 extern void cvmx_qlm_jtag_set(int qlm, int lane, const char *name,
 			      uint64_t value);
@@ -157,18 +144,18 @@ extern void __cvmx_qlm_pcie_cfg_rxd_set_tweak(int qlm, int lane);
 /**
  * Get the speed (Gbaud) of the QLM in Mhz.
  *
- * @param qlm    QLM to examine
+ * @qlm:    QLM to examine
  *
- * @return Speed in Mhz
+ * Returns Speed in Mhz
  */
 extern int cvmx_qlm_get_gbaud_mhz(int qlm);
 /**
  * Get the speed (Gbaud) of the QLM in Mhz on specific node.
  *
- * @param node   Target QLM node
- * @param qlm    QLM to examine
+ * @node:   Target QLM node
+ * @qlm:    QLM to examine
  *
- * @return Speed in Mhz
+ * Returns Speed in Mhz
  */
 extern int cvmx_qlm_get_gbaud_mhz_node(int node, int qlm);
 
@@ -200,7 +187,7 @@ enum cvmx_qlm_mode {
 	CVMX_QLM_MODE_XFI,
 	CVMX_QLM_MODE_10G_KR,
 	CVMX_QLM_MODE_40G_KR4,
-	CVMX_QLM_MODE_PCIE_1X8,  /* 1x8 gen3 / gen2 / gen1 */
+	CVMX_QLM_MODE_PCIE_1X8,	/* 1x8 gen3 / gen2 / gen1 */
 	CVMX_QLM_MODE_RGMII_SGMII,
 	CVMX_QLM_MODE_RGMII_XFI,
 	CVMX_QLM_MODE_RGMII_10G_KR,
@@ -225,9 +212,9 @@ enum cvmx_qlm_mode {
 
 enum cvmx_gmx_inf_mode {
 	CVMX_GMX_INF_MODE_DISABLED = 0,
-	CVMX_GMX_INF_MODE_SGMII = 1,     /* Other interface can be SGMII or QSGMII */
-	CVMX_GMX_INF_MODE_QSGMII = 2,    /* Other interface can be SGMII or QSGMII */
-	CVMX_GMX_INF_MODE_RXAUI = 3,     /* Only interface 0, interface 1 must be DISABLED */
+	CVMX_GMX_INF_MODE_SGMII = 1,	/* Other interface can be SGMII or QSGMII */
+	CVMX_GMX_INF_MODE_QSGMII = 2,	/* Other interface can be SGMII or QSGMII */
+	CVMX_GMX_INF_MODE_RXAUI = 3,	/* Only interface 0, interface 1 must be DISABLED */
 };
 
 /**

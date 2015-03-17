@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -59,12 +47,6 @@
 #include "cvmx-pki-defs.h"
 #include "cvmx-pip-defs.h"
 
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
-
 #define OCT_TAG_TYPE_STRING(x) (((x) == CVMX_POW_TAG_TYPE_ORDERED) ?  "ORDERED" : \
                                 (((x) == CVMX_POW_TAG_TYPE_ATOMIC) ?  "ATOMIC" : \
                                 (((x) == CVMX_POW_TAG_TYPE_NULL) ?  "NULL" : \
@@ -81,14 +63,14 @@ extern "C" {
 #define PKI_ERRLEV_E__LG_M                                 (0x7)
 
 enum cvmx_pki_errlevel {
-	CVMX_PKI_ERRLEV_E_RE                         = PKI_ERRLEV_E__RE_M,
-	CVMX_PKI_ERRLEV_E_LA                         = PKI_ERRLEV_E__LA_M,
-	CVMX_PKI_ERRLEV_E_LB                         = PKI_ERRLEV_E__LB_M,
-	CVMX_PKI_ERRLEV_E_LC                         = PKI_ERRLEV_E__LC_M,
-	CVMX_PKI_ERRLEV_E_LD                         = PKI_ERRLEV_E__LD_M,
-	CVMX_PKI_ERRLEV_E_LE                         = PKI_ERRLEV_E__LE_M,
-	CVMX_PKI_ERRLEV_E_LF                         = PKI_ERRLEV_E__LF_M,
-	CVMX_PKI_ERRLEV_E_LG                         = PKI_ERRLEV_E__LG_M
+	CVMX_PKI_ERRLEV_E_RE = PKI_ERRLEV_E__RE_M,
+	CVMX_PKI_ERRLEV_E_LA = PKI_ERRLEV_E__LA_M,
+	CVMX_PKI_ERRLEV_E_LB = PKI_ERRLEV_E__LB_M,
+	CVMX_PKI_ERRLEV_E_LC = PKI_ERRLEV_E__LC_M,
+	CVMX_PKI_ERRLEV_E_LD = PKI_ERRLEV_E__LD_M,
+	CVMX_PKI_ERRLEV_E_LE = PKI_ERRLEV_E__LE_M,
+	CVMX_PKI_ERRLEV_E_LF = PKI_ERRLEV_E__LF_M,
+	CVMX_PKI_ERRLEV_E_LG = PKI_ERRLEV_E__LG_M
 };
 
 /* Layer types in pki */
@@ -118,47 +100,46 @@ enum cvmx_pki_errlevel {
 #define CVMX_PKI_LTYPE_E_SW31_M                                (0x1F)
 
 enum cvmx_pki_layer_type {
-	CVMX_PKI_LTYPE_E_NONE                        = CVMX_PKI_LTYPE_E_NONE_M,
-	CVMX_PKI_LTYPE_E_ENET                        = CVMX_PKI_LTYPE_E_ENET_M,
-	CVMX_PKI_LTYPE_E_VLAN                        = CVMX_PKI_LTYPE_E_VLAN_M,
-	CVMX_PKI_LTYPE_E_SNAP_PAYLD                  = CVMX_PKI_LTYPE_E_SNAP_PAYLD_M,
-	CVMX_PKI_LTYPE_E_ARP                         = CVMX_PKI_LTYPE_E_ARP_M,
-	CVMX_PKI_LTYPE_E_RARP                        = CVMX_PKI_LTYPE_E_RARP_M,
-	CVMX_PKI_LTYPE_E_IP4                         = CVMX_PKI_LTYPE_E_IP4_M,
-	CVMX_PKI_LTYPE_E_IP4_OPT                     = CVMX_PKI_LTYPE_E_IP4_OPT_M,
-	CVMX_PKI_LTYPE_E_IP6                         = CVMX_PKI_LTYPE_E_IP6_M,
-	CVMX_PKI_LTYPE_E_IP6_OPT                     = CVMX_PKI_LTYPE_E_IP6_OPT_M,
-	CVMX_PKI_LTYPE_E_IPSEC_ESP                   = CVMX_PKI_LTYPE_E_IPSEC_ESP_M,
-	CVMX_PKI_LTYPE_E_IPFRAG                      = CVMX_PKI_LTYPE_E_IPFRAG_M,
-	CVMX_PKI_LTYPE_E_IPCOMP                      = CVMX_PKI_LTYPE_E_IPCOMP_M,
-	CVMX_PKI_LTYPE_E_TCP                         = CVMX_PKI_LTYPE_E_TCP_M,
-	CVMX_PKI_LTYPE_E_UDP                         = CVMX_PKI_LTYPE_E_UDP_M,
-	CVMX_PKI_LTYPE_E_SCTP                        = CVMX_PKI_LTYPE_E_SCTP_M,
-	CVMX_PKI_LTYPE_E_UDP_VXLAN                   = CVMX_PKI_LTYPE_E_UDP_VXLAN_M,
-	CVMX_PKI_LTYPE_E_GRE                         = CVMX_PKI_LTYPE_E_GRE_M,
-	CVMX_PKI_LTYPE_E_NVGRE                       = CVMX_PKI_LTYPE_E_NVGRE_M,
-	CVMX_PKI_LTYPE_E_GTP                         = CVMX_PKI_LTYPE_E_GTP_M,
-	CVMX_PKI_LTYPE_E_SW28                        = CVMX_PKI_LTYPE_E_SW28_M,
-	CVMX_PKI_LTYPE_E_SW29                        = CVMX_PKI_LTYPE_E_SW29_M,
-	CVMX_PKI_LTYPE_E_SW30                        = CVMX_PKI_LTYPE_E_SW30_M,
-	CVMX_PKI_LTYPE_E_SW31                        = CVMX_PKI_LTYPE_E_SW31_M,
-        CVMX_PKI_LTYPE_E_MAX                         = CVMX_PKI_LTYPE_E_SW31
+	CVMX_PKI_LTYPE_E_NONE = CVMX_PKI_LTYPE_E_NONE_M,
+	CVMX_PKI_LTYPE_E_ENET = CVMX_PKI_LTYPE_E_ENET_M,
+	CVMX_PKI_LTYPE_E_VLAN = CVMX_PKI_LTYPE_E_VLAN_M,
+	CVMX_PKI_LTYPE_E_SNAP_PAYLD = CVMX_PKI_LTYPE_E_SNAP_PAYLD_M,
+	CVMX_PKI_LTYPE_E_ARP = CVMX_PKI_LTYPE_E_ARP_M,
+	CVMX_PKI_LTYPE_E_RARP = CVMX_PKI_LTYPE_E_RARP_M,
+	CVMX_PKI_LTYPE_E_IP4 = CVMX_PKI_LTYPE_E_IP4_M,
+	CVMX_PKI_LTYPE_E_IP4_OPT = CVMX_PKI_LTYPE_E_IP4_OPT_M,
+	CVMX_PKI_LTYPE_E_IP6 = CVMX_PKI_LTYPE_E_IP6_M,
+	CVMX_PKI_LTYPE_E_IP6_OPT = CVMX_PKI_LTYPE_E_IP6_OPT_M,
+	CVMX_PKI_LTYPE_E_IPSEC_ESP = CVMX_PKI_LTYPE_E_IPSEC_ESP_M,
+	CVMX_PKI_LTYPE_E_IPFRAG = CVMX_PKI_LTYPE_E_IPFRAG_M,
+	CVMX_PKI_LTYPE_E_IPCOMP = CVMX_PKI_LTYPE_E_IPCOMP_M,
+	CVMX_PKI_LTYPE_E_TCP = CVMX_PKI_LTYPE_E_TCP_M,
+	CVMX_PKI_LTYPE_E_UDP = CVMX_PKI_LTYPE_E_UDP_M,
+	CVMX_PKI_LTYPE_E_SCTP = CVMX_PKI_LTYPE_E_SCTP_M,
+	CVMX_PKI_LTYPE_E_UDP_VXLAN = CVMX_PKI_LTYPE_E_UDP_VXLAN_M,
+	CVMX_PKI_LTYPE_E_GRE = CVMX_PKI_LTYPE_E_GRE_M,
+	CVMX_PKI_LTYPE_E_NVGRE = CVMX_PKI_LTYPE_E_NVGRE_M,
+	CVMX_PKI_LTYPE_E_GTP = CVMX_PKI_LTYPE_E_GTP_M,
+	CVMX_PKI_LTYPE_E_SW28 = CVMX_PKI_LTYPE_E_SW28_M,
+	CVMX_PKI_LTYPE_E_SW29 = CVMX_PKI_LTYPE_E_SW29_M,
+	CVMX_PKI_LTYPE_E_SW30 = CVMX_PKI_LTYPE_E_SW30_M,
+	CVMX_PKI_LTYPE_E_SW31 = CVMX_PKI_LTYPE_E_SW31_M,
+	CVMX_PKI_LTYPE_E_MAX = CVMX_PKI_LTYPE_E_SW31
 };
-
 
 typedef union {
 	uint64_t u64;
 #ifdef __BIG_ENDIAN_BITFIELD
 	struct {
-		uint64_t ptr_vlan:8;              /**< Contains a byte pointer to the first byte of the
+		uint64_t ptr_vlan:8;		  /**< Contains a byte pointer to the first byte of the
 					               VLAN ID field for the first or second VLAN. */
-		uint64_t ptr_layer_g:8;           /**< Contains a byte pointer to the start of layer G */
-		uint64_t ptr_layer_f:8;           /**< Contains a byte pointer to the start of layer F */
-		uint64_t ptr_layer_e:8;           /**< Contains a byte pointer to the start of layer E */
-		uint64_t ptr_layer_d:8;           /**< Contains a byte pointer to the start of layer D */
-		uint64_t ptr_layer_c:8;           /**< Contains a byte pointer to the start of layer C */
-		uint64_t ptr_layer_b:8;           /**< Contains a byte pointer to the start of layer B */
-		uint64_t ptr_layer_a:8;           /**< Contains a byte pointer to the start of layer A */
+		uint64_t ptr_layer_g:8;		  /**< Contains a byte pointer to the start of layer G */
+		uint64_t ptr_layer_f:8;		  /**< Contains a byte pointer to the start of layer F */
+		uint64_t ptr_layer_e:8;		  /**< Contains a byte pointer to the start of layer E */
+		uint64_t ptr_layer_d:8;		  /**< Contains a byte pointer to the start of layer D */
+		uint64_t ptr_layer_c:8;		  /**< Contains a byte pointer to the start of layer C */
+		uint64_t ptr_layer_b:8;		  /**< Contains a byte pointer to the start of layer B */
+		uint64_t ptr_layer_a:8;		  /**< Contains a byte pointer to the start of layer A */
 	};
 #else
 	struct {
@@ -662,7 +643,6 @@ typedef union {
 #endif				/* __LITTLE_ENDIAN_BITFIELD */
 } cvmx_pip_wqe_word2_t;
 
-
 typedef union {
 	uint64_t u64;
 #ifdef __BIG_ENDIAN_BITFIELD
@@ -670,30 +650,30 @@ typedef union {
 		uint64_t software:1;		  /**< reserved for software use, hardware always writes 0 to this bit */
 		uint64_t lg_hdr_type:5;		  /**< Indicates the Layer G header typed parsed,PKI_LTYPE_E */
 		uint64_t lf_hdr_type:5;		  /**< Indicates the Layer F header typed parsed, PKI_LTYPE_E */
-		uint64_t le_hdr_type:5;        	  /**< Indicates the Layer E header typed parsed, PKI_LTYPE_E */
+		uint64_t le_hdr_type:5;		  /**< Indicates the Layer E header typed parsed, PKI_LTYPE_E */
 		uint64_t ld_hdr_type:5;		  /**< Indicates the Layer D header typed parsed, PKI_LTYPE_E */
 		uint64_t lc_hdr_type:5;		  /**< Indicates the Layer C header typed parsed, PKI_LTYPE_E */
 		uint64_t lb_hdr_type:5;		  /**< Indicates the Layer B header typed parsed, PKI_LTYPE_E */
-		uint64_t is_la_ether:1;	          /**< Indicates that Layer A Ethernet was parsed */
+		uint64_t is_la_ether:1;		  /**< Indicates that Layer A Ethernet was parsed */
 		uint64_t rsvd_0:8;
 		uint64_t vlan_valid:1;		  /**< set to 1 if we found VLAN in the L2 */
 		uint64_t vlan_stacked:1;	  /**< set to 1 if the VLAN tag is stacked */
-		uint64_t stat_inc:1;              /**< stat increment Reserved for Statistics hardware */
-		uint64_t pcam_flag4:1;            /**< indicates if PCAM entry has set the flag */
-		uint64_t pcam_flag3:1;            /**< indicates if PCAM entry has set the flag */
-		uint64_t pcam_flag2:1;            /**< indicates if PCAM entry has set the flag */
-		uint64_t pcam_flag1:1;            /**< indicates if PCAM entry has set the flag */
+		uint64_t stat_inc:1;		  /**< stat increment Reserved for Statistics hardware */
+		uint64_t pcam_flag4:1;		  /**< indicates if PCAM entry has set the flag */
+		uint64_t pcam_flag3:1;		  /**< indicates if PCAM entry has set the flag */
+		uint64_t pcam_flag2:1;		  /**< indicates if PCAM entry has set the flag */
+		uint64_t pcam_flag1:1;		  /**< indicates if PCAM entry has set the flag */
 		uint64_t is_frag:1;		  /**< set when the outer IP indicates a fragment */
-		uint64_t is_l3_bcast:1;           /**< set when outer ip indicates broadcast */
-		uint64_t is_l3_mcast:1;           /**< set when outer ipv4 indicates multicast */
-		uint64_t is_l2_bcast:1;           /**< set when the packet’s destination MAC address
+		uint64_t is_l3_bcast:1;		  /**< set when outer ip indicates broadcast */
+		uint64_t is_l3_mcast:1;		  /**< set when outer ipv4 indicates multicast */
+		uint64_t is_l2_bcast:1;		  /**< set when the packet’s destination MAC address
 							field in the L2 HDR is the broadcast address */
-		uint64_t is_l2_mcast:1; 	  /**< set when the packet’s destination MAC address
+		uint64_t is_l2_mcast:1;		  /**< set when the packet’s destination MAC address
 							field in the L2 HDR is a multicast address */
-		uint64_t is_raw:1;                /**< set when PKI_INST_HDR[RAW] was set */
-		uint64_t err_level:3;             /**< contains the lowest protocol layer containing error,
+		uint64_t is_raw:1;		  /**< set when PKI_INST_HDR[RAW] was set */
+		uint64_t err_level:3;		  /**< contains the lowest protocol layer containing error,
 							when errors are detected, normally 0; PKI_ERROR_LEVEL_E */
-		uint64_t err_code:8;              /**< normally 0, but contains a (non-zero) exception opcode
+		uint64_t err_code:8;		  /**< normally 0, but contains a (non-zero) exception opcode
 							enumerated by PKI_OPCODE_E when WQE[ERRLEV] is non-zero */
 	};
 #else
@@ -739,12 +719,11 @@ typedef union {
 #define CVMX_PKI_OPCODE_RE_PKIPCAM	0x14
 #define CVMX_PKI_OPCODE_RE_MEMOUT	0x15
 
-
 typedef union {
 	uint64_t u64;
 	cvmx_pki_wqe_word2_t pki;
 	cvmx_pip_wqe_word2_t pip;
-}cvmx_wqe_word2_t;
+} cvmx_wqe_word2_t;
 
 typedef union {
 	uint64_t u64;
@@ -847,15 +826,20 @@ typedef union {
 	uint64_t u64;
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t len:16,
-		CVMX_BITFIELD_FIELD(uint64_t rsvd_0:2,
-		CVMX_BITFIELD_FIELD(uint64_t rsvd_1:2,
+				    CVMX_BITFIELD_FIELD(uint64_t rsvd_0:2,
+							CVMX_BITFIELD_FIELD
+							(uint64_t rsvd_1:2,
 		/**
 		 * the group that the work queue entry will be scheduled to
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t grp:10,
-		CVMX_BITFIELD_FIELD(cvmx_pow_tag_type_t tag_type:2,
-		CVMX_BITFIELD_FIELD(uint64_t tag:32,
-		))))));
+							 CVMX_BITFIELD_FIELD
+							 (uint64_t grp:10,
+							  CVMX_BITFIELD_FIELD
+							  (cvmx_pow_tag_type_t
+							   tag_type:2,
+							   CVMX_BITFIELD_FIELD
+							   (uint64_t
+							    tag:32,))))));
 	};
 } cvmx_pki_wqe_word1_t;
 
@@ -865,53 +849,65 @@ typedef union {
 	uint64_t u64;
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t len:16,
-		CVMX_BITFIELD_FIELD(uint64_t varies:14,
+				    CVMX_BITFIELD_FIELD(uint64_t varies:14,
 		/**
 		 * the type of the tag (ORDERED, ATOMIC, NULL)
 		 */
-		CVMX_BITFIELD_FIELD(cvmx_pow_tag_type_t tag_type:2,
-		CVMX_BITFIELD_FIELD(uint64_t tag:32,
-		))));
+							CVMX_BITFIELD_FIELD
+							(cvmx_pow_tag_type_t
+							 tag_type:2,
+							 CVMX_BITFIELD_FIELD
+							 (uint64_t tag:32,))));
 	};
 	cvmx_pki_wqe_word1_t cn78xx;
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t len:16,
-		CVMX_BITFIELD_FIELD(uint64_t zero_0:1,
+				    CVMX_BITFIELD_FIELD(uint64_t zero_0:1,
 		/**
 		 * HW sets this to what it thought the priority of the input packet was
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t qos:3,
-
-		CVMX_BITFIELD_FIELD(uint64_t zero_1:1,
+							CVMX_BITFIELD_FIELD
+							(uint64_t qos:3,
+							 CVMX_BITFIELD_FIELD
+							 (uint64_t zero_1:1,
 		/**
 		 * the group that the work queue entry will be scheduled to
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t grp:6,
-		CVMX_BITFIELD_FIELD(uint64_t zero_2:3,
-		CVMX_BITFIELD_FIELD(cvmx_pow_tag_type_t tag_type:2,
-		CVMX_BITFIELD_FIELD(uint64_t tag:32,
-		))))))));
+							  CVMX_BITFIELD_FIELD
+							  (uint64_t grp:6,
+							   CVMX_BITFIELD_FIELD
+							   (uint64_t zero_2:3,
+							    CVMX_BITFIELD_FIELD
+							    (cvmx_pow_tag_type_t
+							     tag_type:2,
+							     CVMX_BITFIELD_FIELD
+							     (uint64_t
+							      tag:32,))))))));
 	} cn68xx;
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t len:16,
 		/**
 		 * HW sets this to input physical port
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t ipprt:6,
-
+				    CVMX_BITFIELD_FIELD(uint64_t ipprt:6,
 		/**
 		 * HW sets this to what it thought the priority of the input packet was
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t qos:3,
-
+							CVMX_BITFIELD_FIELD
+							(uint64_t qos:3,
 		/**
 		 * the group that the work queue entry will be scheduled to
 		 */
-		CVMX_BITFIELD_FIELD(uint64_t grp:4,
-		CVMX_BITFIELD_FIELD(uint64_t zero_2:1,
-		CVMX_BITFIELD_FIELD(cvmx_pow_tag_type_t tag_type:2,
-		CVMX_BITFIELD_FIELD(uint64_t tag:32,
-		)))))));
+							 CVMX_BITFIELD_FIELD
+							 (uint64_t grp:4,
+							  CVMX_BITFIELD_FIELD
+							  (uint64_t zero_2:1,
+							   CVMX_BITFIELD_FIELD
+							   (cvmx_pow_tag_type_t
+							    tag_type:2,
+							    CVMX_BITFIELD_FIELD
+							    (uint64_t
+							     tag:32,)))))));
 	} cn38xx;
 } cvmx_wqe_word1_t;
 
@@ -1014,7 +1010,7 @@ typedef struct {
 	/**
          * WORD 5/6/7 may be extended here if WQE_HSZ is set to !0
 	 */
-        uint64_t        wqe_data[11];
+	uint64_t wqe_data[11];
 
 } CVMX_CACHE_LINE_ALIGNED cvmx_wqe_78xx_t;
 
@@ -1023,16 +1019,16 @@ typedef struct {
  * ingress port number, which can also be used as a destination
  * port number for the same port.
  *
- * @param work - Work Queue Entrey pointer
- * @returns returns the normalized port number, also known as "ipd" port
+ * @work: - Work Queue Entrey pointer
+ * Returnss returns the normalized port number, also known as "ipd" port
  *
  */
-static inline int cvmx_wqe_get_port(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_port(cvmx_wqe_t * work)
 {
 	int port;
 
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		/* In 78xx wqe entry has channel number not port*/
+		/* In 78xx wqe entry has channel number not port */
 		port = work->word0.pki.channel;
 		/* For BGX interfaces (0x800 - 0xdff) the 4 LSBs indicate
 		 * the PFC channel, must be cleared to normalize to "ipd"
@@ -1049,8 +1045,7 @@ static inline int cvmx_wqe_get_port(cvmx_wqe_t *work)
 	return port;
 }
 
-
-static inline void cvmx_wqe_set_port(cvmx_wqe_t *work, int port)
+static inline void cvmx_wqe_set_port(cvmx_wqe_t * work, int port)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word0.pki.channel = port;
@@ -1060,7 +1055,7 @@ static inline void cvmx_wqe_set_port(cvmx_wqe_t *work, int port)
 		work->word1.cn38xx.ipprt = port;
 }
 
-static inline int cvmx_wqe_get_grp(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_grp(cvmx_wqe_t * work)
 {
 	int grp;
 
@@ -1075,7 +1070,7 @@ static inline int cvmx_wqe_get_grp(cvmx_wqe_t *work)
 	return grp;
 }
 
-static inline void cvmx_wqe_set_xgrp(cvmx_wqe_t *work, int grp)
+static inline void cvmx_wqe_set_xgrp(cvmx_wqe_t * work, int grp)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word1.cn78xx.grp = grp;
@@ -1085,7 +1080,7 @@ static inline void cvmx_wqe_set_xgrp(cvmx_wqe_t *work, int grp)
 		work->word1.cn38xx.grp = grp;
 }
 
-static inline int cvmx_wqe_get_xgrp(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_xgrp(cvmx_wqe_t * work)
 {
 	int grp;
 
@@ -1099,7 +1094,7 @@ static inline int cvmx_wqe_get_xgrp(cvmx_wqe_t *work)
 	return grp;
 }
 
-static inline void cvmx_wqe_set_grp(cvmx_wqe_t *work, int grp)
+static inline void cvmx_wqe_set_grp(cvmx_wqe_t * work, int grp)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		unsigned node = cvmx_get_node_num();
@@ -1112,7 +1107,7 @@ static inline void cvmx_wqe_set_grp(cvmx_wqe_t *work, int grp)
 		work->word1.cn38xx.grp = grp;
 }
 
-static inline int cvmx_wqe_get_qos(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_qos(cvmx_wqe_t * work)
 {
 	int qos;
 
@@ -1127,7 +1122,7 @@ static inline int cvmx_wqe_get_qos(cvmx_wqe_t *work)
 	return qos;
 }
 
-static inline void cvmx_wqe_set_qos(cvmx_wqe_t *work, int qos)
+static inline void cvmx_wqe_set_qos(cvmx_wqe_t * work, int qos)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		/* legacy: GRP[0..2] :=QOS */
@@ -1139,7 +1134,7 @@ static inline void cvmx_wqe_set_qos(cvmx_wqe_t *work, int qos)
 		work->word1.cn38xx.qos = qos;
 }
 
-static inline int cvmx_wqe_get_len(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_len(cvmx_wqe_t * work)
 {
 	int len;
 
@@ -1153,7 +1148,7 @@ static inline int cvmx_wqe_get_len(cvmx_wqe_t *work)
 	return len;
 }
 
-static inline void cvmx_wqe_set_len(cvmx_wqe_t *work, int len)
+static inline void cvmx_wqe_set_len(cvmx_wqe_t * work, int len)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word1.cn78xx.len = len;
@@ -1165,63 +1160,58 @@ static inline void cvmx_wqe_set_len(cvmx_wqe_t *work, int len)
 
 /**
  * This function returns if there was L2/L1 errors detected in packet.
- * @param work	pointer to work queue entry
- * @return	error code -- If L2/L1 error was found in packet
+ * @work:	pointer to work queue entry
+ * Returns	error code -- If L2/L1 error was found in packet
  *		0 -- If no L2/L1 error was found in packet.
  */
-static inline int cvmx_wqe_get_rcv_err(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_rcv_err(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (wqe->word2.err_level == CVMX_PKI_ERRLEV_E_RE ||
 		    wqe->word2.err_level == CVMX_PKI_ERRLEV_E_LA)
-			return(wqe->word2.err_code);
-	}
-	else if (work->word2.snoip.rcv_error)
+			return (wqe->word2.err_code);
+	} else if (work->word2.snoip.rcv_error)
 		return (work->word2.snoip.err_code);
 	return 0;
 }
 
-static inline uint32_t cvmx_wqe_get_tag(cvmx_wqe_t *work)
+static inline uint32_t cvmx_wqe_get_tag(cvmx_wqe_t * work)
 {
 	return work->word1.tag;
 }
 
-static inline void cvmx_wqe_set_tag(cvmx_wqe_t *work, uint32_t tag)
+static inline void cvmx_wqe_set_tag(cvmx_wqe_t * work, uint32_t tag)
 {
 	work->word1.tag = tag;
 }
 
-static inline int cvmx_wqe_get_tt(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_tt(cvmx_wqe_t * work)
 {
 	return work->word1.tag_type;
 }
 
-static inline void cvmx_wqe_set_tt(cvmx_wqe_t *work, int tt)
+static inline void cvmx_wqe_set_tt(cvmx_wqe_t * work, int tt)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		work->word1.cn78xx.tag_type = (cvmx_pow_tag_type_t) tt;
-	}
-	else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
+	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		work->word1.cn68xx.tag_type = (cvmx_pow_tag_type_t) tt;
 		work->word1.cn68xx.zero_2 = 0;
-	}
-	else {
+	} else {
 		work->word1.cn38xx.tag_type = (cvmx_pow_tag_type_t) tt;
 		work->word1.cn38xx.zero_2 = 0;
 	}
 }
 
-static inline uint8_t cvmx_wqe_get_unused8(cvmx_wqe_t *work)
+static inline uint8_t cvmx_wqe_get_unused8(cvmx_wqe_t * work)
 {
 	uint8_t bits;
 
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-		{
+	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		bits = wqe->word2.rsvd_0;
-		}
-	else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE))
+	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE))
 		bits = work->word0.pip.cn68xx.unused1;
 	else
 		bits = work->word0.pip.cn38xx.unused;
@@ -1229,20 +1219,18 @@ static inline uint8_t cvmx_wqe_get_unused8(cvmx_wqe_t *work)
 	return bits;
 }
 
-static inline void cvmx_wqe_set_unused8(cvmx_wqe_t *work, uint8_t v)
+static inline void cvmx_wqe_set_unused8(cvmx_wqe_t * work, uint8_t v)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-		{
+	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		wqe->word2.rsvd_0 = v;
-		}
-	else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE))
+	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE))
 		work->word0.pip.cn68xx.unused1 = v;
 	else
 		work->word0.pip.cn38xx.unused = v;
 }
 
-static inline uint8_t cvmx_wqe_get_user_flags(cvmx_wqe_t *work)
+static inline uint8_t cvmx_wqe_get_user_flags(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return work->word0.pki.rsvd_2;
@@ -1250,13 +1238,13 @@ static inline uint8_t cvmx_wqe_get_user_flags(cvmx_wqe_t *work)
 		return 0;
 }
 
-static inline void cvmx_wqe_set_user_flags(cvmx_wqe_t *work, uint8_t v)
+static inline void cvmx_wqe_set_user_flags(cvmx_wqe_t * work, uint8_t v)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word0.pki.rsvd_2 = v;
 }
 
-static inline int cvmx_wqe_get_channel(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_channel(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return (work->word0.pki.channel);
@@ -1265,15 +1253,15 @@ static inline int cvmx_wqe_get_channel(cvmx_wqe_t *work)
 
 }
 
-static inline void cvmx_wqe_set_channel(cvmx_wqe_t *work, int channel)
+static inline void cvmx_wqe_set_channel(cvmx_wqe_t * work, int channel)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word0.pki.channel = channel;
 	else
-		cvmx_dprintf("%s: ERROR: not supported for model\n",__func__);
+		cvmx_dprintf("%s: ERROR: not supported for model\n", __func__);
 }
 
-static inline int cvmx_wqe_get_aura(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_aura(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return (work->word0.pki.aura);
@@ -1281,7 +1269,7 @@ static inline int cvmx_wqe_get_aura(cvmx_wqe_t *work)
 		return (work->packet_ptr.s.pool);
 }
 
-static inline void cvmx_wqe_set_aura(cvmx_wqe_t *work, int aura)
+static inline void cvmx_wqe_set_aura(cvmx_wqe_t * work, int aura)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word0.pki.aura = aura;
@@ -1289,14 +1277,14 @@ static inline void cvmx_wqe_set_aura(cvmx_wqe_t *work, int aura)
 		work->packet_ptr.s.pool = aura;
 }
 
-static inline int cvmx_wqe_get_style(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_style(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		return (work->word0.pki.style);
 	return 0;
 }
 
-static inline void cvmx_wqe_set_style(cvmx_wqe_t *work, int style)
+static inline void cvmx_wqe_set_style(cvmx_wqe_t * work, int style)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		work->word0.pki.style = style;
@@ -1306,14 +1294,14 @@ static inline void cvmx_wqe_set_style(cvmx_wqe_t *work, int style)
  * Return non-zero if the packet Layer-3 protocol is either IPv4 or IPv6.
  *
  */
-static inline int cvmx_wqe_is_l3_ip(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l3_ip(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		/* Match all 4 values for v4/v6 with.without options */
-		if((wqe->word2.lc_hdr_type & 0x1c) == CVMX_PKI_LTYPE_E_IP4)
+		if ((wqe->word2.lc_hdr_type & 0x1c) == CVMX_PKI_LTYPE_E_IP4)
 			return 1;
-		if((wqe->word2.le_hdr_type & 0x1c) == CVMX_PKI_LTYPE_E_IP4)
+		if ((wqe->word2.le_hdr_type & 0x1c) == CVMX_PKI_LTYPE_E_IP4)
 			return 1;
 		return 0;
 	} else
@@ -1321,52 +1309,48 @@ static inline int cvmx_wqe_is_l3_ip(cvmx_wqe_t *work)
 
 }
 
-static inline int cvmx_wqe_is_l3_ipv4(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l3_ipv4(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		/* Match 2 values - with/wotuout options */
-		if((wqe->word2.lc_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP4)
+		if ((wqe->word2.lc_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP4)
 			return 1;
-		if((wqe->word2.le_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP4)
+		if ((wqe->word2.le_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP4)
 			return 1;
 		return 0;
 	} else
-		return (
-			!work->word2.s_cn38xx.not_IP &&
-			!work->word2.s_cn38xx.is_v6
-			);
+		return (!work->word2.s_cn38xx.not_IP &&
+			!work->word2.s_cn38xx.is_v6);
 
 }
 
-static inline int cvmx_wqe_is_l3_ipv6(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l3_ipv6(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		/* Match 2 values - with/wotuout options */
-		if((wqe->word2.lc_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP6)
+		if ((wqe->word2.lc_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP6)
 			return 1;
-		if((wqe->word2.le_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP6)
+		if ((wqe->word2.le_hdr_type & 0x1e) == CVMX_PKI_LTYPE_E_IP6)
 			return 1;
 		return 0;
 	} else
-		return (
-			!work->word2.s_cn38xx.not_IP &&
-			work->word2.s_cn38xx.is_v6
-			);
+		return (!work->word2.s_cn38xx.not_IP &&
+			work->word2.s_cn38xx.is_v6);
 }
 
 /**
  * Return true if an IP packet has a Layer-4 protocol
  * as TCP or UDP. and is not fragmented.
  */
-static inline bool cvmx_wqe_is_l4_udp_or_tcp(cvmx_wqe_t *work)
+static inline bool cvmx_wqe_is_l4_udp_or_tcp(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
-		if (wqe->word2.lf_hdr_type  == CVMX_PKI_LTYPE_E_TCP)
+		if (wqe->word2.lf_hdr_type == CVMX_PKI_LTYPE_E_TCP)
 			return true;
-		if (wqe->word2.lf_hdr_type  == CVMX_PKI_LTYPE_E_UDP)
+		if (wqe->word2.lf_hdr_type == CVMX_PKI_LTYPE_E_UDP)
 			return true;
 		return false;
 	} else {
@@ -1376,60 +1360,59 @@ static inline bool cvmx_wqe_is_l4_udp_or_tcp(cvmx_wqe_t *work)
 	}
 }
 
-
-static inline int cvmx_wqe_is_l2_bcast(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l2_bcast(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return (wqe->word2.is_l2_bcast);
 	} else
 		return (work->word2.s_cn38xx.is_bcast);
 }
 
-static inline int cvmx_wqe_is_l2_mcast(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l2_mcast(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return (wqe->word2.is_l2_mcast);
 	} else
 		return (work->word2.s_cn38xx.is_mcast);
 }
 
-static inline void cvmx_wqe_set_l2_bcast(cvmx_wqe_t *work, bool bcast)
+static inline void cvmx_wqe_set_l2_bcast(cvmx_wqe_t * work, bool bcast)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		wqe->word2.is_l2_bcast = bcast;
 	} else
 		work->word2.s_cn38xx.is_bcast = bcast;
 }
 
-static inline void cvmx_wqe_set_l2_mcast(cvmx_wqe_t *work, bool mcast)
+static inline void cvmx_wqe_set_l2_mcast(cvmx_wqe_t * work, bool mcast)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		wqe->word2.is_l2_mcast = mcast;
 	} else
 		work->word2.s_cn38xx.is_mcast = mcast;
 }
 
-static inline int cvmx_wqe_is_l3_bcast(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l3_bcast(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return (wqe->word2.is_l3_bcast);
 	}
-	cvmx_dprintf("%s: ERROR: not supported for model\n",__func__);
+	cvmx_dprintf("%s: ERROR: not supported for model\n", __func__);
 	return 0;
 }
 
-static inline int cvmx_wqe_is_l3_mcast(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l3_mcast(cvmx_wqe_t * work)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)){
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return (wqe->word2.is_l3_mcast);
 	}
-	cvmx_dprintf("%s: ERROR: not supported for model\n",__func__);
+	cvmx_dprintf("%s: ERROR: not supported for model\n", __func__);
 	return 0;
 }
 
@@ -1438,14 +1421,14 @@ static inline int cvmx_wqe_is_l3_mcast(cvmx_wqe_t *work)
  * For 78XX it does not flag ipv4 options and ipv6 extensions.
  * For older chips if PIP_GBL_CTL was proviosned to flag ip4_otions and
  * ipv6 extension, it will be flag them.
- * @param work	pointer to work queue entry
- * @return	1 -- If IP error was found in packet
+ * @work:	pointer to work queue entry
+ * Returns	1 -- If IP error was found in packet
  *		0 -- If no IP error was found in packet.
  */
-static inline int cvmx_wqe_is_ip_exception(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_ip_exception(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (wqe->word2.err_level == CVMX_PKI_ERRLEV_E_LC)
 			return 1;
 		if (wqe->word2.err_level == CVMX_PKI_ERRLEV_E_LE)
@@ -1456,10 +1439,10 @@ static inline int cvmx_wqe_is_ip_exception(cvmx_wqe_t *work)
 		return work->word2.s.IP_exc;
 }
 
-static inline int cvmx_wqe_is_l4_error(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_l4_error(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (wqe->word2.err_level == CVMX_PKI_ERRLEV_E_LF)
 			return 1;
 		else
@@ -1468,19 +1451,19 @@ static inline int cvmx_wqe_is_l4_error(cvmx_wqe_t *work)
 		return work->word2.s.L4_error;
 }
 
-static inline int cvmx_wqe_is_vlan(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_vlan(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
-			return wqe->word2.vlan_valid;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
+		return wqe->word2.vlan_valid;
 	} else
 		return work->word2.s.vlan_valid;
 }
 
-static inline int cvmx_wqe_is_vlan_stacked(cvmx_wqe_t *work)
+static inline int cvmx_wqe_is_vlan_stacked(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return wqe->word2.vlan_stacked;
 	} else
 		return work->word2.s.vlan_stacked;
@@ -1498,21 +1481,15 @@ static inline int cvmx_wqe_is_vlan_stacked(cvmx_wqe_t *work)
  * If the packet data is only found inside the work queue entry,
  * a standard buffer pointer structure is created for it.
  */
-cvmx_buf_ptr_t cvmx_wqe_get_packet_ptr(cvmx_wqe_t *work);
+cvmx_buf_ptr_t cvmx_wqe_get_packet_ptr(cvmx_wqe_t * work);
 
-static inline int cvmx_wqe_get_bufs(cvmx_wqe_t *work)
+static inline int cvmx_wqe_get_bufs(cvmx_wqe_t * work)
 {
 	int bufs;
 
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
 		bufs = work->word0.pki.bufs;
 	else {
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-		/* Adjust for packet-in-WQE cases */
-		if (cvmx_unlikely(work->word2.s_cn38xx.bufs == 0 &&
-		    !work->word2.s.software))
-			(void) cvmx_wqe_get_packet_ptr(work);
-#endif
 		bufs = work->word2.s_cn38xx.bufs;
 	}
 
@@ -1529,16 +1506,16 @@ static inline int cvmx_wqe_get_bufs(cvmx_wqe_t *work)
  * It can also follow a call to cvmx_helper_free_packet_data()
  * to release the WQE after associated data was released.
  */
-void cvmx_wqe_free(cvmx_wqe_t *work);
+void cvmx_wqe_free(cvmx_wqe_t * work);
 
 /**
  * Check if a work entry has been intiated by software
  *
  */
-static inline bool cvmx_wqe_is_soft(cvmx_wqe_t *work)
+static inline bool cvmx_wqe_is_soft(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		return wqe->word2.software;
 	} else
 		return work->word2.s.software;
@@ -1550,20 +1527,18 @@ static inline bool cvmx_wqe_is_soft(cvmx_wqe_t *work)
  * The application data is copied into the work-queue entry,
  * if the space is sufficient.
  */
-extern cvmx_wqe_t * cvmx_wqe_soft_create(void *data_p, unsigned data_sz);
-
+extern cvmx_wqe_t *cvmx_wqe_soft_create(void *data_p, unsigned data_sz);
 
 /* Errata (PKI-20776) PKI_BUFLINK_S's are endian-swapped
    CN78XX pass 1.x has a bug where the packet pointer in each segment is
    written in the opposite endianness of the configured mode. Fix these
    here */
-static inline void cvmx_wqe_pki_errata_20776(cvmx_wqe_t *work)
+static inline void cvmx_wqe_pki_errata_20776(cvmx_wqe_t * work)
 {
 #ifndef __LITTLE_ENDIAN_BITFIELD
-	cvmx_wqe_78xx_t *wqe = (cvmx_wqe_78xx_t*) work;
+	cvmx_wqe_78xx_t *wqe = (cvmx_wqe_78xx_t *) work;
 
-	if (OCTEON_IS_MODEL(OCTEON_CN78XX_PASS1_X) && !wqe->pki_errata20776)
-	{
+	if (OCTEON_IS_MODEL(OCTEON_CN78XX_PASS1_X) && !wqe->pki_errata20776) {
 		uint64_t bufs;
 		cvmx_buf_ptr_pki_t buffer_next;
 
@@ -1572,9 +1547,9 @@ static inline void cvmx_wqe_pki_errata_20776(cvmx_wqe_t *work)
 		while (bufs > 1) {
 			cvmx_buf_ptr_pki_t next;
 			void *nextaddr = cvmx_phys_to_ptr(buffer_next.addr - 8);
-			memcpy (&next, nextaddr, sizeof(next));
+			memcpy(&next, nextaddr, sizeof(next));
 			next.u64 = __builtin_bswap64(next.u64);
-			memcpy (nextaddr, &next, sizeof(next));
+			memcpy(nextaddr, &next, sizeof(next));
 			buffer_next = next;
 			bufs--;
 		}
@@ -1587,11 +1562,11 @@ static inline void cvmx_wqe_pki_errata_20776(cvmx_wqe_t *work)
    CN78XX pass 1.x has a bug where the packet pointer in each segment is
    written in the opposite endianness of the configured mode. Fix these
    here */
-static inline void cvmx_wqe_pko_errata_22235(cvmx_buf_ptr_pki_t packet_ptr, unsigned len)
+static inline void cvmx_wqe_pko_errata_22235(cvmx_buf_ptr_pki_t packet_ptr,
+					     unsigned len)
 {
 #ifdef __LITTLE_ENDIAN_BITFIELD
-	if (OCTEON_IS_MODEL(OCTEON_CN78XX_PASS1_X))
-	{
+	if (OCTEON_IS_MODEL(OCTEON_CN78XX_PASS1_X)) {
 		unsigned total_len = 0;
 		cvmx_buf_ptr_pki_t buffer_next;
 		buffer_next = packet_ptr;
@@ -1599,7 +1574,7 @@ static inline void cvmx_wqe_pko_errata_22235(cvmx_buf_ptr_pki_t packet_ptr, unsi
 		while (total_len < len) {
 			cvmx_buf_ptr_pki_t next;
 			void *nextaddr = cvmx_phys_to_ptr(buffer_next.addr - 8);
-			buffer_next.u64 = *(unsigned long long*)(nextaddr);
+			buffer_next.u64 = *(unsigned long long *)(nextaddr);
 			total_len += buffer_next.size;
 			memcpy(&next, nextaddr, sizeof(next));
 			next.u64 = __builtin_bswap64(next.u64);
@@ -1609,7 +1584,6 @@ static inline void cvmx_wqe_pko_errata_22235(cvmx_buf_ptr_pki_t packet_ptr, unsi
 #endif
 }
 
-
 /**
  * @INTERNAL
  *
@@ -1617,23 +1591,24 @@ static inline void cvmx_wqe_pko_errata_22235(cvmx_buf_ptr_pki_t packet_ptr, unsi
  *
  * NOTE: Provisional, may be superceded.
  */
-static inline cvmx_buf_ptr_pki_t cvmx_wqe_get_pki_pkt_ptr(cvmx_wqe_t *work)
+static inline cvmx_buf_ptr_pki_t cvmx_wqe_get_pki_pkt_ptr(cvmx_wqe_t * work)
 {
-	cvmx_wqe_78xx_t * wqe = (cvmx_wqe_78xx_t *) work;
+	cvmx_wqe_78xx_t *wqe = (cvmx_wqe_78xx_t *) work;
 	if (!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_buf_ptr_pki_t x = {0};
+		cvmx_buf_ptr_pki_t x = { 0 };
 		return x;
 	}
 	cvmx_wqe_pki_errata_20776(work);
 	return wqe->packet_ptr;
 }
+
 /**
  * Set the buffer segment count for a packet.
  *
- * @return Returns the actual resulting value in the WQE fielda
+ * Returns Returns the actual resulting value in the WQE fielda
  *
  */
-static inline unsigned cvmx_wqe_set_bufs(cvmx_wqe_t *work, unsigned bufs)
+static inline unsigned cvmx_wqe_set_bufs(cvmx_wqe_t * work, unsigned bufs)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		work->word0.pki.bufs = bufs;
@@ -1648,11 +1623,11 @@ static inline unsigned cvmx_wqe_set_bufs(cvmx_wqe_t *work, unsigned bufs)
  * Get the offset of Layer-3 header,
  * only supported when Layer-3 protocol is IPv4 or IPv6.
  *
- * @return Returns the offset, or 0 if the offset is not known or unsupported.
+ * Returns Returns the offset, or 0 if the offset is not known or unsupported.
  *
  * FIXME: Assuming word4 is present.
  */
-static inline unsigned cvmx_wqe_get_l3_offset(cvmx_wqe_t *work)
+static inline unsigned cvmx_wqe_get_l3_offset(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
@@ -1671,11 +1646,12 @@ static inline unsigned cvmx_wqe_get_l3_offset(cvmx_wqe_t *work)
  * or when the Layer-2 header length is modified, and
  * a subsequent recalculation of checksums is anticipated.
  *
- * @return Returns the actual value of the work entry offset field.
+ * Returns Returns the actual value of the work entry offset field.
  *
  * FIXME: Assuming word4 is present.
  */
-static inline unsigned cvmx_wqe_set_l3_offset(cvmx_wqe_t *work, unsigned ip_off)
+static inline unsigned cvmx_wqe_set_l3_offset(cvmx_wqe_t * work,
+					      unsigned ip_off)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
@@ -1697,7 +1673,7 @@ static inline unsigned cvmx_wqe_set_l3_offset(cvmx_wqe_t *work, unsigned ip_off)
  *
  * FIXME: Add IPV4_OPT handling based on L3 header length.
  */
-static inline void cvmx_wqe_set_l3_ipv4(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_l3_ipv4(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
@@ -1717,17 +1693,17 @@ static inline void cvmx_wqe_set_l3_ipv4(cvmx_wqe_t *work, bool set)
  *
  * FIXME: Add IPV6_OPT handling based on presence of extended headers.
  */
-static inline void cvmx_wqe_set_l3_ipv6(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_l3_ipv6(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (set)
 			wqe->word2.lc_hdr_type = CVMX_PKI_LTYPE_E_IP6;
 		else
 			wqe->word2.lc_hdr_type = CVMX_PKI_LTYPE_E_NONE;
 	} else {
 		work->word2.s_cn38xx.not_IP = !set;
-		if(set)
+		if (set)
 			work->word2.s_cn38xx.is_v6 = 1;
 	}
 
@@ -1736,14 +1712,14 @@ static inline void cvmx_wqe_set_l3_ipv6(cvmx_wqe_t *work, bool set)
 /**
  * Set a packet Layer-4 protocol type to UDP.
  */
-static inline void cvmx_wqe_set_l4_udp(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_l4_udp(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (set)
-			wqe->word2.lf_hdr_type  = CVMX_PKI_LTYPE_E_UDP;
+			wqe->word2.lf_hdr_type = CVMX_PKI_LTYPE_E_UDP;
 		else
-			wqe->word2.lf_hdr_type  = CVMX_PKI_LTYPE_E_NONE;
+			wqe->word2.lf_hdr_type = CVMX_PKI_LTYPE_E_NONE;
 	} else {
 		if (!work->word2.s_cn38xx.not_IP)
 			work->word2.s_cn38xx.tcp_or_udp = set;
@@ -1754,14 +1730,14 @@ static inline void cvmx_wqe_set_l4_udp(cvmx_wqe_t *work, bool set)
  * Set a packet Layer-4 protocol type to TCP.
  *
  */
-static inline void cvmx_wqe_set_l4_tcp(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_l4_tcp(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
 		if (set)
-			wqe->word2.lf_hdr_type  = CVMX_PKI_LTYPE_E_TCP;
+			wqe->word2.lf_hdr_type = CVMX_PKI_LTYPE_E_TCP;
 		else
-			wqe->word2.lf_hdr_type  = CVMX_PKI_LTYPE_E_NONE;
+			wqe->word2.lf_hdr_type = CVMX_PKI_LTYPE_E_NONE;
 	} else {
 		if (!work->word2.s_cn38xx.not_IP)
 			work->word2.s_cn38xx.tcp_or_udp = set;
@@ -1771,10 +1747,10 @@ static inline void cvmx_wqe_set_l4_tcp(cvmx_wqe_t *work, bool set)
 /**
  * Set the "software" flag in a work entry.
  */
-static inline void cvmx_wqe_set_soft(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_soft(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_wqe_78xx_t* wqe = (void *)work;
+		cvmx_wqe_78xx_t *wqe = (void *)work;
 		wqe->word2.software = set;
 	} else {
 		work->word2.s.software = set;
@@ -1784,7 +1760,7 @@ static inline void cvmx_wqe_set_soft(cvmx_wqe_t *work, bool set)
 /**
  * Return true if the packet is an IP fragment.
  */
-static inline bool  cvmx_wqe_is_l3_frag(cvmx_wqe_t *work)
+static inline bool cvmx_wqe_is_l3_frag(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
@@ -1800,7 +1776,7 @@ static inline bool  cvmx_wqe_is_l3_frag(cvmx_wqe_t *work)
 /**
  * Set the indicator that the packet is an fragmented IP packet.
  */
-static inline void cvmx_wqe_set_l3_frag(cvmx_wqe_t *work, bool set)
+static inline void cvmx_wqe_set_l3_frag(cvmx_wqe_t * work, bool set)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
@@ -1814,11 +1790,11 @@ static inline void cvmx_wqe_set_l3_frag(cvmx_wqe_t *work, bool set)
 /**
  * Return true if the packet Layer-3 protocol is ARP.
  */
-static inline bool cvmx_wqe_is_l3_arp(cvmx_wqe_t *work)
+static inline bool cvmx_wqe_is_l3_arp(cvmx_wqe_t * work)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		cvmx_wqe_78xx_t *wqe = (void *)work;
-		return (wqe->word2.lc_hdr_type  == CVMX_PKI_LTYPE_E_ARP);
+		return (wqe->word2.lc_hdr_type == CVMX_PKI_LTYPE_E_ARP);
 	} else {
 		if (work->word2.s_cn38xx.not_IP)
 			return (work->word2.snoip.is_arp != 0);
@@ -1826,11 +1802,5 @@ static inline bool cvmx_wqe_is_l3_arp(cvmx_wqe_t *work)
 			return false;
 	}
 }
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 
 #endif /* __CVMX_WQE_H__ */

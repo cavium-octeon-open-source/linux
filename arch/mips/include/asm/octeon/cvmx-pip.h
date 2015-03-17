@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2010  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2010 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -42,7 +30,6 @@
  *
  * Interface to the hardware Packet Input Processing unit.
  *
- * <hr>$Revision: 106447 $<hr>
  */
 
 #ifndef __CVMX_PIP_H__
@@ -51,19 +38,11 @@
 #include "cvmx-wqe.h"
 #include "cvmx-pki.h"
 #include "cvmx-helper-pki.h"
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include "cvmx-pip-defs.h"
-#endif
 
 #include "cvmx-helper.h"
 #include "cvmx-helper-util.h"
 #include "cvmx-pki-resources.h"
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 #define CVMX_PIP_NUM_INPUT_PORTS                46
 #define CVMX_PIP_NUM_WATCHERS                   8
@@ -297,49 +276,54 @@ enum cvmx_pki_pcam_match {
 
 /* CSR typedefs have been moved to cvmx-pip-defs.h */
 static inline int cvmx_pip_config_watcher(int index, int type, uint16_t match,
-		    uint16_t mask, int grp, int qos)
+					  uint16_t mask, int grp, int qos)
 {
 	if (index >= CVMX_PIP_NUM_WATCHERS) {
-		cvmx_dprintf("ERROR: pip watcher %d is > than supported\n", index);
+		cvmx_dprintf("ERROR: pip watcher %d is > than supported\n",
+			     index);
 		return -1;
 	}
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		/* store in software for now, only when the watcher is enabled program the entry*/
+		/* store in software for now, only when the watcher is enabled program the entry */
 		if (type == CVMX_PIP_QOS_WATCH_PROTNH) {
 			qos_watcher[index].field = CVMX_PKI_PCAM_TERM_L3_FLAGS;
-			qos_watcher[index].data = (uint32_t)(match << 16);
-			qos_watcher[index].data_mask = (uint32_t)(mask << 16);
+			qos_watcher[index].data = (uint32_t) (match << 16);
+			qos_watcher[index].data_mask = (uint32_t) (mask << 16);
 			qos_watcher[index].advance = 0;
 		} else if (type == CVMX_PIP_QOS_WATCH_TCP) {
 			qos_watcher[index].field = CVMX_PKI_PCAM_TERM_L4_PORT;
 			qos_watcher[index].data = 0x060000;
-			qos_watcher[index].data |= (uint32_t)match;
-			qos_watcher[index].data_mask = (uint32_t)(mask);
+			qos_watcher[index].data |= (uint32_t) match;
+			qos_watcher[index].data_mask = (uint32_t) (mask);
 			qos_watcher[index].advance = 0;
 		} else if (type == CVMX_PIP_QOS_WATCH_UDP) {
 			qos_watcher[index].field = CVMX_PKI_PCAM_TERM_L4_PORT;
 			qos_watcher[index].data = 0x110000;
-			qos_watcher[index].data |= (uint32_t)match;
-			qos_watcher[index].data_mask = (uint32_t)(mask);
+			qos_watcher[index].data |= (uint32_t) match;
+			qos_watcher[index].data_mask = (uint32_t) (mask);
 			qos_watcher[index].advance = 0;
-		} else if (type == 0x4 /*CVMX_PIP_QOS_WATCH_ETHERTYPE*/) {
+		} else if (type == 0x4 /*CVMX_PIP_QOS_WATCH_ETHERTYPE */ ) {
 			qos_watcher[index].field = CVMX_PKI_PCAM_TERM_ETHTYPE0;
 			if (match == 0x8100) {
-				cvmx_dprintf("ERROR: default vlan entry already exist, cant set watcher\n");
+				cvmx_dprintf
+				    ("ERROR: default vlan entry already exist, cant set watcher\n");
 				return -1;
 			}
-			qos_watcher[index].data = (uint32_t)(match << 16);
-			qos_watcher[index].data_mask = (uint32_t)(mask << 16);
+			qos_watcher[index].data = (uint32_t) (match << 16);
+			qos_watcher[index].data_mask = (uint32_t) (mask << 16);
 			qos_watcher[index].advance = 4;
 		} else {
-			cvmx_dprintf("ERROR: Unsupported watcher type %d\n", type);
+			cvmx_dprintf("ERROR: Unsupported watcher type %d\n",
+				     type);
 			return -1;
 		}
 		if (grp >= 32) {
-			cvmx_dprintf("ERROR: grp %d out of range for backward compat 78xx\n", grp);
+			cvmx_dprintf
+			    ("ERROR: grp %d out of range for backward compat 78xx\n",
+			     grp);
 			return -1;
 		}
-		qos_watcher[index].sso_grp = (uint8_t)(grp << 3 | qos);
+		qos_watcher[index].sso_grp = (uint8_t) (grp << 3 | qos);
 		qos_watcher[index].configured = 1;
 	} else {
 		/* Implement it later */
@@ -348,7 +332,7 @@ static inline int cvmx_pip_config_watcher(int index, int type, uint16_t match,
 }
 
 static inline int __cvmx_pip_set_tag_type(int node, int style,
-	int tag_type, int field)
+					  int tag_type, int field)
 {
 	struct cvmx_pki_style_config style_cfg;
 	int style_num;
@@ -358,14 +342,16 @@ static inline int __cvmx_pip_set_tag_type(int node, int style,
 	struct cvmx_pki_pcam_action pcam_action;
 
 	/* All other style parameters remain same except tag type */
-	cvmx_pki_read_style_config(node, style, CVMX_PKI_CLUSTER_ALL, &style_cfg);
+	cvmx_pki_read_style_config(node, style, CVMX_PKI_CLUSTER_ALL,
+				   &style_cfg);
 	style_cfg.parm_cfg.tag_type = tag_type;
 	style_num = cvmx_pki_style_alloc(node, -1);
 	if (style_num < 0) {
 		cvmx_dprintf("ERROR: style not available to set tag type\n");
 		return -1;
 	}
-	cvmx_pki_write_style_config(node, style_num, CVMX_PKI_CLUSTER_ALL, &style_cfg);
+	cvmx_pki_write_style_config(node, style_num, CVMX_PKI_CLUSTER_ALL,
+				    &style_cfg);
 	memset(&pcam_input, 0, sizeof(pcam_input));
 	memset(&pcam_action, 0, sizeof(pcam_action));
 	pcam_input.style = style;
@@ -376,18 +362,23 @@ static inline int __cvmx_pip_set_tag_type(int node, int style,
 		pcam_input.data = 0x08000000;
 		pcam_input.data_mask = 0xffff0000;
 		pcam_action.pointer_advance = 4;
-		/* legacy will write to all clusters*/
+		/* legacy will write to all clusters */
 		bank = 0;
-		pcam_offset = cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY, bank, CVMX_PKI_CLUSTER_ALL);
+		pcam_offset =
+		    cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY,
+					      bank, CVMX_PKI_CLUSTER_ALL);
 		if (pcam_offset < 0) {
-			cvmx_dprintf("ERROR: pcam entry not available to enable qos watcher\n");
+			cvmx_dprintf
+			    ("ERROR: pcam entry not available to enable qos watcher\n");
 			cvmx_pki_style_free(node, style_num);
 			return -1;
 		}
 		pcam_action.parse_mode_chg = CVMX_PKI_PARSE_NO_CHG;
 		pcam_action.layer_type_set = CVMX_PKI_LTYPE_E_NONE;
-		pcam_action.style_add = (uint8_t)(style_num - style);
-		cvmx_pki_pcam_write_entry(node, pcam_offset, CVMX_PKI_CLUSTER_ALL, pcam_input, pcam_action);
+		pcam_action.style_add = (uint8_t) (style_num - style);
+		cvmx_pki_pcam_write_entry(node, pcam_offset,
+					  CVMX_PKI_CLUSTER_ALL, pcam_input,
+					  pcam_action);
 		field = CVMX_PKI_PCAM_MATCH_IPV6;
 	}
 	if (field == CVMX_PKI_PCAM_MATCH_IPV4) {
@@ -411,21 +402,25 @@ static inline int __cvmx_pip_set_tag_type(int node, int style,
 	}
 	pcam_action.parse_mode_chg = CVMX_PKI_PARSE_NO_CHG;
 	pcam_action.layer_type_set = CVMX_PKI_LTYPE_E_NONE;
-	pcam_action.style_add = (uint8_t)(style_num - style);
+	pcam_action.style_add = (uint8_t) (style_num - style);
 	bank = pcam_input.field & 0x01;
-	pcam_offset = cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY, bank, CVMX_PKI_CLUSTER_ALL);
+	pcam_offset =
+	    cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY, bank,
+				      CVMX_PKI_CLUSTER_ALL);
 	if (pcam_offset < 0) {
-		cvmx_dprintf("ERROR: pcam entry not available to enable qos watcher\n");
+		cvmx_dprintf
+		    ("ERROR: pcam entry not available to enable qos watcher\n");
 		cvmx_pki_style_free(node, style_num);
 		return -1;
 	}
-	cvmx_pki_pcam_write_entry(node, pcam_offset, CVMX_PKI_CLUSTER_ALL, pcam_input, pcam_action);
+	cvmx_pki_pcam_write_entry(node, pcam_offset, CVMX_PKI_CLUSTER_ALL,
+				  pcam_input, pcam_action);
 	return style_num;
-	}
+}
 
 /* Only for legacy internal use */
 static inline int __cvmx_pip_enable_watcher_78xx(int node, int index, int style)
-	{
+{
 	struct cvmx_pki_style_config style_cfg;
 	struct cvmx_pki_qpg_config qpg_cfg;
 	struct cvmx_pki_pcam_input pcam_input;
@@ -436,34 +431,43 @@ static inline int __cvmx_pip_enable_watcher_78xx(int node, int index, int style)
 	int bank;
 
 	if (!qos_watcher[index].configured) {
-		cvmx_dprintf("ERROR: qos watcher %d should be configured before enable\n", index);
+		cvmx_dprintf
+		    ("ERROR: qos watcher %d should be configured before enable\n",
+		     index);
 		return -1;
 	}
 	/* All other style parameters remain same except grp and qos and qps base */
-	cvmx_pki_read_style_config(node, style, CVMX_PKI_CLUSTER_ALL, &style_cfg);
+	cvmx_pki_read_style_config(node, style, CVMX_PKI_CLUSTER_ALL,
+				   &style_cfg);
 	cvmx_pki_read_qpg_entry(node, style_cfg.parm_cfg.qpg_base, &qpg_cfg);
 	qpg_cfg.grp_ok = qos_watcher[index].sso_grp;
 	qpg_cfg.grp_bad = qos_watcher[index].sso_grp;
 	qpg_offset = cvmx_helper_pki_set_qpg_entry(node, &qpg_cfg);
 	if (qpg_offset == -1) {
-		cvmx_dprintf("Warning: no new qpg entry available to enable watcher\n");
+		cvmx_dprintf
+		    ("Warning: no new qpg entry available to enable watcher\n");
 		return -1;
 	}
 	/* try to reserve the style, if it is not configured already, reserve
-	and configure it */
+	   and configure it */
 	style_cfg.parm_cfg.qpg_base = qpg_offset;
 	style_num = cvmx_pki_style_alloc(node, -1);
 	if (style_num < 0) {
-		cvmx_dprintf("ERROR: style not available to enable qos watcher\n");
+		cvmx_dprintf
+		    ("ERROR: style not available to enable qos watcher\n");
 		cvmx_pki_qpg_entry_free(node, qpg_offset, 1);
 		return -1;
 	}
-	cvmx_pki_write_style_config(node, style_num, CVMX_PKI_CLUSTER_ALL, &style_cfg);
-	/* legacy will write to all clusters*/
+	cvmx_pki_write_style_config(node, style_num, CVMX_PKI_CLUSTER_ALL,
+				    &style_cfg);
+	/* legacy will write to all clusters */
 	bank = qos_watcher[index].field & 0x01;
-	pcam_offset = cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY, bank, CVMX_PKI_CLUSTER_ALL);
+	pcam_offset =
+	    cvmx_pki_pcam_entry_alloc(node, CVMX_PKI_FIND_AVAL_ENTRY, bank,
+				      CVMX_PKI_CLUSTER_ALL);
 	if (pcam_offset < 0) {
-		cvmx_dprintf("ERROR: pcam entry not available to enable qos watcher\n");
+		cvmx_dprintf
+		    ("ERROR: pcam entry not available to enable qos watcher\n");
 		cvmx_pki_style_free(node, style_num);
 		cvmx_pki_qpg_entry_free(node, qpg_offset, 1);
 		return -1;
@@ -478,21 +482,24 @@ static inline int __cvmx_pip_enable_watcher_78xx(int node, int index, int style)
 	pcam_input.data_mask = qos_watcher[index].data_mask;
 	pcam_action.parse_mode_chg = CVMX_PKI_PARSE_NO_CHG;
 	pcam_action.layer_type_set = CVMX_PKI_LTYPE_E_NONE;
-	pcam_action.style_add = (uint8_t)(style_num - style);
+	pcam_action.style_add = (uint8_t) (style_num - style);
 	pcam_action.pointer_advance = qos_watcher[index].advance;
-	cvmx_pki_pcam_write_entry(node, pcam_offset, CVMX_PKI_CLUSTER_ALL, pcam_input, pcam_action);
+	cvmx_pki_pcam_write_entry(node, pcam_offset, CVMX_PKI_CLUSTER_ALL,
+				  pcam_input, pcam_action);
 	return 0;
-	}
+}
 
 /**
  * Configure an ethernet input port
  *
- * @param ipd_port Port number to configure
- * @param port_cfg Port hardware configuration
- * @param port_tag_cfg Port POW tagging configuration
+ * @ipd_port: Port number to configure
+ * @port_cfg: Port hardware configuration
+ * @port_tag_cfg: Port POW tagging configuration
  */
-static inline void cvmx_pip_config_port(uint64_t ipd_port, cvmx_pip_prt_cfgx_t port_cfg, cvmx_pip_prt_tagx_t port_tag_cfg)
-	{
+static inline void cvmx_pip_config_port(uint64_t ipd_port,
+					cvmx_pip_prt_cfgx_t port_cfg,
+					cvmx_pip_prt_tagx_t port_tag_cfg)
+{
 	struct cvmx_pki_qpg_config qpg_cfg;
 	int qpg_offset;
 	uint8_t tcp_tag = 0xff;
@@ -505,141 +512,210 @@ static inline void cvmx_pip_config_port(uint64_t ipd_port, cvmx_pip_prt_cfgx_t p
 
 		cvmx_pki_get_port_config(ipd_port, &pki_prt_cfg);
 		style = pki_prt_cfg.pkind_cfg.initial_style;
-		if (port_cfg.s.ih_pri || port_cfg.s.vlan_len || port_cfg.s.pad_len)
-			cvmx_dprintf("Warning: 78xx: use different config for this option\n");
-		pki_prt_cfg.style_cfg.parm_cfg.minmax_sel = port_cfg.s.len_chk_sel;
+		if (port_cfg.s.ih_pri || port_cfg.s.vlan_len
+		    || port_cfg.s.pad_len)
+			cvmx_dprintf
+			    ("Warning: 78xx: use different config for this option\n");
+		pki_prt_cfg.style_cfg.parm_cfg.minmax_sel =
+		    port_cfg.s.len_chk_sel;
 		pki_prt_cfg.style_cfg.parm_cfg.lenerr_en = port_cfg.s.lenerr_en;
 		pki_prt_cfg.style_cfg.parm_cfg.maxerr_en = port_cfg.s.maxerr_en;
 		pki_prt_cfg.style_cfg.parm_cfg.minerr_en = port_cfg.s.minerr_en;
 		pki_prt_cfg.style_cfg.parm_cfg.fcs_chk = port_cfg.s.crc_en;
 		if (port_cfg.s.grp_wat || port_cfg.s.qos_wat ||
 		    port_cfg.s.grp_wat_47 || port_cfg.s.qos_wat_47) {
-			uint8_t group_mask = (uint8_t)(port_cfg.s.grp_wat | (uint8_t)(port_cfg.s.grp_wat_47 << 4));
-			uint8_t qos_mask = (uint8_t)(port_cfg.s.qos_wat | (uint8_t)(port_cfg.s.qos_wat_47 << 4));
+			uint8_t group_mask =
+			    (uint8_t) (port_cfg.s.
+				       grp_wat | (uint8_t) (port_cfg.s.
+							    grp_wat_47 << 4));
+			uint8_t qos_mask =
+			    (uint8_t) (port_cfg.s.
+				       qos_wat | (uint8_t) (port_cfg.s.
+							    qos_wat_47 << 4));
 			int i;
-			for (i=0; i<CVMX_PIP_NUM_WATCHERS; i++) {
-				if ((group_mask & (1 << i)) || (qos_mask & (1 << i)))
-					__cvmx_pip_enable_watcher_78xx(xp.node, i, style);
+			for (i = 0; i < CVMX_PIP_NUM_WATCHERS; i++) {
+				if ((group_mask & (1 << i))
+				    || (qos_mask & (1 << i)))
+					__cvmx_pip_enable_watcher_78xx(xp.node,
+								       i,
+								       style);
 			}
 		}
 		if (port_tag_cfg.s.tag_mode) {
 			if (OCTEON_IS_MODEL(OCTEON_CN78XX_PASS1_X))
-				cvmx_printf("Warning: mask tag is not supported in 78xx pass1\n");
-			else {}
-				/* need to implement for 78xx*/
+				cvmx_printf
+				    ("Warning: mask tag is not supported in 78xx pass1\n");
+			else {
+			}
+			/* need to implement for 78xx */
 		}
 		if (port_cfg.s.tag_inc)
-			cvmx_dprintf("Warning: 78xx uses differnet method for tag generation\n");
+			cvmx_dprintf
+			    ("Warning: 78xx uses differnet method for tag generation\n");
 		pki_prt_cfg.style_cfg.parm_cfg.rawdrp = port_cfg.s.rawdrp;
 		pki_prt_cfg.pkind_cfg.parse_en.inst_hdr = port_cfg.s.inst_hdr;
 		if (port_cfg.s.hg_qos)
-			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos = CVMX_PKI_QPG_QOS_HIGIG;
+			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos =
+			    CVMX_PKI_QPG_QOS_HIGIG;
 		else if (port_cfg.s.qos_vlan)
-			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos = CVMX_PKI_QPG_QOS_VLAN;
+			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos =
+			    CVMX_PKI_QPG_QOS_VLAN;
 		else if (port_cfg.s.qos_diff)
-			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos = CVMX_PKI_QPG_QOS_DIFFSERV;
+			pki_prt_cfg.style_cfg.parm_cfg.qpg_qos =
+			    CVMX_PKI_QPG_QOS_DIFFSERV;
 		if (port_cfg.s.qos_vod)
-			cvmx_dprintf("Warning: 78xx needs pcam entries installed to achieve qos_vod\n");
+			cvmx_dprintf
+			    ("Warning: 78xx needs pcam entries installed to achieve qos_vod\n");
 		if (port_cfg.s.qos) {
 			cvmx_pki_read_qpg_entry(xp.node,
-				pki_prt_cfg.style_cfg.parm_cfg.qpg_base, &qpg_cfg);
+						pki_prt_cfg.style_cfg.parm_cfg.
+						qpg_base, &qpg_cfg);
 			qpg_cfg.grp_ok |= port_cfg.s.qos;
 			qpg_cfg.grp_bad |= port_cfg.s.qos;
-			qpg_offset = cvmx_helper_pki_set_qpg_entry(xp.node, &qpg_cfg);
+			qpg_offset =
+			    cvmx_helper_pki_set_qpg_entry(xp.node, &qpg_cfg);
 			if (qpg_offset == -1)
-				cvmx_dprintf("Warning: no new qpg entry available, will not modify qos\n");
+				cvmx_dprintf
+				    ("Warning: no new qpg entry available, will not modify qos\n");
 			else
-				pki_prt_cfg.style_cfg.parm_cfg.qpg_base = qpg_offset;
+				pki_prt_cfg.style_cfg.parm_cfg.qpg_base =
+				    qpg_offset;
 		}
 		if (port_tag_cfg.s.grp != pki_dflt_sso_grp[xp.node].group) {
 			cvmx_pki_read_qpg_entry(xp.node,
-					pki_prt_cfg.style_cfg.parm_cfg.qpg_base, &qpg_cfg);
-			qpg_cfg.grp_ok |= (uint8_t)(port_tag_cfg.s.grp << 3);
-			qpg_cfg.grp_bad |= (uint8_t)(port_tag_cfg.s.grp << 3);
-			qpg_offset = cvmx_helper_pki_set_qpg_entry(xp.node, &qpg_cfg);
+						pki_prt_cfg.style_cfg.parm_cfg.
+						qpg_base, &qpg_cfg);
+			qpg_cfg.grp_ok |= (uint8_t) (port_tag_cfg.s.grp << 3);
+			qpg_cfg.grp_bad |= (uint8_t) (port_tag_cfg.s.grp << 3);
+			qpg_offset =
+			    cvmx_helper_pki_set_qpg_entry(xp.node, &qpg_cfg);
 			if (qpg_offset == -1)
-				cvmx_dprintf("Warning: no new qpg entry available, will not modify group\n");
+				cvmx_dprintf
+				    ("Warning: no new qpg entry available, will not modify group\n");
 			else
-				pki_prt_cfg.style_cfg.parm_cfg.qpg_base = qpg_offset;
+				pki_prt_cfg.style_cfg.parm_cfg.qpg_base =
+				    qpg_offset;
 		}
 		pki_prt_cfg.pkind_cfg.parse_en.dsa_en = port_cfg.s.dsa_en;
 		pki_prt_cfg.pkind_cfg.parse_en.hg_en = port_cfg.s.higig_en;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_c_src = port_tag_cfg.s.ip6_src_flag |
-				port_tag_cfg.s.ip4_src_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_c_dst = port_tag_cfg.s.ip6_dst_flag |
-				port_tag_cfg.s.ip4_dst_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.ip_prot_nexthdr = port_tag_cfg.s.ip6_nxth_flag |
-				port_tag_cfg.s.ip4_pctl_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_d_src = port_tag_cfg.s.ip6_sprt_flag |
-				port_tag_cfg.s.ip4_sprt_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_d_dst = port_tag_cfg.s.ip6_dprt_flag |
-				port_tag_cfg.s.ip4_dprt_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.input_port = port_tag_cfg.s.inc_prt_flag;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.first_vlan = port_tag_cfg.s.inc_vlan;
-		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.second_vlan = port_tag_cfg.s.inc_vs;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_c_src =
+		    port_tag_cfg.s.ip6_src_flag | port_tag_cfg.s.ip4_src_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_c_dst =
+		    port_tag_cfg.s.ip6_dst_flag | port_tag_cfg.s.ip4_dst_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.ip_prot_nexthdr =
+		    port_tag_cfg.s.ip6_nxth_flag | port_tag_cfg.s.ip4_pctl_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_d_src =
+		    port_tag_cfg.s.ip6_sprt_flag | port_tag_cfg.s.ip4_sprt_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.layer_d_dst =
+		    port_tag_cfg.s.ip6_dprt_flag | port_tag_cfg.s.ip4_dprt_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.input_port =
+		    port_tag_cfg.s.inc_prt_flag;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.first_vlan =
+		    port_tag_cfg.s.inc_vlan;
+		pki_prt_cfg.style_cfg.tag_cfg.tag_fields.second_vlan =
+		    port_tag_cfg.s.inc_vs;
 
-		if (port_tag_cfg.s.tcp6_tag_type == port_tag_cfg.s.tcp4_tag_type)
+		if (port_tag_cfg.s.tcp6_tag_type ==
+		    port_tag_cfg.s.tcp4_tag_type)
 			tcp_tag = port_tag_cfg.s.tcp6_tag_type;
 		if (port_tag_cfg.s.ip6_tag_type == port_tag_cfg.s.ip4_tag_type)
 			ip_tag = port_tag_cfg.s.ip6_tag_type;
-		pki_prt_cfg.style_cfg.parm_cfg.tag_type = port_tag_cfg.s.non_tag_type;
+		pki_prt_cfg.style_cfg.parm_cfg.tag_type =
+		    port_tag_cfg.s.non_tag_type;
 		if (tcp_tag == ip_tag && tcp_tag == port_tag_cfg.s.non_tag_type)
 			pki_prt_cfg.style_cfg.parm_cfg.tag_type = tcp_tag;
 		else if (tcp_tag == ip_tag) {
 			/* allocate and copy style */
 			/* modify tag type */
-			/*pcam entry for ip6 && ip4 match*/
+			/*pcam entry for ip6 && ip4 match */
 			/* default is non tag type */
-			__cvmx_pip_set_tag_type(xp.node, style, ip_tag, CVMX_PKI_PCAM_MATCH_IP);
-		}
-		else if (ip_tag == port_tag_cfg.s.non_tag_type)
-		{
+			__cvmx_pip_set_tag_type(xp.node, style, ip_tag,
+						CVMX_PKI_PCAM_MATCH_IP);
+		} else if (ip_tag == port_tag_cfg.s.non_tag_type) {
 			/* allocate and copy style */
 			/* modify tag type */
-			/*pcam entry for tcp6 & tcp4 match*/
+			/*pcam entry for tcp6 & tcp4 match */
 			/* default is non tag type */
-			__cvmx_pip_set_tag_type(xp.node, style, tcp_tag, CVMX_PKI_PCAM_MATCH_TCP);
-		}
-		else {
+			__cvmx_pip_set_tag_type(xp.node, style, tcp_tag,
+						CVMX_PKI_PCAM_MATCH_TCP);
+		} else {
 			if (ip_tag != 0xaa) {
-				nstyle = __cvmx_pip_set_tag_type(xp.node, style, ip_tag, CVMX_PKI_PCAM_MATCH_IP);
+				nstyle =
+				    __cvmx_pip_set_tag_type(xp.node, style,
+							    ip_tag,
+							    CVMX_PKI_PCAM_MATCH_IP);
 				if (tcp_tag != 0xff)
-					__cvmx_pip_set_tag_type(xp.node, nstyle, tcp_tag, CVMX_PKI_PCAM_MATCH_TCP);
+					__cvmx_pip_set_tag_type(xp.node, nstyle,
+								tcp_tag,
+								CVMX_PKI_PCAM_MATCH_TCP);
 				else {
-					n4style = __cvmx_pip_set_tag_type(xp.node, nstyle, ip_tag,
-							CVMX_PKI_PCAM_MATCH_IPV4);
-					__cvmx_pip_set_tag_type(xp.node, n4style, port_tag_cfg.s.tcp4_tag_type,
-							CVMX_PKI_PCAM_MATCH_TCP);
-					n6style = __cvmx_pip_set_tag_type(xp.node, nstyle, ip_tag,
-							CVMX_PKI_PCAM_MATCH_IPV6);
-					__cvmx_pip_set_tag_type(xp.node, n6style, port_tag_cfg.s.tcp6_tag_type,
-							CVMX_PKI_PCAM_MATCH_TCP);
+					n4style =
+					    __cvmx_pip_set_tag_type(xp.node,
+								    nstyle,
+								    ip_tag,
+								    CVMX_PKI_PCAM_MATCH_IPV4);
+					__cvmx_pip_set_tag_type(xp.node,
+								n4style,
+								port_tag_cfg.s.
+								tcp4_tag_type,
+								CVMX_PKI_PCAM_MATCH_TCP);
+					n6style =
+					    __cvmx_pip_set_tag_type(xp.node,
+								    nstyle,
+								    ip_tag,
+								    CVMX_PKI_PCAM_MATCH_IPV6);
+					__cvmx_pip_set_tag_type(xp.node,
+								n6style,
+								port_tag_cfg.s.
+								tcp6_tag_type,
+								CVMX_PKI_PCAM_MATCH_TCP);
 				}
-			}
-			else {
-				n4style = __cvmx_pip_set_tag_type(xp.node, style, port_tag_cfg.s.ip4_tag_type,
-						CVMX_PKI_PCAM_MATCH_IPV4);
-				n6style = __cvmx_pip_set_tag_type(xp.node, style, port_tag_cfg.s.ip6_tag_type,
-						CVMX_PKI_PCAM_MATCH_IPV6);
+			} else {
+				n4style =
+				    __cvmx_pip_set_tag_type(xp.node, style,
+							    port_tag_cfg.s.
+							    ip4_tag_type,
+							    CVMX_PKI_PCAM_MATCH_IPV4);
+				n6style =
+				    __cvmx_pip_set_tag_type(xp.node, style,
+							    port_tag_cfg.s.
+							    ip6_tag_type,
+							    CVMX_PKI_PCAM_MATCH_IPV6);
 				if (tcp_tag != 0xff) {
-					__cvmx_pip_set_tag_type(xp.node, n4style, tcp_tag, CVMX_PKI_PCAM_MATCH_TCP);
-					__cvmx_pip_set_tag_type(xp.node, n6style, tcp_tag, CVMX_PKI_PCAM_MATCH_TCP);
+					__cvmx_pip_set_tag_type(xp.node,
+								n4style,
+								tcp_tag,
+								CVMX_PKI_PCAM_MATCH_TCP);
+					__cvmx_pip_set_tag_type(xp.node,
+								n6style,
+								tcp_tag,
+								CVMX_PKI_PCAM_MATCH_TCP);
 				} else {
-					__cvmx_pip_set_tag_type(xp.node, n4style, port_tag_cfg.s.tcp4_tag_type,
-							CVMX_PKI_PCAM_MATCH_TCP);
-					__cvmx_pip_set_tag_type(xp.node, n6style, port_tag_cfg.s.tcp6_tag_type,
-							CVMX_PKI_PCAM_MATCH_TCP);
+					__cvmx_pip_set_tag_type(xp.node,
+								n4style,
+								port_tag_cfg.s.
+								tcp4_tag_type,
+								CVMX_PKI_PCAM_MATCH_TCP);
+					__cvmx_pip_set_tag_type(xp.node,
+								n6style,
+								port_tag_cfg.s.
+								tcp6_tag_type,
+								CVMX_PKI_PCAM_MATCH_TCP);
 				}
 			}
 		}
-		pki_prt_cfg.style_cfg.parm_cfg.qpg_dis_padd = !port_tag_cfg.s.portadd_en;
+		pki_prt_cfg.style_cfg.parm_cfg.qpg_dis_padd =
+		    !port_tag_cfg.s.portadd_en;
 
 		if (port_cfg.s.mode == 0x1)
-			pki_prt_cfg.pkind_cfg.initial_parse_mode = CVMX_PKI_PARSE_LA_TO_LG;
+			pki_prt_cfg.pkind_cfg.initial_parse_mode =
+			    CVMX_PKI_PARSE_LA_TO_LG;
 		else if (port_cfg.s.mode == 0x2)
-			pki_prt_cfg.pkind_cfg.initial_parse_mode = CVMX_PKI_PARSE_LC_TO_LG;
+			pki_prt_cfg.pkind_cfg.initial_parse_mode =
+			    CVMX_PKI_PARSE_LC_TO_LG;
 		else
-			pki_prt_cfg.pkind_cfg.initial_parse_mode = CVMX_PKI_PARSE_NOTHING;
+			pki_prt_cfg.pkind_cfg.initial_parse_mode =
+			    CVMX_PKI_PARSE_NOTHING;
 		/* This is only for backward compatibility, not all the parameters are supported in 78xx */
 		cvmx_pki_set_port_config(ipd_port, &pki_prt_cfg);
 	} else {
@@ -660,25 +736,27 @@ static inline void cvmx_pip_config_port(uint64_t ipd_port, cvmx_pip_prt_cfgx_t p
 /**
  * Configure the VLAN priority to QoS queue mapping.
  *
- * @param vlan_priority
+ * @vlan_priority:
  *               VLAN priority (0-7)
- * @param qos    QoS queue for packets matching this watcher
+ * @qos:    QoS queue for packets matching this watcher
  */
-static inline void cvmx_pip_config_vlan_qos(uint64_t vlan_priority, uint64_t qos)
+static inline void cvmx_pip_config_vlan_qos(uint64_t vlan_priority,
+					    uint64_t qos)
 {
 	if (!octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		cvmx_pip_qos_vlanx_t pip_qos_vlanx;
 		pip_qos_vlanx.u64 = 0;
 		pip_qos_vlanx.s.qos = qos;
-		cvmx_write_csr(CVMX_PIP_QOS_VLANX(vlan_priority), pip_qos_vlanx.u64);
+		cvmx_write_csr(CVMX_PIP_QOS_VLANX(vlan_priority),
+			       pip_qos_vlanx.u64);
 	}
 }
 
 /**
  * Configure the Diffserv to QoS queue mapping.
  *
- * @param diffserv Diffserv field value (0-63)
- * @param qos      QoS queue for packets matching this watcher
+ * @diffserv: Diffserv field value (0-63)
+ * @qos:      QoS queue for packets matching this watcher
  */
 static inline void cvmx_pip_config_diffserv_qos(uint64_t diffserv, uint64_t qos)
 {
@@ -693,11 +771,12 @@ static inline void cvmx_pip_config_diffserv_qos(uint64_t diffserv, uint64_t qos)
 /**
  * Get the status counters for a port for older non PKI chips.
  *
- * @param port_num Port number (ipd_port) to get statistics for.
- * @param clear    Set to 1 to clear the counters after they are read
- * @param status   Where to put the results.
+ * @port_num: Port number (ipd_port) to get statistics for.
+ * @clear:    Set to 1 to clear the counters after they are read
+ * @status:   Where to put the results.
  */
-static inline void cvmx_pip_get_port_stats(uint64_t port_num, uint64_t clear, cvmx_pip_port_status_t *status)
+static inline void cvmx_pip_get_port_stats(uint64_t port_num, uint64_t clear,
+					   cvmx_pip_port_status_t * status)
 {
 	cvmx_pip_stat_ctl_t pip_stat_ctl;
 	cvmx_pip_stat0_prtx_t stat0;
@@ -741,50 +820,84 @@ static inline void cvmx_pip_get_port_stats(uint64_t port_num, uint64_t clear, cv
 		stat11.u64 = cvmx_read_csr(CVMX_PIP_STAT11_X(pknd));
 	} else {
 		if (port_num >= 40) {
-			stat0.u64 = cvmx_read_csr(CVMX_PIP_XSTAT0_PRTX(port_num));
-			stat1.u64 = cvmx_read_csr(CVMX_PIP_XSTAT1_PRTX(port_num));
-			stat2.u64 = cvmx_read_csr(CVMX_PIP_XSTAT2_PRTX(port_num));
-			stat3.u64 = cvmx_read_csr(CVMX_PIP_XSTAT3_PRTX(port_num));
-			stat4.u64 = cvmx_read_csr(CVMX_PIP_XSTAT4_PRTX(port_num));
-			stat5.u64 = cvmx_read_csr(CVMX_PIP_XSTAT5_PRTX(port_num));
-			stat6.u64 = cvmx_read_csr(CVMX_PIP_XSTAT6_PRTX(port_num));
-			stat7.u64 = cvmx_read_csr(CVMX_PIP_XSTAT7_PRTX(port_num));
-			stat8.u64 = cvmx_read_csr(CVMX_PIP_XSTAT8_PRTX(port_num));
-			stat9.u64 = cvmx_read_csr(CVMX_PIP_XSTAT9_PRTX(port_num));
+			stat0.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT0_PRTX(port_num));
+			stat1.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT1_PRTX(port_num));
+			stat2.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT2_PRTX(port_num));
+			stat3.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT3_PRTX(port_num));
+			stat4.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT4_PRTX(port_num));
+			stat5.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT5_PRTX(port_num));
+			stat6.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT6_PRTX(port_num));
+			stat7.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT7_PRTX(port_num));
+			stat8.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT8_PRTX(port_num));
+			stat9.u64 =
+			    cvmx_read_csr(CVMX_PIP_XSTAT9_PRTX(port_num));
 			if (OCTEON_IS_MODEL(OCTEON_CN6XXX)) {
-				stat10.u64 = cvmx_read_csr(CVMX_PIP_XSTAT10_PRTX(port_num));
-				stat11.u64 = cvmx_read_csr(CVMX_PIP_XSTAT11_PRTX(port_num));
+				stat10.u64 =
+				    cvmx_read_csr(CVMX_PIP_XSTAT10_PRTX
+						  (port_num));
+				stat11.u64 =
+				    cvmx_read_csr(CVMX_PIP_XSTAT11_PRTX
+						  (port_num));
 			}
 		} else {
-			stat0.u64 = cvmx_read_csr(CVMX_PIP_STAT0_PRTX(port_num));
-			stat1.u64 = cvmx_read_csr(CVMX_PIP_STAT1_PRTX(port_num));
-			stat2.u64 = cvmx_read_csr(CVMX_PIP_STAT2_PRTX(port_num));
-			stat3.u64 = cvmx_read_csr(CVMX_PIP_STAT3_PRTX(port_num));
-			stat4.u64 = cvmx_read_csr(CVMX_PIP_STAT4_PRTX(port_num));
-			stat5.u64 = cvmx_read_csr(CVMX_PIP_STAT5_PRTX(port_num));
-			stat6.u64 = cvmx_read_csr(CVMX_PIP_STAT6_PRTX(port_num));
-			stat7.u64 = cvmx_read_csr(CVMX_PIP_STAT7_PRTX(port_num));
-			stat8.u64 = cvmx_read_csr(CVMX_PIP_STAT8_PRTX(port_num));
-			stat9.u64 = cvmx_read_csr(CVMX_PIP_STAT9_PRTX(port_num));
+			stat0.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT0_PRTX(port_num));
+			stat1.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT1_PRTX(port_num));
+			stat2.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT2_PRTX(port_num));
+			stat3.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT3_PRTX(port_num));
+			stat4.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT4_PRTX(port_num));
+			stat5.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT5_PRTX(port_num));
+			stat6.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT6_PRTX(port_num));
+			stat7.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT7_PRTX(port_num));
+			stat8.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT8_PRTX(port_num));
+			stat9.u64 =
+			    cvmx_read_csr(CVMX_PIP_STAT9_PRTX(port_num));
 			if (OCTEON_IS_MODEL(OCTEON_CN52XX)
 			    || OCTEON_IS_MODEL(OCTEON_CN56XX)
 			    || OCTEON_IS_OCTEON2()
 			    || OCTEON_IS_MODEL(OCTEON_CN70XX)) {
-				stat10.u64 = cvmx_read_csr(CVMX_PIP_STAT10_PRTX(port_num));
-				stat11.u64 = cvmx_read_csr(CVMX_PIP_STAT11_PRTX(port_num));
+				stat10.u64 =
+				    cvmx_read_csr(CVMX_PIP_STAT10_PRTX
+						  (port_num));
+				stat11.u64 =
+				    cvmx_read_csr(CVMX_PIP_STAT11_PRTX
+						  (port_num));
 			}
 		}
 	}
 	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 		int pknd = cvmx_helper_get_pknd(interface, index);
 
-		pip_stat_inb_pktsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_PKTS_PKNDX(pknd));
-		pip_stat_inb_octsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_OCTS_PKNDX(pknd));
-		pip_stat_inb_errsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_ERRS_PKNDX(pknd));
+		pip_stat_inb_pktsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_PKTS_PKNDX(pknd));
+		pip_stat_inb_octsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_OCTS_PKNDX(pknd));
+		pip_stat_inb_errsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_ERRS_PKNDX(pknd));
 	} else {
-		pip_stat_inb_pktsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_PKTSX(port_num));
-		pip_stat_inb_octsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_OCTSX(port_num));
-		pip_stat_inb_errsx.u64 = cvmx_read_csr(CVMX_PIP_STAT_INB_ERRSX(port_num));
+		pip_stat_inb_pktsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_PKTSX(port_num));
+		pip_stat_inb_octsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_OCTSX(port_num));
+		pip_stat_inb_errsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_ERRSX(port_num));
 	}
 
 	status->dropped_octets = stat0.s.drp_octs;
@@ -823,15 +936,17 @@ static inline void cvmx_pip_get_port_stats(uint64_t port_num, uint64_t clear, cv
 /**
  * Get the status counters for a port.
  *
- * @param port_num Port number (ipd_port) to get statistics for.
- * @param clear    Set to 1 to clear the counters after they are read
- * @param status   Where to put the results.
+ * @port_num: Port number (ipd_port) to get statistics for.
+ * @clear:    Set to 1 to clear the counters after they are read
+ * @status:   Where to put the results.
  */
-static inline void cvmx_pip_get_port_status(uint64_t port_num, uint64_t clear, cvmx_pip_port_status_t *status)
+static inline void cvmx_pip_get_port_status(uint64_t port_num, uint64_t clear,
+					    cvmx_pip_port_status_t * status)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		unsigned int node = cvmx_get_node_num();
-		cvmx_pki_get_port_stats(node, port_num, (struct cvmx_pki_port_stats *)status);
+		cvmx_pki_get_port_stats(node, port_num,
+					(struct cvmx_pki_port_stats *)status);
 	} else {
 		cvmx_pip_get_port_stats(port_num, clear, status);
 	}
@@ -840,14 +955,16 @@ static inline void cvmx_pip_get_port_status(uint64_t port_num, uint64_t clear, c
 /**
  * Configure the hardware CRC engine
  *
- * @param interface Interface to configure (0 or 1)
- * @param invert_result
+ * @interface: Interface to configure (0 or 1)
+ * @invert_result:
  *                 Invert the result of the CRC
- * @param reflect  Reflect
- * @param initialization_vector
+ * @reflect:  Reflect
+ * @initialization_vector:
  *                 CRC initialization vector
  */
-static inline void cvmx_pip_config_crc(uint64_t interface, uint64_t invert_result, uint64_t reflect, uint32_t initialization_vector)
+static inline void cvmx_pip_config_crc(uint64_t interface,
+				       uint64_t invert_result, uint64_t reflect,
+				       uint32_t initialization_vector)
 {
 	if ((OCTEON_IS_MODEL(OCTEON_CN38XX) || OCTEON_IS_MODEL(OCTEON_CN58XX))) {
 		cvmx_pip_crc_ctlx_t config;
@@ -870,7 +987,7 @@ static inline void cvmx_pip_config_crc(uint64_t interface, uint64_t invert_resul
  * set in the final mask represent a byte used in the packet for
  * tag generation.
  *
- * @param mask_index Which tag mask to clear (0..3)
+ * @mask_index: Which tag mask to clear (0..3)
  */
 static inline void cvmx_pip_tag_mask_clear(uint64_t mask_index)
 {
@@ -887,17 +1004,18 @@ static inline void cvmx_pip_tag_mask_clear(uint64_t mask_index)
  * when the cvmx_pip_port_tag_cfg_t tag_mode is non zero.
  * There are four separate masks that can be configured.
  *
- * @param mask_index Which tag mask to modify (0..3)
- * @param offset     Offset into the bitmask to set bits at. Use the GCC macro
+ * @mask_index: Which tag mask to modify (0..3)
+ * @offset:     Offset into the bitmask to set bits at. Use the GCC macro
  *                   offsetof() to determine the offsets into packet headers.
  *                   For example, offsetof(ethhdr, protocol) returns the offset
  *                   of the ethernet protocol field.  The bitmask selects which bytes
  *                   to include the the tag, with bit offset X selecting byte at offset X
  *                   from the beginning of the packet data.
- * @param len        Number of bytes to include. Usually this is the sizeof()
+ * @len:        Number of bytes to include. Usually this is the sizeof()
  *                   the field.
  */
-static inline void cvmx_pip_tag_mask_set(uint64_t mask_index, uint64_t offset, uint64_t len)
+static inline void cvmx_pip_tag_mask_set(uint64_t mask_index, uint64_t offset,
+					 uint64_t len)
 {
 	while (len--) {
 		cvmx_pip_tag_incx_t pip_tag_incx;
@@ -912,8 +1030,8 @@ static inline void cvmx_pip_tag_mask_set(uint64_t mask_index, uint64_t offset, u
 /**
  * Set byte count for Max-Sized and Min Sized frame check.
  *
- * @param interface   Which interface to set the limit
- * @param max_size    Byte count for Max-Size frame check
+ * @interface:   Which interface to set the limit
+ * @max_size:    Byte count for Max-Size frame check
  */
 static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
 {
@@ -932,18 +1050,22 @@ static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
 		for (port = 0; port < num_ports; port++) {
 			if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 				int ipd_port;
-				ipd_port = cvmx_helper_get_ipd_port(interface, port);
+				ipd_port =
+				    cvmx_helper_get_ipd_port(interface, port);
 				cvmx_pki_set_max_frm_len(ipd_port, max_size);
 			} else {
 				int pknd;
 				int sel;
 				cvmx_pip_prt_cfgx_t config;
 				pknd = cvmx_helper_get_pknd(interface, port);
-				config.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGX(pknd));
+				config.u64 =
+				    cvmx_read_csr(CVMX_PIP_PRT_CFGX(pknd));
 				sel = config.s.len_chk_sel;
-				frm_len.u64 = cvmx_read_csr(CVMX_PIP_FRM_LEN_CHKX(sel));
+				frm_len.u64 =
+				    cvmx_read_csr(CVMX_PIP_FRM_LEN_CHKX(sel));
 				frm_len.s.maxlen = max_size;
-				cvmx_write_csr(CVMX_PIP_FRM_LEN_CHKX(sel), frm_len.u64);
+				cvmx_write_csr(CVMX_PIP_FRM_LEN_CHKX(sel),
+					       frm_len.u64);
 			}
 		}
 	}
@@ -968,9 +1090,9 @@ static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
  * Initialize Bit Select Extractor config. Their are 8 bit positions and valids
  * to be used when using the corresponding extractor.
  *
- * @param bit     Bit Select Extractor to use
- * @param pos     Which position to update
- * @param val     The value to update the position with
+ * @bit:     Bit Select Extractor to use
+ * @pos:     Which position to update
+ * @val:     The value to update the position with
  */
 static inline void cvmx_pip_set_bsel_pos(int bit, int pos, int val)
 {
@@ -981,7 +1103,9 @@ static inline void cvmx_pip_set_bsel_pos(int bit, int pos, int val)
 		return;
 
 	if (bit < 0 || bit > 3) {
-		cvmx_dprintf("ERROR: cvmx_pip_set_bsel_pos: Invalid Bit-Select Extractor (%d) passed\n", bit);
+		cvmx_dprintf
+		    ("ERROR: cvmx_pip_set_bsel_pos: Invalid Bit-Select Extractor (%d) passed\n",
+		     bit);
 		return;
 	}
 
@@ -1020,7 +1144,8 @@ static inline void cvmx_pip_set_bsel_pos(int bit, int pos, int val)
 		bsel_pos.s.pos7 = val & 0x7f;
 		break;
 	default:
-		cvmx_dprintf("Warning: cvmx_pip_set_bsel_pos: Invalid pos(%d)\n", pos);
+		cvmx_dprintf
+		    ("Warning: cvmx_pip_set_bsel_pos: Invalid pos(%d)\n", pos);
 		break;
 	}
 	cvmx_write_csr(CVMX_PIP_BSEL_EXT_POSX(bit), bsel_pos.u64);
@@ -1029,10 +1154,10 @@ static inline void cvmx_pip_set_bsel_pos(int bit, int pos, int val)
 /**
  * Initialize offset and skip values to use by bit select extractor.
 
- * @param bit     	Bit Select Extractor to use
- * @param offset	Offset to add to extractor mem addr to get final address
+ * @bit:     	Bit Select Extractor to use
+ * @offset:	Offset to add to extractor mem addr to get final address
  *			to lookup table.
- * @param skip		Number of bytes to skip from start of packet 0-64
+ * @skip:		Number of bytes to skip from start of packet 0-64
  */
 static inline void cvmx_pip_bsel_config(int bit, int offset, int skip)
 {
@@ -1050,10 +1175,10 @@ static inline void cvmx_pip_bsel_config(int bit, int offset, int skip)
 
 /**
  * Get the entry for the Bit Select Extractor Table.
- * @param work   pointer to work queue entry
- * @return       Index of the Bit Select Extractor Table
+ * @work:   pointer to work queue entry
+ * Returns       Index of the Bit Select Extractor Table
  */
-static inline int cvmx_pip_get_bsel_table_index(cvmx_wqe_t *work)
+static inline int cvmx_pip_get_bsel_table_index(cvmx_wqe_t * work)
 {
 	int bit = cvmx_wqe_get_port(work) & 0x3;
 	/* Get the Bit select table index. */
@@ -1117,7 +1242,7 @@ static inline int cvmx_pip_get_bsel_table_index(cvmx_wqe_t *work)
 	return index;
 }
 
-static inline int cvmx_pip_get_bsel_qos(cvmx_wqe_t *work)
+static inline int cvmx_pip_get_bsel_qos(cvmx_wqe_t * work)
 {
 	int index = cvmx_pip_get_bsel_table_index(work);
 	cvmx_pip_bsel_tbl_entx_t bsel_tbl;
@@ -1131,7 +1256,7 @@ static inline int cvmx_pip_get_bsel_qos(cvmx_wqe_t *work)
 	return bsel_tbl.s.qos;
 }
 
-static inline int cvmx_pip_get_bsel_grp(cvmx_wqe_t *work)
+static inline int cvmx_pip_get_bsel_grp(cvmx_wqe_t * work)
 {
 	int index = cvmx_pip_get_bsel_table_index(work);
 	cvmx_pip_bsel_tbl_entx_t bsel_tbl;
@@ -1145,7 +1270,7 @@ static inline int cvmx_pip_get_bsel_grp(cvmx_wqe_t *work)
 	return bsel_tbl.s.grp;
 }
 
-static inline int cvmx_pip_get_bsel_tt(cvmx_wqe_t *work)
+static inline int cvmx_pip_get_bsel_tt(cvmx_wqe_t * work)
 {
 	int index = cvmx_pip_get_bsel_table_index(work);
 	cvmx_pip_bsel_tbl_entx_t bsel_tbl;
@@ -1159,7 +1284,7 @@ static inline int cvmx_pip_get_bsel_tt(cvmx_wqe_t *work)
 	return bsel_tbl.s.tt;
 }
 
-static inline int cvmx_pip_get_bsel_tag(cvmx_wqe_t *work)
+static inline int cvmx_pip_get_bsel_tag(cvmx_wqe_t * work)
 {
 	int index = cvmx_pip_get_bsel_table_index(work);
 	int port = cvmx_wqe_get_port(work);
@@ -1179,13 +1304,9 @@ static inline int cvmx_pip_get_bsel_tag(cvmx_wqe_t *work)
 	prt_tag.u64 = cvmx_read_csr(CVMX_PIP_PRT_TAGX(port));
 	if (prt_tag.s.inc_prt_flag == 0)
 		upper_tag = bsel_cfg.s.upper_tag;
-	return bsel_tbl.s.tag | ((bsel_cfg.s.tag << 8) & 0xff00) | ((upper_tag << 16) & 0xffff0000);
+	return bsel_tbl.s.
+	    tag | ((bsel_cfg.s.tag << 8) & 0xff00) | ((upper_tag << 16) &
+						      0xffff0000);
 }
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 
 #endif /*  __CVMX_PIP_H__ */

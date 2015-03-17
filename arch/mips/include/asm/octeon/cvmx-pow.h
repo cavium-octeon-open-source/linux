@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2011  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2011 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -68,19 +56,8 @@
 #include "cvmx-scratch.h"
 #include "cvmx-wqe.h"
 
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx-sso-defs.h>
 #include <asm/octeon/cvmx-address.h>
-#else
-#include "cvmx-warn.h"
-#include "cvmx-address.h"
-#endif
-
-#ifdef  __cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 /* Default to having all POW constancy checks turned on */
 #ifndef CVMX_ENABLE_POW_CHECKS
@@ -92,22 +69,18 @@ extern "C" {
  * for distinction from legacy-style groups (0..15)
  */
 typedef union {
-	uint8_t		xgrp;
+	uint8_t xgrp;
 	/* Fields that map XGRP for backwards compatibility */
 	struct __attribute__ ((__packed__)) {
 #ifdef __BIG_ENDIAN_BITFIELD
-		uint8_t	group: 5,
-			qus: 3;
+		uint8_t group:5, qus:3;
 #else
-		uint8_t	qus: 3,
-			group: 5;
+		uint8_t qus:3, group:5;
 #endif
 	};
 } cvmx_xgrp_t;
 
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL	//XXX- Temporary
 #define CVMX_SSO_NUM_XGRP		(256)
-#endif
 
 /*
  * Softwsare-only structure to convey a return value
@@ -116,7 +89,7 @@ typedef union {
 typedef struct {
 	uint32_t tag;
 	uint16_t index;
-	uint8_t grp;	/* Legacy group # (0..15) */
+	uint8_t grp;		/* Legacy group # (0..15) */
 	uint8_t tag_type;
 } cvmx_pow_tag_info_t;
 
@@ -304,7 +277,7 @@ typedef union {
 #else
 		uint64_t wqp:42;
 		uint64_t rsvd_42_43:2;
-		cvmx_pow_tag_op_t op:4; /**< the operation to perform */
+		cvmx_pow_tag_op_t op:4;	/**< the operation to perform */
 		uint64_t rsvd_48:1;
 		uint64_t no_sched:1;
 		cvmx_pow_tag_type_t type:2;
@@ -319,28 +292,38 @@ union cvmx_pow_tag_req_addr {
 	uint64_t u64;
 	struct {
 		/**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,/**< Must be one */
-	        CVMX_BITFIELD_FIELD(uint64_t did:8,
-		CVMX_BITFIELD_FIELD(uint64_t addr:40,
-				    ;)))))
+		CVMX_BITFIELD_FIELD(uint64_t mem_region:2, CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13, CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+						     /**< Must be one */
+															       CVMX_BITFIELD_FIELD
+															       (uint64_t
+																did:8,
+																CVMX_BITFIELD_FIELD
+																(uint64_t
+																 addr:40,;
+																)))))
 	} s;
 	struct {
 		/**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,           /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,
+		CVMX_BITFIELD_FIELD(uint64_t mem_region:2, CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13, CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+								/**< Must be one */
+															       CVMX_BITFIELD_FIELD
+															       (uint64_t
+																did:8,
 		/**<OCI node number. For SWTAG*, and UPD_WQP_GRP this must
 		   always indicate the local node, or an error will result.
 		   ADDWQ can be performed onto any node. */
-		CVMX_BITFIELD_FIELD(uint64_t node:4,
+																CVMX_BITFIELD_FIELD
+																(uint64_t
+																 node:4,
 		/**< The actual tag. Tag is used for SWTAG, SWTAG_FULL,
 		   SWTAG_DESCHED, ADDWQ. */
-		CVMX_BITFIELD_FIELD(uint64_t tag:32,
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_3:4,
-				    ;)))))))
+																 CVMX_BITFIELD_FIELD
+																 (uint64_t
+																  tag:32,
+																  CVMX_BITFIELD_FIELD
+																  (uint64_t
+																   reserved_0_3:4,;
+																  )))))))
 	} s_cn78xx;
 };
 
@@ -356,33 +339,53 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 0 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_4_39:36,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 0 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_4_39:36,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t wait:1,	    /**< If set, don't return load response until work is available */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+												 CVMX_BITFIELD_FIELD(uint64_t wait:1,
+							    /**< If set, don't return load response until work is available */
+														     CVMX_BITFIELD_FIELD
+														     (uint64_t
+														      reserved_0_2:3,
 					    /**< Must be zero */
-		)))))));
+														     )))))));
 	} swork;
 
 	struct {
-		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,      /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13, /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,           /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,             /**< the ID of POW -- did<2:0> == 0 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t node:4,            /**< OCI Node number */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_32_35:4,  /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t indexed:1,  /**< Indexed get_work if set */
-		CVMX_BITFIELD_FIELD(uint64_t grouped:1,  /**< get_work for group specified in index */
-		CVMX_BITFIELD_FIELD(uint64_t rtngrp:1,  /**< Return group and tt in the return if set */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_16_28:13,  /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t index:12,  /**< mask/grp/index of the request */
-		CVMX_BITFIELD_FIELD(uint64_t wait:1,            /**< If set, don't return load response until work is available */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,    /**< Must be zero */
-		)))))))))))));
+		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,	/**< Mips64 address region. Should be CVMX_IO_SEG */
+				    CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+								/**< Must be zero */
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+								/**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								/**< the ID of POW -- did<2:0> == 0 in this case */
+												CVMX_BITFIELD_FIELD(uint64_t node:4,
+								/**< OCI Node number */
+														    CVMX_BITFIELD_FIELD(uint64_t reserved_32_35:4,
+								/**< Must be zero */
+																	CVMX_BITFIELD_FIELD(uint64_t indexed:1,
+							 /**< Indexed get_work if set */
+																			    CVMX_BITFIELD_FIELD(uint64_t grouped:1,
+							 /**< get_work for group specified in index */
+																						CVMX_BITFIELD_FIELD(uint64_t rtngrp:1,
+							/**< Return group and tt in the return if set */
+																								    CVMX_BITFIELD_FIELD(uint64_t reserved_16_28:13,
+								 /**< Must be zero */
+																											CVMX_BITFIELD_FIELD(uint64_t index:12,
+							/**< mask/grp/index of the request */
+																													    CVMX_BITFIELD_FIELD(uint64_t wait:1,
+								/**< If set, don't return load response until work is available */
+																																CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+								/**< Must be zero */
+																																)))))))))))));
 	} swork_78xx;
 
     /**
@@ -391,18 +394,28 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 1 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_10_39:30,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 1 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_10_39:30,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t coreid:4,	    /**< The core id to get status for */
-		CVMX_BITFIELD_FIELD(uint64_t get_rev:1,	    /**< If set and get_cur is set, return reverse tag-list pointer rather than forward tag-list pointer */
-		CVMX_BITFIELD_FIELD(uint64_t get_cur:1,	    /**< If set, return current status rather than pending status */
-		CVMX_BITFIELD_FIELD(uint64_t get_wqp:1,	    /**< If set, get the work-queue pointer rather than tag/type */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,  /**< Must be zero */
-		))))))))));
+												 CVMX_BITFIELD_FIELD(uint64_t coreid:4,
+							    /**< The core id to get status for */
+														     CVMX_BITFIELD_FIELD(uint64_t get_rev:1,
+							    /**< If set and get_cur is set, return reverse tag-list pointer rather than forward tag-list pointer */
+																	 CVMX_BITFIELD_FIELD(uint64_t get_cur:1,
+							    /**< If set, return current status rather than pending status */
+																			     CVMX_BITFIELD_FIELD(uint64_t get_wqp:1,
+							    /**< If set, get the work-queue pointer rather than tag/type */
+																						 CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							      /**< Must be zero */
+																						 ))))))))));
 	} sstatus;
 
     /**
@@ -411,17 +424,24 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 1 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_14_39:26,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 1 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_14_39:26,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t coreid:5,	    /**< The core id to get status for */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_6_8:3,
-		CVMX_BITFIELD_FIELD(uint64_t opcode:3,	    /**< Status operation */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3, /**< Must be zero */
-		)))))))));
+												 CVMX_BITFIELD_FIELD(uint64_t coreid:5,
+							    /**< The core id to get status for */
+														     CVMX_BITFIELD_FIELD(uint64_t reserved_6_8:3, CVMX_BITFIELD_FIELD(uint64_t opcode:3,
+							    /**< Status operation */
+																						      CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							     /**< Must be zero */
+																						      )))))))));
 	} sstatus_cn68xx;
 
     /**
@@ -430,19 +450,28 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 2 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_16_39:24,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 2 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_16_39:24,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t index:11,	    /**< POW memory index */
-		CVMX_BITFIELD_FIELD(uint64_t get_des:1,	    /**< If set, return deschedule information rather than the standard
+												 CVMX_BITFIELD_FIELD(uint64_t index:11,
+							    /**< POW memory index */
+														     CVMX_BITFIELD_FIELD(uint64_t get_des:1,
+							    /**< If set, return deschedule information rather than the standard
                                                 response for work-queue index (invalid if the work-queue entry is not on the
                                                 deschedule list). */
-		CVMX_BITFIELD_FIELD(uint64_t get_wqp:1,	    /**< If set, get the work-queue pointer rather than tag/type (no effect when get_des set). */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,  /**< Must be zero */
-		)))))))));
+																	 CVMX_BITFIELD_FIELD(uint64_t get_wqp:1,
+							    /**< If set, get the work-queue pointer rather than tag/type (no effect when get_des set). */
+																			     CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							      /**< Must be zero */
+																			     )))))))));
 	} smemload;
 
     /**
@@ -451,18 +480,28 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of SSO - did<2:0> == 2 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_20_39:20,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of SSO - did<2:0> == 2 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_20_39:20,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t index:11,	    /**< SSO memory index */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_6_8:3,
+												 CVMX_BITFIELD_FIELD(uint64_t index:11,
+							    /**< SSO memory index */
+														     CVMX_BITFIELD_FIELD
+														     (uint64_t
+														      reserved_6_8:3,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t opcode:3,	    /**< Read TAG/WQ pointer/pending tag/next potr */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3, /**< Must be zero */
-		)))))))));
+														      CVMX_BITFIELD_FIELD(uint64_t opcode:3,
+							    /**< Read TAG/WQ pointer/pending tag/next potr */
+																	  CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							     /**< Must be zero */
+																	  )))))))));
 	} smemload_cn68xx;
 
     /**
@@ -471,13 +510,19 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 3 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_9_39:31,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 3 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_9_39:31,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t qosgrp:4,	    /**< when {get_rmt ==0 AND get_des_get_tail == 0}, this field selects one of
+												 CVMX_BITFIELD_FIELD(uint64_t qosgrp:4,
+							    /**< when {get_rmt ==0 AND get_des_get_tail == 0}, this field selects one of
                                                 eight POW internal-input queues (0-7), one per QOS level; values 8-15 are
                                                 illegal in this case;
                                                 when {get_rmt ==0 AND get_des_get_tail == 1}, this field selects one of
@@ -492,13 +537,17 @@ typedef union {
                                                 - qosgrp = 5, qosgrp = 13:     QOS5
                                                 - qosgrp = 6, qosgrp = 14:     QOS6
                                                 - qosgrp = 7, qosgrp = 15:     QOS7 */
-		CVMX_BITFIELD_FIELD(uint64_t get_des_get_tail:1,
+														     CVMX_BITFIELD_FIELD
+														     (uint64_t
+														      get_des_get_tail:1,
 					    /**< If set and get_rmt is clear, return deschedule list indexes
                                                 rather than indexes for the specified qos level; if set and get_rmt is set, return
                                                 the tail pointer rather than the head pointer for the specified qos level. */
-		CVMX_BITFIELD_FIELD(uint64_t get_rmt:1,	    /**< If set, return remote pointers rather than the local indexes for the specified qos level. */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,   /**< Must be zero */
-		)))))))));
+														      CVMX_BITFIELD_FIELD(uint64_t get_rmt:1,
+							    /**< If set, return remote pointers rather than the local indexes for the specified qos level. */
+																	  CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							       /**< Must be zero */
+																	  )))))))));
 	} sindexload;
 
     /**
@@ -507,20 +556,30 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of SSO - did<2:0> == 2 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_15_39:25,
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of SSO - did<2:0> == 2 in this case */
+												CVMX_BITFIELD_FIELD
+												(uint64_t
+												 reserved_15_39:25,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t qos_grp:6,	    /**< When opcode = IPL_IQ, this field specifies IQ (or QOS).
+												 CVMX_BITFIELD_FIELD(uint64_t qos_grp:6,
+							    /**< When opcode = IPL_IQ, this field specifies IQ (or QOS).
                                                  When opcode = IPL_DESCHED, this field specifies the group.
                                                  This field is reserved for all other opcodes. */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_6_8:3,
+														     CVMX_BITFIELD_FIELD
+														     (uint64_t
+														      reserved_6_8:3,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t opcode:3,	    /**< Read TAG/WQ pointer/pending tag/next potr */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3, /**< Must be zero */
-		)))))))));
+														      CVMX_BITFIELD_FIELD(uint64_t opcode:3,
+							    /**< Read TAG/WQ pointer/pending tag/next potr */
+																	  CVMX_BITFIELD_FIELD(uint64_t reserved_0_2:3,
+							     /**< Must be zero */
+																	  )))))))));
 	} sindexload_cn68xx;
 
     /**
@@ -533,12 +592,16 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t mem_region:2,
 					    /**< Mips64 address region. Should be CVMX_IO_SEG */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_49_61:13,
+				    CVMX_BITFIELD_FIELD(uint64_t
+							reserved_49_61:13,
 					    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t is_io:1,	    /**< Must be one */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,		    /**< the ID of POW -- did<2:0> == 4 in this case */
-		CVMX_BITFIELD_FIELD(uint64_t reserved_0_39:40, /**< Must be zero */
-		)))));
+							CVMX_BITFIELD_FIELD(uint64_t is_io:1,
+							    /**< Must be one */
+									    CVMX_BITFIELD_FIELD(uint64_t did:8,
+								    /**< the ID of POW -- did<2:0> == 4 in this case */
+												CVMX_BITFIELD_FIELD(uint64_t reserved_0_39:40,
+							       /**< Must be zero */
+												)))));
 	} snull_rd;
 } cvmx_pow_load_addr_t;
 
@@ -561,13 +624,13 @@ typedef union {
                                                     case can happen, regardless of the wait bit value
                                                     in the original request, when there is work
                                                     in the IQ's that is too deep down the list. */
-		CVMX_BITFIELD_FIELD(uint64_t pend_switch:1, /**< cn68XX and above, set if there was a pending tag switch*/
-		CVMX_BITFIELD_FIELD(uint64_t tt:2,
-		CVMX_BITFIELD_FIELD(uint64_t reserved_58_59:2,
-		CVMX_BITFIELD_FIELD(uint64_t grp:10,
-		CVMX_BITFIELD_FIELD(uint64_t reserved_42_47:6,    /**< Must be zero */
-		CVMX_BITFIELD_FIELD(uint64_t addr:42,	    /**< 36 in O1 -- the work queue pointer */
-		)))))));
+				    CVMX_BITFIELD_FIELD(uint64_t pend_switch:1,
+							    /**< cn68XX and above, set if there was a pending tag switch*/
+							CVMX_BITFIELD_FIELD(uint64_t tt:2, CVMX_BITFIELD_FIELD(uint64_t reserved_58_59:2, CVMX_BITFIELD_FIELD(uint64_t grp:10, CVMX_BITFIELD_FIELD(uint64_t reserved_42_47:6,
+								  /**< Must be zero */
+																								   CVMX_BITFIELD_FIELD(uint64_t addr:42,
+							    /**< 36 in O1 -- the work queue pointer */
+																								   )))))));
 	} s_work;
 
     /**
@@ -1238,29 +1301,30 @@ typedef union {
 
 	struct {
 #ifdef __BIG_ENDIAN_BITFIELD
-	uint64_t pend_switch		:1;  /**< Set when there is a pending SWTAG, SWTAG_DESCHED, or SWTAG_FULL to ORDERED or ATOMIC. If
+		uint64_t pend_switch:1;	     /**< Set when there is a pending SWTAG, SWTAG_DESCHED, or SWTAG_FULL to ORDERED or ATOMIC. If
 					the register read was issued after an indexed GET_WORK, the DESCHED portion of a
 					SWTAG_DESCHED cannot still be pending. */
-	uint64_t pend_get_work		:1;  /**< Set when there is a pending GET_WORK. */
-	uint64_t pend_get_work_wait	:1;  /**< When PEND_GET_WORK is set, indicates that the WAITW bit was set. */
-	uint64_t pend_nosched		:1;  /**< Set when nosched is desired and PEND_DESCHED is set. */
-	uint64_t pend_nosched_clr	:1;  /**< Set when there is a pending CLR_NSCHED. */
-	uint64_t pend_desched		:1;  /**< Set when there is a pending DESCHED or SWTAG_DESCHED. */
-	uint64_t pend_alloc_we		:1;  /**< Set when there is a pending ALLOC_WE. */
-	uint64_t reserved_34_56		:23;
-	uint64_t pend_tt		:2;  /**< The tag type when PEND_SWITCH is set. */
-	uint64_t pend_tag		:32; /**< The tag when PEND_SWITCH is set. */
+		uint64_t pend_get_work:1;    /**< Set when there is a pending GET_WORK. */
+		uint64_t pend_get_work_wait:1;
+					     /**< When PEND_GET_WORK is set, indicates that the WAITW bit was set. */
+		uint64_t pend_nosched:1;     /**< Set when nosched is desired and PEND_DESCHED is set. */
+		uint64_t pend_nosched_clr:1; /**< Set when there is a pending CLR_NSCHED. */
+		uint64_t pend_desched:1;     /**< Set when there is a pending DESCHED or SWTAG_DESCHED. */
+		uint64_t pend_alloc_we:1;    /**< Set when there is a pending ALLOC_WE. */
+		uint64_t reserved_34_56:23;
+		uint64_t pend_tt:2;	     /**< The tag type when PEND_SWITCH is set. */
+		uint64_t pend_tag:32;	     /**< The tag when PEND_SWITCH is set. */
 #else
-	uint64_t pend_tag		:32;
-	uint64_t pend_tt		:2;
-	uint64_t reserved_34_56		:23;
-	uint64_t pend_alloc_we		:1;
-	uint64_t pend_desched		:1;
-	uint64_t pend_nosched_clr	:1;
-	uint64_t pend_nosched		:1;
-	uint64_t pend_get_work_wait	:1;
-	uint64_t pend_get_work		:1;
-	uint64_t pend_switch		:1;
+		uint64_t pend_tag:32;
+		uint64_t pend_tt:2;
+		uint64_t reserved_34_56:23;
+		uint64_t pend_alloc_we:1;
+		uint64_t pend_desched:1;
+		uint64_t pend_nosched_clr:1;
+		uint64_t pend_nosched:1;
+		uint64_t pend_get_work_wait:1;
+		uint64_t pend_get_work:1;
+		uint64_t pend_switch:1;
 #endif
 	} s_sso_ppx_pendtag_cn78xx;
 
@@ -1286,23 +1350,23 @@ typedef union {
 
 	struct {
 #ifdef __BIG_ENDIAN_BITFIELD
-	uint64_t reserved_28_63		:36;
-	uint64_t prev_index		:12;
+		uint64_t reserved_28_63:36;
+		uint64_t prev_index:12;
 	/**< The previous entry in the tag chain. Unpredictable if the entry
 	 * is at the head of the list or the head of a conflicted tag chain. */
-	uint64_t reserved_13_15		:3;
-	uint64_t next_index_vld		:1;
+		uint64_t reserved_13_15:3;
+		uint64_t next_index_vld:1;
 	/**< The NEXT_INDEX is valid. Unpredictable unless the entry is the
 	 * tail entry of an atomic tag chain. */
-	uint64_t next_index		:12;
+		uint64_t next_index:12;
 	/**< The next entry in the tag chain or conflicted tag chain.
 	 * Unpredictable if the entry is at the tail of the list. */
 #else
-	uint64_t next_index		:12;
-	uint64_t next_index_vld		:1;
-	uint64_t reserved_13_15		:3;
-	uint64_t prev_index		:12;
-	uint64_t reserved_28_63		:36;
+		uint64_t next_index:12;
+		uint64_t next_index_vld:1;
+		uint64_t reserved_13_15:3;
+		uint64_t prev_index:12;
+		uint64_t reserved_28_63:36;
 #endif
 	} s_sso_ientx_links_cn78xx;
 
@@ -1602,37 +1666,40 @@ typedef union {
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t scraddr:8,
 				    /**< the (64-bit word) location in scratchpad to write to (if len != 0) */
-		CVMX_BITFIELD_FIELD(uint64_t len:8,
+				    CVMX_BITFIELD_FIELD(uint64_t len:8,
 				    /**< the number of words in the response (0 => no response) */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,
+							CVMX_BITFIELD_FIELD
+							(uint64_t did:8,
 				    /**< the ID of the device on the non-coherent bus */
-		CVMX_BITFIELD_FIELD(uint64_t unused:36,
-		CVMX_BITFIELD_FIELD(uint64_t wait:1,
+							 CVMX_BITFIELD_FIELD
+							 (uint64_t unused:36,
+							  CVMX_BITFIELD_FIELD
+							  (uint64_t wait:1,
 				    /**< if set, don't return load response until work is available */
-		CVMX_BITFIELD_FIELD(uint64_t unused2:3,
-		))))));
+							   CVMX_BITFIELD_FIELD
+							   (uint64_t
+							    unused2:3,))))));
 	} s;
 	struct {
 		CVMX_BITFIELD_FIELD(uint64_t scraddr:8,/**< the (64-bit word) location in scratchpad to write to (if len != 0) */
-		CVMX_BITFIELD_FIELD(uint64_t len:8,    /**< the number of words in the response (0 => no response) */
-		CVMX_BITFIELD_FIELD(uint64_t did:8,    /**< the ID of the device on the non-coherent bus */
-		CVMX_BITFIELD_FIELD(uint64_t node:4,   /**< OCI node number, should always be local node */
-		CVMX_BITFIELD_FIELD(uint64_t unused1:4,
-		CVMX_BITFIELD_FIELD(uint64_t indexed:1,
-		CVMX_BITFIELD_FIELD(uint64_t grouped:1,
-		CVMX_BITFIELD_FIELD(uint64_t rtngrp:1,
-		CVMX_BITFIELD_FIELD(uint64_t unused2:13,
-		CVMX_BITFIELD_FIELD(uint64_t index_grp_mask:12,
-		CVMX_BITFIELD_FIELD(uint64_t wait:1,   /**< if set, don't return load response until work is available */
-		CVMX_BITFIELD_FIELD(uint64_t unused3:3,
-		))))))))))));
+				    CVMX_BITFIELD_FIELD(uint64_t len:8,
+						       /**< the number of words in the response (0 => no response) */
+							CVMX_BITFIELD_FIELD(uint64_t did:8,
+						       /**< the ID of the device on the non-coherent bus */
+									    CVMX_BITFIELD_FIELD(uint64_t node:4,
+						       /**< OCI node number, should always be local node */
+												CVMX_BITFIELD_FIELD(uint64_t unused1:4, CVMX_BITFIELD_FIELD(uint64_t indexed:1, CVMX_BITFIELD_FIELD(uint64_t grouped:1, CVMX_BITFIELD_FIELD(uint64_t rtngrp:1, CVMX_BITFIELD_FIELD(uint64_t unused2:13, CVMX_BITFIELD_FIELD(uint64_t index_grp_mask:12, CVMX_BITFIELD_FIELD(uint64_t wait:1,
+						       /**< if set, don't return load response until work is available */
+																																													    CVMX_BITFIELD_FIELD
+																																													    (uint64_t
+																																													     unused3:3,))))))))))));
 	} s_cn78xx;
 } cvmx_pow_iobdma_store_t;
 
 /* CSR typedefs have been moved to cvmx-pow-defs.h */
 
 /*enum for group priority parameters which needs modification*/
-enum cvmx_sso_group_modify_mask{
+enum cvmx_sso_group_modify_mask {
 	CVMX_SSO_MODIFY_GROUP_PRIORITY = 0x01,
 	CVMX_SSO_MODIFY_GROUP_WEIGHT = 0x02,
 	CVMX_SSO_MODIFY_GROUP_AFFINITY = 0x04
@@ -1654,7 +1721,6 @@ static inline unsigned cvmx_sso_num_xgrp(void)
 	return 0;
 }
 
-
 /**
  * Get the POW tag for this core. This returns the current
  * tag type, tag, group, and POW entry index associated with
@@ -1662,7 +1728,7 @@ static inline unsigned cvmx_sso_num_xgrp(void)
  * If a tag switch is pending this routine returns the tag before
  * the tag switch, not after.
  *
- * @return Current tag
+ * Returns Current tag
  */
 static inline cvmx_pow_tag_info_t cvmx_pow_get_current_tag(void)
 {
@@ -1674,13 +1740,14 @@ static inline cvmx_pow_tag_info_t cvmx_pow_get_current_tag(void)
 		cvmx_xgrp_t xgrp;
 		int node = cvmx_get_node_num();
 		int core = cvmx_get_local_core_num();
-		sl_ppx_tag.u64 = cvmx_read_csr_node(node, CVMX_SSO_SL_PPX_TAG(core));
+		sl_ppx_tag.u64 =
+		    cvmx_read_csr_node(node, CVMX_SSO_SL_PPX_TAG(core));
 		result.index = sl_ppx_tag.s.index;
 		result.tag_type = sl_ppx_tag.s.tt;
-		result.tag      = sl_ppx_tag.s.tag;
+		result.tag = sl_ppx_tag.s.tag;
 
 		/* Return legacy style group 0..15 */
-		xgrp.xgrp -=  sl_ppx_tag.s.grp;
+		xgrp.xgrp -= sl_ppx_tag.s.grp;
 		result.grp = xgrp.group;
 	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		cvmx_pow_sl_tag_resp_t load_resp;
@@ -1716,7 +1783,7 @@ static inline cvmx_pow_tag_info_t cvmx_pow_get_current_tag(void)
  * Get the POW WQE for this core. This returns the work queue
  * entry currently associated with this core.
  *
- * @return WQE pointer
+ * Returns WQE pointer
  */
 static inline cvmx_wqe_t *cvmx_pow_get_current_wqp(void)
 {
@@ -1727,7 +1794,8 @@ static inline cvmx_wqe_t *cvmx_pow_get_current_wqp(void)
 		cvmx_sso_sl_ppx_wqp_t sso_wqp;
 		int node = cvmx_get_node_num();
 		int core = cvmx_get_local_core_num();
-		sso_wqp.u64 = cvmx_read_csr_node(node, CVMX_SSO_SL_PPX_WQP(core));
+		sso_wqp.u64 =
+		    cvmx_read_csr_node(node, CVMX_SSO_SL_PPX_WQP(core));
 		if (sso_wqp.s.wqp)
 			return (cvmx_wqe_t *) cvmx_phys_to_ptr(sso_wqp.s.wqp);
 		return (cvmx_wqe_t *) 0;
@@ -1741,7 +1809,9 @@ static inline cvmx_wqe_t *cvmx_pow_get_current_wqp(void)
 		load_addr.sstatus_cn68xx.opcode = 4;
 		load_resp.u64 = cvmx_read_csr(load_addr.u64);
 		if (load_resp.s_sstatus3_cn68xx.wqp)
-			return (cvmx_wqe_t *) cvmx_phys_to_ptr(load_resp.s_sstatus3_cn68xx.wqp);
+			return (cvmx_wqe_t *) cvmx_phys_to_ptr(load_resp.
+							       s_sstatus3_cn68xx.
+							       wqp);
 		else
 			return (cvmx_wqe_t *) 0;
 	} else {
@@ -1753,7 +1823,8 @@ static inline cvmx_wqe_t *cvmx_pow_get_current_wqp(void)
 		load_addr.sstatus.get_cur = 1;
 		load_addr.sstatus.get_wqp = 1;
 		load_resp.u64 = cvmx_read_csr(load_addr.u64);
-		return (cvmx_wqe_t *) cvmx_phys_to_ptr(load_resp.s_sstatus4.wqp);
+		return (cvmx_wqe_t *) cvmx_phys_to_ptr(load_resp.s_sstatus4.
+						       wqp);
 	}
 }
 
@@ -1761,13 +1832,14 @@ static inline cvmx_wqe_t *cvmx_pow_get_current_wqp(void)
  * @INTERNAL
  * Print a warning if a tag switch is pending for this core
  *
- * @param function Function name checking for a pending tag switch
+ * @function: Function name checking for a pending tag switch
  */
 static inline void __cvmx_pow_warn_if_pending_switch(const char *function)
 {
 	uint64_t switch_complete;
 	CVMX_MF_CHORD(switch_complete);
-	cvmx_warn_if(!switch_complete, "%s called with tag switch in progress\n", function);
+	cvmx_warn_if(!switch_complete,
+		     "%s called with tag switch in progress\n", function);
 }
 
 /**
@@ -1790,11 +1862,11 @@ static inline void cvmx_pow_tag_sw_wait(void)
 			break;
 		if (CVMX_ENABLE_POW_CHECKS) {
 			if (cvmx_unlikely(cvmx_get_cycle() >
-				(start_cycle + MAX_CYCLES))) {
+					  (start_cycle + MAX_CYCLES))) {
 				cvmx_dprintf("WARNING: %s:"
-					"Tag switch is taking a long time, "
-					"possible deadlock\n", __func__);
-			start_cycle += MAX_CYCLES - 1;
+					     "Tag switch is taking a long time, "
+					     "possible deadlock\n", __func__);
+				start_cycle += MAX_CYCLES - 1;
 			}
 		}
 	}
@@ -1805,12 +1877,13 @@ static inline void cvmx_pow_tag_sw_wait(void)
  * This function does NOT wait for previous tag switches to complete,
  * so the caller must ensure that there is not a pending tag switch.
  *
- * @param wait   When set, call stalls until work becomes avaiable, or times out.
+ * @wait:   When set, call stalls until work becomes avaiable, or times out.
  *               If not set, returns immediately.
  *
- * @return Returns the WQE pointer from POW. Returns NULL if no work was available.
+ * Returns Returns the WQE pointer from POW. Returns NULL if no work was available.
  */
-static inline cvmx_wqe_t *cvmx_pow_work_request_sync_nocheck(cvmx_pow_wait_t wait)
+static inline cvmx_wqe_t *cvmx_pow_work_request_sync_nocheck(cvmx_pow_wait_t
+							     wait)
 {
 	cvmx_pow_load_addr_t ptr;
 	cvmx_pow_tag_load_resp_t result;
@@ -1847,10 +1920,10 @@ static inline cvmx_wqe_t *cvmx_pow_work_request_sync_nocheck(cvmx_pow_wait_t wai
  * This function waits for any previous tag switch to complete before
  * requesting the new work.
  *
- * @param wait   When set, call stalls until work becomes avaiable, or times out.
+ * @wait:   When set, call stalls until work becomes avaiable, or times out.
  *               If not set, returns immediately.
  *
- * @return Returns the WQE pointer from POW. Returns NULL if no work was available.
+ * Returns Returns the WQE pointer from POW. Returns NULL if no work was available.
  */
 static inline cvmx_wqe_t *cvmx_pow_work_request_sync(cvmx_pow_wait_t wait)
 {
@@ -1868,7 +1941,7 @@ static inline cvmx_wqe_t *cvmx_pow_work_request_sync(cvmx_pow_wait_t wait)
  * This function waits for any previous tag switch to complete before
  * requesting the null_rd.
  *
- * @return Returns the POW state of type cvmx_pow_tag_type_t.
+ * Returns Returns the POW state of type cvmx_pow_tag_type_t.
  */
 static inline cvmx_pow_tag_type_t cvmx_pow_work_request_null_rd(void)
 {
@@ -1897,13 +1970,14 @@ static inline cvmx_pow_tag_type_t cvmx_pow_work_request_null_rd(void)
  * This function does NOT wait for previous tag switches to complete,
  * so the caller must ensure that there is not a pending tag switch.
  *
- * @param scr_addr Scratch memory address that response will be returned to,
+ * @scr_addr: Scratch memory address that response will be returned to,
  *                  which is either a valid WQE, or a response with the invalid bit set.
  *                  Byte address, must be 8 byte aligned.
- * @param wait      1 to cause response to wait for work to become available (or timeout)
+ * @wait:      1 to cause response to wait for work to become available (or timeout)
  *                  0 to cause response to return immediately
  */
-static inline void cvmx_pow_work_request_async_nocheck(int scr_addr, cvmx_pow_wait_t wait)
+static inline void cvmx_pow_work_request_async_nocheck(int scr_addr,
+						       cvmx_pow_wait_t wait)
 {
 	cvmx_pow_iobdma_store_t data;
 
@@ -1935,21 +2009,23 @@ static inline void cvmx_pow_work_request_async_nocheck(int scr_addr, cvmx_pow_wa
  *
  * Only works on CN78XX style SSO.
  *
- * @param scr_addr Scratch memory address that response will be returned to,
+ * @scr_addr: Scratch memory address that response will be returned to,
  *                  which is either a valid WQE, or a response with the invalid bit set.
  *                  Byte address, must be 8 byte aligned.
- * @param xgrp      group to receive work for (0-255).
- * @param wait      1 to cause response to wait for work to become available (or timeout)
+ * @xgrp:      group to receive work for (0-255).
+ * @wait:      1 to cause response to wait for work to become available (or timeout)
  *                  0 to cause response to return immediately
  */
 static inline void cvmx_sso_work_request_grp_async_nocheck(int scr_addr,
-	cvmx_xgrp_t xgrp, cvmx_pow_wait_t wait)
+							   cvmx_xgrp_t xgrp,
+							   cvmx_pow_wait_t wait)
 {
 	cvmx_pow_iobdma_store_t data;
 	unsigned int node = cvmx_get_node_num();
 	if (CVMX_ENABLE_POW_CHECKS) {
 		__cvmx_pow_warn_if_pending_switch(__func__);
-		cvmx_warn_if(!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE), "Not CN78XX");
+		cvmx_warn_if(!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE),
+			     "Not CN78XX");
 	}
 
 	/* scr_addr must be 8 byte aligned */
@@ -1958,7 +2034,7 @@ static inline void cvmx_sso_work_request_grp_async_nocheck(int scr_addr,
 	data.s_cn78xx.len = 1;
 	data.s_cn78xx.did = CVMX_OCT_DID_TAG_SWTAG;
 	data.s_cn78xx.grouped = 1;
-	data.s_cn78xx.index_grp_mask = (node << 8) | xgrp.xgrp ;
+	data.s_cn78xx.index_grp_mask = (node << 8) | xgrp.xgrp;
 	data.s_cn78xx.wait = wait;
 	data.s_cn78xx.node = node;
 
@@ -1972,13 +2048,14 @@ static inline void cvmx_sso_work_request_grp_async_nocheck(int scr_addr,
  *
  * Only works on CN78XX style SSO.
  *
- * @param lgrp The local group number (within the SSO of the node of the caller) from which to get the work.
- * @param wait   When set, call stalls until work becomes avaiable, or times out.
+ * @lgrp: The local group number (within the SSO of the node of the caller) from which to get the work.
+ * @wait:   When set, call stalls until work becomes avaiable, or times out.
  *               If not set, returns immediately.
  *
- * @return Returns the WQE pointer from SSO. Returns NULL if no work was available.
+ * Returns Returns the WQE pointer from SSO. Returns NULL if no work was available.
  */
-static inline void *cvmx_sso_work_request_grp_sync_nocheck(unsigned int lgrp, cvmx_pow_wait_t wait)
+static inline void *cvmx_sso_work_request_grp_sync_nocheck(unsigned int lgrp,
+							   cvmx_pow_wait_t wait)
 {
 	cvmx_pow_load_addr_t ptr;
 	cvmx_pow_tag_load_resp_t result;
@@ -1986,7 +2063,8 @@ static inline void *cvmx_sso_work_request_grp_sync_nocheck(unsigned int lgrp, cv
 
 	if (CVMX_ENABLE_POW_CHECKS) {
 		__cvmx_pow_warn_if_pending_switch(__func__);
-		cvmx_warn_if(!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE), "Not CN78XX");
+		cvmx_warn_if(!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE),
+			     "Not CN78XX");
 	}
 
 	ptr.u64 = 0;
@@ -2013,13 +2091,14 @@ static inline void *cvmx_sso_work_request_grp_sync_nocheck(unsigned int lgrp, cv
  * This function waits for any previous tag switch to complete before
  * requesting the new work.
  *
- * @param scr_addr Scratch memory address that response will be returned to,
+ * @scr_addr: Scratch memory address that response will be returned to,
  *                  which is either a valid WQE, or a response with the invalid bit set.
  *                  Byte address, must be 8 byte aligned.
- * @param wait      1 to cause response to wait for work to become available (or timeout)
+ * @wait:      1 to cause response to wait for work to become available (or timeout)
  *                  0 to cause response to return immediately
  */
-static inline void cvmx_pow_work_request_async(int scr_addr, cvmx_pow_wait_t wait)
+static inline void cvmx_pow_work_request_async(int scr_addr,
+					       cvmx_pow_wait_t wait)
 {
 	if (CVMX_ENABLE_POW_CHECKS)
 		__cvmx_pow_warn_if_pending_switch(__func__);
@@ -2033,9 +2112,9 @@ static inline void cvmx_pow_work_request_async(int scr_addr, cvmx_pow_wait_t wai
  * Gets result of asynchronous work request.  Performs a IOBDMA sync
  * to wait for the response.
  *
- * @param scr_addr Scratch memory address to get result from
+ * @scr_addr: Scratch memory address to get result from
  *                  Byte address, must be 8 byte aligned.
- * @return Returns the WQE from the scratch register, or NULL if no work was available.
+ * Returns Returns the WQE from the scratch register, or NULL if no work was available.
  */
 static inline cvmx_wqe_t *cvmx_pow_work_response_async(int scr_addr)
 {
@@ -2055,9 +2134,9 @@ static inline cvmx_wqe_t *cvmx_pow_work_response_async(int scr_addr)
  * request is valid.  It may be invalid due to no work
  * being available or due to a timeout.
  *
- * @param wqe_ptr pointer to a work queue entry returned by the POW
+ * @wqe_ptr: pointer to a work queue entry returned by the POW
  *
- * @return 0 if pointer is valid
+ * Returns 0 if pointer is valid
  *         1 if invalid (no work was returned)
  */
 static inline uint64_t cvmx_pow_work_invalid(cvmx_wqe_t * wqe_ptr)
@@ -2081,10 +2160,11 @@ static inline uint64_t cvmx_pow_work_invalid(cvmx_wqe_t * wqe_ptr)
  * This function does no checks, so the caller must ensure that any previous tag
  * switch has completed.
  *
- * @param tag      new tag value
- * @param tag_type new tag type (ordered or atomic)
+ * @tag:      new tag value
+ * @tag_type: new tag type (ordered or atomic)
  */
-static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag_type)
+static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag,
+					   cvmx_pow_tag_type_t tag_type)
 {
 	union cvmx_pow_tag_req_addr ptr;
 	cvmx_pow_tag_req_t tag_req;
@@ -2093,10 +2173,18 @@ static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag
 		cvmx_pow_tag_info_t current_tag;
 		__cvmx_pow_warn_if_pending_switch(__func__);
 		current_tag = cvmx_pow_get_current_tag();
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL_NULL, "%s called with NULL_NULL tag\n", __func__);
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called with NULL tag\n", __func__);
-		cvmx_warn_if((current_tag.tag_type == tag_type) && (current_tag.tag == tag), "%s called to perform a tag switch to the same tag\n", __func__);
-		cvmx_warn_if(tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called to perform a tag switch to NULL. Use cvmx_pow_tag_sw_null() instead\n", __func__);
+		cvmx_warn_if(current_tag.tag_type ==
+			     CVMX_POW_TAG_TYPE_NULL_NULL,
+			     "%s called with NULL_NULL tag\n", __func__);
+		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called with NULL tag\n", __func__);
+		cvmx_warn_if((current_tag.tag_type == tag_type)
+			     && (current_tag.tag == tag),
+			     "%s called to perform a tag switch to the same tag\n",
+			     __func__);
+		cvmx_warn_if(tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called to perform a tag switch to NULL. Use cvmx_pow_tag_sw_null() instead\n",
+			     __func__);
 	}
 
 	/* Note that WQE in DRAM is not updated here, as the POW does not read from DRAM
@@ -2107,7 +2195,7 @@ static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag
 
 	tag_req.u64 = 0;
 	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		tag_req.s_cn78xx_other.op   = CVMX_POW_TAG_OP_SWTAG;
+		tag_req.s_cn78xx_other.op = CVMX_POW_TAG_OP_SWTAG;
 		tag_req.s_cn78xx_other.type = tag_type;
 	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		tag_req.s_cn68xx_other.op = CVMX_POW_TAG_OP_SWTAG;
@@ -2125,7 +2213,7 @@ static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag
 		ptr.s_cn78xx.is_io = 1;
 		ptr.s_cn78xx.did = CVMX_OCT_DID_TAG_SWTAG;
 		ptr.s_cn78xx.node = cvmx_get_node_num();
-		ptr.s_cn78xx.tag  = tag;
+		ptr.s_cn78xx.tag = tag;
 	} else {
 		ptr.s.mem_region = CVMX_IO_SEG;
 		ptr.s.is_io = 1;
@@ -2153,8 +2241,8 @@ static inline void cvmx_pow_tag_sw_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag
  * This function waits for any previous tag switch to complete, and also
  * displays an error on tag switches to NULL.
  *
- * @param tag      new tag value
- * @param tag_type new tag type (ordered or atomic)
+ * @tag:      new tag value
+ * @tag_type: new tag type (ordered or atomic)
  */
 static inline void cvmx_pow_tag_sw(uint32_t tag, cvmx_pow_tag_type_t tag_type)
 {
@@ -2188,12 +2276,14 @@ static inline void cvmx_pow_tag_sw(uint32_t tag, cvmx_pow_tag_type_t tag_type)
  * This function does no checks, so the caller must ensure that any previous tag
  * switch has completed.
  *
- * @param wqp      pointer to work queue entry to submit.  This entry is updated to match the other parameters
- * @param tag      tag value to be assigned to work queue entry
- * @param tag_type type of tag
- * @param group      group value for the work queue entry.
+ * @wqp:      pointer to work queue entry to submit.  This entry is updated to match the other parameters
+ * @tag:      tag value to be assigned to work queue entry
+ * @tag_type: type of tag
+ * @group:      group value for the work queue entry.
  */
-static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow_tag_type_t tag_type, uint64_t group)
+static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag,
+						cvmx_pow_tag_type_t tag_type,
+						uint64_t group)
 {
 	union cvmx_pow_tag_req_addr ptr;
 	cvmx_pow_tag_req_t tag_req;
@@ -2203,11 +2293,21 @@ static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, 
 		cvmx_pow_tag_info_t current_tag;
 		__cvmx_pow_warn_if_pending_switch(__func__);
 		current_tag = cvmx_pow_get_current_tag();
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL_NULL, "%s called with NULL_NULL tag\n", __func__);
-		cvmx_warn_if((current_tag.tag_type == tag_type) && (current_tag.tag == tag), "%s called to perform a tag switch to the same tag\n", __func__);
-		cvmx_warn_if(tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called to perform a tag switch to NULL. Use cvmx_pow_tag_sw_null() instead\n", __func__);
-		if ((wqp != cvmx_phys_to_ptr(0x80)) && cvmx_pow_get_current_wqp())
-			cvmx_warn_if(wqp != cvmx_pow_get_current_wqp(), "%s passed WQE(%p) doesn't match the address in the POW(%p)\n", __func__, wqp, cvmx_pow_get_current_wqp());
+		cvmx_warn_if(current_tag.tag_type ==
+			     CVMX_POW_TAG_TYPE_NULL_NULL,
+			     "%s called with NULL_NULL tag\n", __func__);
+		cvmx_warn_if((current_tag.tag_type == tag_type)
+			     && (current_tag.tag == tag),
+			     "%s called to perform a tag switch to the same tag\n",
+			     __func__);
+		cvmx_warn_if(tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called to perform a tag switch to NULL. Use cvmx_pow_tag_sw_null() instead\n",
+			     __func__);
+		if ((wqp != cvmx_phys_to_ptr(0x80))
+		    && cvmx_pow_get_current_wqp())
+			cvmx_warn_if(wqp != cvmx_pow_get_current_wqp(),
+				     "%s passed WQE(%p) doesn't match the address in the POW(%p)\n",
+				     __func__, wqp, cvmx_pow_get_current_wqp());
 	}
 
 	/* Note that WQE in DRAM is not updated here, as the POW does not read from DRAM
@@ -2223,7 +2323,7 @@ static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, 
 
 		wqp_phys = cvmx_ptr_to_phys(wqp);
 
-		if(wqp_phys!= 0x80) {
+		if (wqp_phys != 0x80) {
 			/* If WQE is valid, use its XGRP */
 			xgrp = wqp->word1.cn78xx.grp;
 			/* Use XGRP[node] too */
@@ -2248,8 +2348,7 @@ static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, 
 		tag_req.s_cn78xx_other.wqp = wqp_phys;
 
 		/* WQE GRP is 10 bits, includes node # */
-	}
-	else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
+	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		tag_req.s_cn68xx_other.op = CVMX_POW_TAG_OP_SWTAG_FULL;
 		tag_req.s_cn68xx_other.tag = tag;
 		tag_req.s_cn68xx_other.type = tag_type;
@@ -2267,7 +2366,7 @@ static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, 
 		ptr.s_cn78xx.is_io = 1;
 		ptr.s_cn78xx.did = CVMX_OCT_DID_TAG_SWTAG;
 		ptr.s_cn78xx.node = node;
-		ptr.s_cn78xx.tag  = tag;
+		ptr.s_cn78xx.tag = tag;
 	} else {
 		ptr.s.mem_region = CVMX_IO_SEG;
 		ptr.s.is_io = 1;
@@ -2295,12 +2394,14 @@ static inline void cvmx_pow_tag_sw_full_nocheck(cvmx_wqe_t * wqp, uint32_t tag, 
  * This function waits for any pending tag switches to complete
  * before requesting the tag switch.
  *
- * @param wqp      pointer to work queue entry to submit.  This entry is updated to match the other parameters
- * @param tag      tag value to be assigned to work queue entry
- * @param tag_type type of tag
- * @param group      group value for the work queue entry.
+ * @wqp:      pointer to work queue entry to submit.  This entry is updated to match the other parameters
+ * @tag:      tag value to be assigned to work queue entry
+ * @tag_type: type of tag
+ * @group:      group value for the work queue entry.
  */
-static inline void cvmx_pow_tag_sw_full(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow_tag_type_t tag_type, uint64_t group)
+static inline void cvmx_pow_tag_sw_full(cvmx_wqe_t * wqp, uint32_t tag,
+					cvmx_pow_tag_type_t tag_type,
+					uint64_t group)
 {
 	if (CVMX_ENABLE_POW_CHECKS)
 		__cvmx_pow_warn_if_pending_switch(__func__);
@@ -2328,8 +2429,12 @@ static inline void cvmx_pow_tag_sw_null_nocheck(void)
 		cvmx_pow_tag_info_t current_tag;
 		__cvmx_pow_warn_if_pending_switch(__func__);
 		current_tag = cvmx_pow_get_current_tag();
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL_NULL, "%s called with NULL_NULL tag\n", __func__);
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called when we already have a NULL tag\n", __func__);
+		cvmx_warn_if(current_tag.tag_type ==
+			     CVMX_POW_TAG_TYPE_NULL_NULL,
+			     "%s called with NULL_NULL tag\n", __func__);
+		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called when we already have a NULL tag\n",
+			     __func__);
 	}
 
 	tag_req.u64 = 0;
@@ -2389,13 +2494,15 @@ static inline void cvmx_pow_tag_sw_null(void)
  * Note that the tag provided is for the work queue entry submitted, and is unrelated to the tag that
  * the core currently holds.
  *
- * @param wqp      pointer to work queue entry to submit.  This entry is updated to match the other parameters
- * @param tag      tag value to be assigned to work queue entry
- * @param tag_type type of tag
- * @param qos      Input queue to add to.
- * @param grp      group value for the work queue entry.
+ * @wqp:      pointer to work queue entry to submit.  This entry is updated to match the other parameters
+ * @tag:      tag value to be assigned to work queue entry
+ * @tag_type: type of tag
+ * @qos:      Input queue to add to.
+ * @grp:      group value for the work queue entry.
  */
-static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow_tag_type_t tag_type, uint64_t qos, uint64_t grp)
+static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag,
+					cvmx_pow_tag_type_t tag_type,
+					uint64_t qos, uint64_t grp)
 {
 	union cvmx_pow_tag_req_addr ptr;
 	cvmx_pow_tag_req_t tag_req;
@@ -2407,7 +2514,7 @@ static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow
 		unsigned node = cvmx_get_node_num();
 		unsigned xgrp;
 
-		xgrp = (grp & 0x1f) << 3 ;
+		xgrp = (grp & 0x1f) << 3;
 		xgrp |= (qos & 7);
 		xgrp |= 0x300 & (node << 8);
 
@@ -2423,7 +2530,7 @@ static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow
 		tag_req.s_cn78xx_other.wqp = cvmx_ptr_to_phys(wqp);
 		tag_req.s_cn78xx_other.grp = xgrp;
 
-		ptr.s_cn78xx.did = 0x66; //CVMX_OCT_DID_TAG_TAG6;
+		ptr.s_cn78xx.did = 0x66;	//CVMX_OCT_DID_TAG_TAG6;
 		ptr.s_cn78xx.mem_region = CVMX_IO_SEG;
 		ptr.s_cn78xx.is_io = 1;
 		ptr.s_cn78xx.node = node;
@@ -2483,12 +2590,12 @@ static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow
  * Note that the tag provided is for the work queue entry submitted,
  * and is unrelated to the tag that the core currently holds.
  *
- * @param wqp pointer to work queue entry to submit.
+ * @wqp: pointer to work queue entry to submit.
  * This entry is updated to match the other parameters
- * @param tag tag value to be assigned to work queue entry
- * @param tag_type type of tag
- * @param xgrp native CN78XX group in the range 0..255
- * @param node The OCI node number for the target group
+ * @tag: tag value to be assigned to work queue entry
+ * @tag_type: type of tag
+ * @xgrp: native CN78XX group in the range 0..255
+ * @node: The OCI node number for the target group
  *
  * When this function is called on a model prior to CN78XX, which does
  * not support OCI nodes, the 'node' argument is ignored, and the 'xgrp'
@@ -2496,7 +2603,9 @@ static inline void cvmx_pow_work_submit(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow
  * 5 bits), following the backward-compatibility scheme of translating
  * between new and old style group numbers.
  */
-static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag, cvmx_pow_tag_type_t tag_type, uint8_t xgrp, uint8_t node)
+static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag,
+					     cvmx_pow_tag_type_t tag_type,
+					     uint8_t xgrp, uint8_t node)
 {
 	union cvmx_pow_tag_req_addr ptr;
 	cvmx_pow_tag_req_t tag_req;
@@ -2522,7 +2631,7 @@ static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag, cvm
 		tag_req.s_cn78xx_other.wqp = cvmx_ptr_to_phys(wqp);
 		tag_req.s_cn78xx_other.grp = xgrp;
 
-		ptr.s_cn78xx.did = 0x66; //CVMX_OCT_DID_TAG_TAG6;
+		ptr.s_cn78xx.did = 0x66;	//CVMX_OCT_DID_TAG_TAG6;
 		ptr.s_cn78xx.mem_region = CVMX_IO_SEG;
 		ptr.s_cn78xx.is_io = 1;
 		ptr.s_cn78xx.node = node;
@@ -2580,8 +2689,8 @@ static inline void cvmx_pow_work_submit_node(cvmx_wqe_t * wqp, uint32_t tag, cvm
  * indicates which groups each core will accept work from. There are
  * 16 groups.
  *
- * @param core_num   core to apply mask to
- * @param mask   Group mask, one bit for up to 64 groups.
+ * @core_num:   core to apply mask to
+ * @mask:   Group mask, one bit for up to 64 groups.
  *               Each 1 bit in the mask enables the core to accept work from
  *               the corresponding group.
  *               The CN68XX supports 64 groups, earlier models only support
@@ -2607,30 +2716,32 @@ static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
 		unsigned xgrp;	/* native group # */
 
 		cvmx_warn_if(mask & (~0xffffffffull),
-			"%s group number range exceeded: %#llx\n",
-			__FUNCTION__, (unsigned long long) mask);
+			     "%s group number range exceeded: %#llx\n",
+			     __FUNCTION__, (unsigned long long)mask);
 
 		node = cvmx_coremask_core_to_node(core_num);
 		core = cvmx_coremask_core_on_node(core_num);
 
 		/* 78xx: 256 groups divided into 4 X 64 bit registers */
 		/* 73xx: 64 groups are in one register */
-		for (rix = 0; rix < (cvmx_sso_num_xgrp() >> 6); rix ++ ) {
+		for (rix = 0; rix < (cvmx_sso_num_xgrp() >> 6); rix++) {
 			grp_msk.u64 = 0;
-			for(bit = 0; bit < 64; bit++) {
+			for (bit = 0; bit < 64; bit++) {
 				/* 8-bit native XGRP number */
 				xgrp = (rix << 6) | bit;
 				/* Legacy 5-bit group number */
 				grp = (xgrp >> 3) & 0x1f;
 				/* Inspect legacy mask by legacy group */
-				if(mask & (1ull << grp))
+				if (mask & (1ull << grp))
 					grp_msk.s.grp_msk |= 1ull << bit;
 				/* Pre-set to all 0's */
 			}
 
 			cvmx_write_csr_node(node,
-				CVMX_SSO_PPX_SX_GRPMSKX(core, mask_set, rix),
-				grp_msk.u64);
+					    CVMX_SSO_PPX_SX_GRPMSKX(core,
+								    mask_set,
+								    rix),
+					    grp_msk.u64);
 		}
 	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
 		cvmx_sso_ppx_grp_msk_t grp_msk;
@@ -2640,8 +2751,8 @@ static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
 		cvmx_pow_pp_grp_mskx_t grp_msk;
 
 		cvmx_warn_if(mask & ~0xffffull,
-			"%s group number range exceeded: %#llx\n",
-			__FUNCTION__, (unsigned long long) mask);
+			     "%s group number range exceeded: %#llx\n",
+			     __FUNCTION__, (unsigned long long)mask);
 
 		grp_msk.u64 = cvmx_read_csr(CVMX_POW_PP_GRP_MSKX(core_num));
 		grp_msk.s.grp_msk = mask & 0xffff;
@@ -2654,13 +2765,13 @@ static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
  * indicates which groups each core will accept work from. There are
  * 256 groups in 78xx.
  *
- * @param core_num   	processor core to apply mask to
- * @param mask_set	78XX has 2 set of masks per core each with 256 groups.
+ * @core_num:   	processor core to apply mask to
+ * @mask_set:	78XX has 2 set of masks per core each with 256 groups.
  *                      Bit 0 represents the first mask set, bit 1 the second,
  * 			when set a each member of <xgrp_mask> will be added
  * 			to the core, when cleared, each of the groups in
  * 			<xgrp_mask> will be removed from the mask set.
- * @param xgrp_mask   	Group mask. There are 256 groups, divided in 4 of 64 bit mask sets.
+ * @xgrp_mask:   	Group mask. There are 256 groups, divided in 4 of 64 bit mask sets.
  * 	        	Each 1 bit in the mask enables the core to accept work from
  *      	        the corresponding group.
  *
@@ -2672,16 +2783,16 @@ static inline void cvmx_pow_set_group_mask(uint64_t core_num, uint64_t mask)
  *
  * TBD: function to configure which mask_set is applied to a core.
  */
-static inline void cvmx_pow_set_xgrp_mask( uint64_t core_num,
-		uint8_t mask_set, const uint64_t xgrp_mask[])
+static inline void cvmx_pow_set_xgrp_mask(uint64_t core_num,
+					  uint8_t mask_set,
+					  const uint64_t xgrp_mask[])
 {
 	cvmx_sso_ppx_sx_grpmskx_t grp_msk;
 	unsigned grp, node, core;
 
 	if (!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_dprintf(
-			"ERROR: %s is not supported on this chip)\n",
-			__FUNCTION__);
+		cvmx_dprintf("ERROR: %s is not supported on this chip)\n",
+			     __FUNCTION__);
 		return;
 	}
 
@@ -2692,7 +2803,7 @@ static inline void cvmx_pow_set_xgrp_mask( uint64_t core_num,
 		uint64_t reg_addr;
 
 		reg_addr = CVMX_SSO_PPX_SX_GRPMSKX(core, 0, grp),
-		grp_msk.u64 = cvmx_read_csr_node(node,reg_addr);
+		    grp_msk.u64 = cvmx_read_csr_node(node, reg_addr);
 
 		if (mask_set & 1)
 			grp_msk.s.grp_msk |= xgrp_mask[grp];
@@ -2702,7 +2813,7 @@ static inline void cvmx_pow_set_xgrp_mask( uint64_t core_num,
 		cvmx_write_csr_node(node, reg_addr, grp_msk.u64);
 
 		reg_addr = CVMX_SSO_PPX_SX_GRPMSKX(core, 1, grp),
-		grp_msk.u64 = cvmx_read_csr_node(node,reg_addr);
+		    grp_msk.u64 = cvmx_read_csr_node(node, reg_addr);
 
 		if (mask_set & 2)
 			grp_msk.s.grp_msk |= xgrp_mask[grp];
@@ -2717,9 +2828,9 @@ static inline void cvmx_pow_set_xgrp_mask( uint64_t core_num,
  * This function sets the the affinity of group to the cores in 78xx.
  * It sets up all the cores in core_mask to accept work from the specified group.
  *
- * @param xgrp  	group to accept work from, 0 - 255.
- * @param core_mask	mask of all the cores which will accept work from this group
- * @param mask_set	every core has set of 2 masks which can be set to accept work
+ * @xgrp:  	group to accept work from, 0 - 255.
+ * @core_mask:	mask of all the cores which will accept work from this group
+ * @mask_set:	every core has set of 2 masks which can be set to accept work
  *                      from 256 groups. At the time of get_work, cores can choose which
  *			mask_set to get work from.
  * 			<mask_set> values range from 0 to 3, where
@@ -2733,17 +2844,17 @@ static inline void cvmx_pow_set_xgrp_mask( uint64_t core_num,
  *
  */
 static inline void cvmx_sso_set_group_core_affinity(cvmx_xgrp_t xgrp,
-		const cvmx_coremask_t * core_mask, uint8_t mask_set)
+						    const cvmx_coremask_t *
+						    core_mask, uint8_t mask_set)
 {
 	cvmx_sso_ppx_sx_grpmskx_t grp_msk;
 	int core;
-	int grp_index  = xgrp.xgrp >> 6;
+	int grp_index = xgrp.xgrp >> 6;
 	int bit_pos = xgrp.xgrp % 64;
 
 	if (!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_dprintf(
-			"ERROR: %s is not supported on this chip)\n",
-			__FUNCTION__);
+		cvmx_dprintf("ERROR: %s is not supported on this chip)\n",
+			     __FUNCTION__);
 		return;
 	}
 
@@ -2757,7 +2868,7 @@ static inline void cvmx_sso_set_group_core_affinity(cvmx_xgrp_t xgrp,
 		reg_addr = CVMX_SSO_PPX_SX_GRPMSKX(ncore, 0, grp_index);
 		grp_msk.u64 = cvmx_read_csr_node(node, reg_addr);
 
-		if(mask_set & 1)
+		if (mask_set & 1)
 			grp_msk.s.grp_msk |= (1ull << bit_pos);
 		else
 			grp_msk.s.grp_msk &= ~(1ull << bit_pos);
@@ -2767,7 +2878,7 @@ static inline void cvmx_sso_set_group_core_affinity(cvmx_xgrp_t xgrp,
 		reg_addr = CVMX_SSO_PPX_SX_GRPMSKX(ncore, 1, grp_index);
 		grp_msk.u64 = cvmx_read_csr_node(node, reg_addr);
 
-		if(mask_set & 2)
+		if (mask_set & 2)
 			grp_msk.s.grp_msk |= (1ull << bit_pos);
 		else
 			grp_msk.s.grp_msk &= ~(1ull << bit_pos);
@@ -2779,34 +2890,35 @@ static inline void cvmx_sso_set_group_core_affinity(cvmx_xgrp_t xgrp,
 /**
  * This function sets the priority and group affinity arbitration for each group.
  *
- * @param node 		node number
- * @param xgrp  	group 0 - 255 to apply mask parameters to
- * @param priority	priority of the group relative to other groups
+ * @node: 		node number
+ * @xgrp:  	group 0 - 255 to apply mask parameters to
+ * @priority:	priority of the group relative to other groups
  *			0x0 - highest priority
  *			0x7 - lowest priority
- * @param weight	Cross-group arbitration weight to apply to this group.
+ * @weight:	Cross-group arbitration weight to apply to this group.
  *			valid values are 1-63
  *			h/w default is 0x3f
- * @param affinity	Processor affinity arbitration weight to apply to this group.
+ * @affinity:	Processor affinity arbitration weight to apply to this group.
  *			If zero, affinity is disabled.
  *			valid values are 0-15
  *			h/w default which is 0xf.
- * @param modify_mask   mask of the parameters which needs to be modified.
+ * @modify_mask:   mask of the parameters which needs to be modified.
  *			enum cvmx_sso_group_modify_mask
  *                      to modify only priority -- set bit0
  *                      to modify only weight   -- set bit1
  *			to modify only affinity -- set bit2
  */
 static inline void cvmx_sso_set_group_priority(int node, cvmx_xgrp_t xgrp,
-			int priority, int weight, int affinity,
-		       enum cvmx_sso_group_modify_mask modify_mask)
+					       int priority, int weight,
+					       int affinity,
+					       enum cvmx_sso_group_modify_mask
+					       modify_mask)
 {
 	cvmx_sso_grpx_pri_t grp_pri;
 
 	if (!octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-		cvmx_dprintf(
-			"ERROR: %s is not supported on this chip)\n",
-			__FUNCTION__);
+		cvmx_dprintf("ERROR: %s is not supported on this chip)\n",
+			     __FUNCTION__);
 		return;
 	}
 
@@ -2814,23 +2926,23 @@ static inline void cvmx_sso_set_group_priority(int node, cvmx_xgrp_t xgrp,
 		weight = 0x3f;	/* Force HW default when out of range */
 
 	grp_pri.u64 = cvmx_read_csr_node(node, CVMX_SSO_GRPX_PRI(xgrp.xgrp));
-	if(grp_pri.s.weight == 0)
+	if (grp_pri.s.weight == 0)
 		grp_pri.s.weight = 0x3f;
-	if(modify_mask & CVMX_SSO_MODIFY_GROUP_PRIORITY)
+	if (modify_mask & CVMX_SSO_MODIFY_GROUP_PRIORITY)
 		grp_pri.s.pri = priority;
-	if(modify_mask & CVMX_SSO_MODIFY_GROUP_WEIGHT)
+	if (modify_mask & CVMX_SSO_MODIFY_GROUP_WEIGHT)
 		grp_pri.s.weight = weight;
-	if(modify_mask & CVMX_SSO_MODIFY_GROUP_AFFINITY)
+	if (modify_mask & CVMX_SSO_MODIFY_GROUP_AFFINITY)
 		grp_pri.s.affinity = affinity;
-	cvmx_write_csr_node(node,CVMX_SSO_GRPX_PRI(xgrp.xgrp),grp_pri.u64);
+	cvmx_write_csr_node(node, CVMX_SSO_GRPX_PRI(xgrp.xgrp), grp_pri.u64);
 }
 
 /**
  * This function sets POW static priorities for a core. Each input queue has
  * an associated priority value.
  *
- * @param core_num   core to apply priorities to
- * @param priority   Vector of 8 priorities, one per POW Input Queue (0-7).
+ * @core_num:   core to apply priorities to
+ * @priority:   Vector of 8 priorities, one per POW Input Queue (0-7).
  *                   Highest priority is 0 and lowest is 7. A priority value
  *                   of 0xF instructs POW to skip the Input Queue when
  *                   scheduling to this specific core.
@@ -2838,7 +2950,8 @@ static inline void cvmx_sso_set_group_priority(int node, cvmx_xgrp_t xgrp,
  *                         {0,1,1,1,1,1,1,1} is a valid configuration while
  *                         {0,2,2,2,2,2,2,2} is not.
  */
-static inline void cvmx_pow_set_priority(uint64_t core_num, const uint8_t priority[])
+static inline void cvmx_pow_set_priority(uint64_t core_num,
+					 const uint8_t priority[])
 {
 	if (OCTEON_IS_MODEL(OCTEON_CN3XXX))
 		return;
@@ -2853,7 +2966,9 @@ static inline void cvmx_pow_set_priority(uint64_t core_num, const uint8_t priori
 				prio_mask |= 1 << priority[i];
 
 		if (prio_mask ^ ((1 << cvmx_pop(prio_mask)) - 1)) {
-			cvmx_dprintf("ERROR: POW static priorities should be contiguous (0x%llx)\n", (unsigned long long)prio_mask);
+			cvmx_dprintf
+			    ("ERROR: POW static priorities should be contiguous (0x%llx)\n",
+			     (unsigned long long)prio_mask);
 			return;
 		}
 	}
@@ -2866,12 +2981,14 @@ static inline void cvmx_pow_set_priority(uint64_t core_num, const uint8_t priori
 		grp_pri.s.weight = 0x3f;
 		grp_pri.s.affinity = 0xf;
 
-		for(group = 0; group < cvmx_sso_num_xgrp(); group ++ ) {
+		for (group = 0; group < cvmx_sso_num_xgrp(); group++) {
 			grp_pri.u64 = cvmx_read_csr_node(node,
-				CVMX_SSO_GRPX_PRI(group));
+							 CVMX_SSO_GRPX_PRI
+							 (group));
 			grp_pri.s.pri = priority[group & 0x7];
 			cvmx_write_csr_node(node,
-				CVMX_SSO_GRPX_PRI(group), grp_pri.u64);
+					    CVMX_SSO_GRPX_PRI(group),
+					    grp_pri.u64);
 		}
 
 	} else if (octeon_has_feature(OCTEON_FEATURE_CN68XX_WQE)) {
@@ -2939,14 +3056,17 @@ static inline void cvmx_pow_set_priority(uint64_t core_num, const uint8_t priori
  * when the HW re-schedules, this switch can be IMMEDIATE upon
  * the reception of the pointer during the re-schedule.
  *
- * @param tag      New tag value
- * @param tag_type New tag type
- * @param group    New group value
- * @param no_sched Control whether this work queue entry will be rescheduled.
+ * @tag:      New tag value
+ * @tag_type: New tag type
+ * @group:    New group value
+ * @no_sched: Control whether this work queue entry will be rescheduled.
  *                 - 1 : don't schedule this work
  *                 - 0 : allow this work to be scheduled.
  */
-static inline void cvmx_pow_tag_sw_desched_nocheck(uint32_t tag, cvmx_pow_tag_type_t tag_type, uint64_t group, uint64_t no_sched)
+static inline void cvmx_pow_tag_sw_desched_nocheck(uint32_t tag,
+						   cvmx_pow_tag_type_t tag_type,
+						   uint64_t group,
+						   uint64_t no_sched)
 {
 	union cvmx_pow_tag_req_addr ptr;
 	cvmx_pow_tag_req_t tag_req;
@@ -2955,10 +3075,16 @@ static inline void cvmx_pow_tag_sw_desched_nocheck(uint32_t tag, cvmx_pow_tag_ty
 		cvmx_pow_tag_info_t current_tag;
 		__cvmx_pow_warn_if_pending_switch(__func__);
 		current_tag = cvmx_pow_get_current_tag();
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL_NULL, "%s called with NULL_NULL tag\n", __func__);
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called with NULL tag. Deschedule not allowed from NULL state\n", __func__);
+		cvmx_warn_if(current_tag.tag_type ==
+			     CVMX_POW_TAG_TYPE_NULL_NULL,
+			     "%s called with NULL_NULL tag\n", __func__);
+		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called with NULL tag. Deschedule not allowed from NULL state\n",
+			     __func__);
 		cvmx_warn_if((current_tag.tag_type != CVMX_POW_TAG_TYPE_ATOMIC)
-			     && (tag_type != CVMX_POW_TAG_TYPE_ATOMIC), "%s called where neither the before or after tag is ATOMIC\n", __func__);
+			     && (tag_type != CVMX_POW_TAG_TYPE_ATOMIC),
+			     "%s called where neither the before or after tag is ATOMIC\n",
+			     __func__);
 	}
 
 	tag_req.u64 = 0;
@@ -2990,8 +3116,8 @@ static inline void cvmx_pow_tag_sw_desched_nocheck(uint32_t tag, cvmx_pow_tag_ty
 		ptr.s.mem_region = CVMX_IO_SEG;
 		ptr.s.is_io = 1;
 		ptr.s.did = CVMX_OCT_DID_TAG_TAG3;
-		ptr.s_cn78xx.node =  cvmx_get_node_num();
-		ptr.s_cn78xx.tag  = tag;
+		ptr.s_cn78xx.node = cvmx_get_node_num();
+		ptr.s_cn78xx.tag = tag;
 	} else {
 		ptr.s.mem_region = CVMX_IO_SEG;
 		ptr.s.is_io = 1;
@@ -3034,14 +3160,16 @@ static inline void cvmx_pow_tag_sw_desched_nocheck(uint32_t tag, cvmx_pow_tag_ty
  * when the HW re-schedules, this switch can be IMMEDIATE upon
  * the reception of the pointer during the re-schedule.
  *
- * @param tag      New tag value
- * @param tag_type New tag type
- * @param group    New group value
- * @param no_sched Control whether this work queue entry will be rescheduled.
+ * @tag:      New tag value
+ * @tag_type: New tag type
+ * @group:    New group value
+ * @no_sched: Control whether this work queue entry will be rescheduled.
  *                 - 1 : don't schedule this work
  *                 - 0 : allow this work to be scheduled.
  */
-static inline void cvmx_pow_tag_sw_desched(uint32_t tag, cvmx_pow_tag_type_t tag_type, uint64_t group, uint64_t no_sched)
+static inline void cvmx_pow_tag_sw_desched(uint32_t tag,
+					   cvmx_pow_tag_type_t tag_type,
+					   uint64_t group, uint64_t no_sched)
 {
 	if (CVMX_ENABLE_POW_CHECKS)
 		__cvmx_pow_warn_if_pending_switch(__func__);
@@ -3057,7 +3185,7 @@ static inline void cvmx_pow_tag_sw_desched(uint32_t tag, cvmx_pow_tag_type_t tag
 /**
  * Descchedules the current work queue entry.
  *
- * @param no_sched no schedule flag value to be set on the work queue entry.  If this is set
+ * @no_sched: no schedule flag value to be set on the work queue entry.  If this is set
  *                 the entry will not be rescheduled.
  */
 static inline void cvmx_pow_desched(uint64_t no_sched)
@@ -3069,8 +3197,12 @@ static inline void cvmx_pow_desched(uint64_t no_sched)
 		cvmx_pow_tag_info_t current_tag;
 		__cvmx_pow_warn_if_pending_switch(__func__);
 		current_tag = cvmx_pow_get_current_tag();
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL_NULL, "%s called with NULL_NULL tag\n", __func__);
-		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL, "%s called with NULL tag. Deschedule not expected from NULL state\n", __func__);
+		cvmx_warn_if(current_tag.tag_type ==
+			     CVMX_POW_TAG_TYPE_NULL_NULL,
+			     "%s called with NULL_NULL tag\n", __func__);
+		cvmx_warn_if(current_tag.tag_type == CVMX_POW_TAG_TYPE_NULL,
+			     "%s called with NULL tag. Deschedule not expected from NULL state\n",
+			     __func__);
 	}
 
 	/* Need to make sure any writes to the work queue entry are complete */
@@ -3136,37 +3268,40 @@ static inline void cvmx_pow_desched(uint64_t no_sched)
 /**
  * This function creates a 32 bit tag value from the two values provided.
  *
- * @param sw_bits The upper bits (number depends on configuration) are set to this value.  The remainder of
+ * @sw_bits: The upper bits (number depends on configuration) are set to this value.  The remainder of
  *                bits are set by the hw_bits parameter.
- * @param hw_bits The lower bits (number depends on configuration) are set to this value.  The remainder of
+ * @hw_bits: The lower bits (number depends on configuration) are set to this value.  The remainder of
  *                bits are set by the sw_bits parameter.
  *
- * @return 32 bit value of the combined hw and sw bits.
+ * Returns 32 bit value of the combined hw and sw bits.
  */
 static inline uint32_t cvmx_pow_tag_compose(uint64_t sw_bits, uint64_t hw_bits)
 {
-	return ((((sw_bits & cvmx_build_mask(CVMX_TAG_SW_BITS)) << CVMX_TAG_SW_SHIFT) | (hw_bits & cvmx_build_mask(32 - CVMX_TAG_SW_BITS))));
+	return ((((sw_bits & cvmx_build_mask(CVMX_TAG_SW_BITS)) <<
+		  CVMX_TAG_SW_SHIFT) | (hw_bits & cvmx_build_mask(32 -
+								  CVMX_TAG_SW_BITS))));
 }
 
 /**
  * Extracts the bits allocated for software use from the tag
  *
- * @param tag    32 bit tag value
+ * @tag:    32 bit tag value
  *
- * @return N bit software tag value, where N is configurable with the CVMX_TAG_SW_BITS define
+ * Returns N bit software tag value, where N is configurable with the CVMX_TAG_SW_BITS define
  */
 static inline uint32_t cvmx_pow_tag_get_sw_bits(uint64_t tag)
 {
-	return ((tag >> (32 - CVMX_TAG_SW_BITS)) & cvmx_build_mask(CVMX_TAG_SW_BITS));
+	return ((tag >> (32 - CVMX_TAG_SW_BITS)) &
+		cvmx_build_mask(CVMX_TAG_SW_BITS));
 }
 
 /**
  *
  * Extracts the bits allocated for hardware use from the tag
  *
- * @param tag    32 bit tag value
+ * @tag:    32 bit tag value
  *
- * @return (32 - N) bit software tag value, where N is configurable with the CVMX_TAG_SW_BITS define
+ * Returns (32 - N) bit software tag value, where N is configurable with the CVMX_TAG_SW_BITS define
  */
 static inline uint32_t cvmx_pow_tag_get_hw_bits(uint64_t tag)
 {
@@ -3179,9 +3314,9 @@ static inline uint64_t cvmx_sso3_get_wqe_count(int node)
 	unsigned grp = 0;
 	uint64_t cnt = 0;
 
-	for( grp = 0; grp < cvmx_sso_num_xgrp(); grp++) {
+	for (grp = 0; grp < cvmx_sso_num_xgrp(); grp++) {
 		aq_cnt.u64 = cvmx_read_csr_node(node,
-				CVMX_SSO_GRPX_AQ_CNT(grp));
+						CVMX_SSO_GRPX_AQ_CNT(grp));
 		cnt += aq_cnt.s.aq_cnt;
 	}
 	return cnt;
@@ -3189,25 +3324,20 @@ static inline uint64_t cvmx_sso3_get_wqe_count(int node)
 
 static inline uint64_t cvmx_sso_get_total_wqe_count(void)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-	{
+	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
 		int node = cvmx_get_node_num();
 		return cvmx_sso3_get_wqe_count(node);
-	}
-	else if (OCTEON_IS_MODEL(OCTEON_CN68XX))
-	{
+	} else if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
 		cvmx_sso_iq_com_cnt_t sso_iq_com_cnt;
 
 		sso_iq_com_cnt.u64 = cvmx_read_csr(CVMX_SSO_IQ_COM_CNT);
 
 		return (sso_iq_com_cnt.s.iq_cnt);
-	}
-	else
-	{
+	} else {
 		cvmx_pow_iq_com_cnt_t pow_iq_com_cnt;
 
 		pow_iq_com_cnt.u64 = cvmx_read_csr(CVMX_POW_IQ_COM_CNT);
-		return(pow_iq_com_cnt.s.iq_cnt);
+		return (pow_iq_com_cnt.s.iq_cnt);
 	}
 }
 
@@ -3217,19 +3347,19 @@ static inline uint64_t cvmx_sso_get_total_wqe_count(void)
  * 128KB. The format of the capture may change based on SDK
  * version and Octeon chip.
  *
- * @param buffer Buffer to store capture into
- * @param buffer_size
+ * @buffer: Buffer to store capture into
+ * @buffer_size:
  *               The size of the supplied buffer
  *
- * @return Zero on sucess, negative on failure
+ * Returns Zero on sucess, negative on failure
  */
 extern int cvmx_pow_capture(void *buffer, int buffer_size);
 
 /**
  * Dump a POW capture to the console in a human readable format.
  *
- * @param buffer POW capture from cvmx_pow_capture()
- * @param buffer_size
+ * @buffer: POW capture from cvmx_pow_capture()
+ * @buffer_size:
  *               Size of the buffer
  */
 extern void cvmx_pow_display(void *buffer, int buffer_size);
@@ -3237,7 +3367,7 @@ extern void cvmx_pow_display(void *buffer, int buffer_size);
 /**
  * Return the number of POW entries supported by this chip
  *
- * @return Number of POW entries
+ * Returns Number of POW entries
  */
 extern int cvmx_pow_get_num_entries(void);
 extern int cvmx_pow_get_dump_size(void);
@@ -3246,10 +3376,10 @@ extern int cvmx_pow_get_dump_size(void);
  * This will allocate count number of SSO groups on the specified node to the
  * calling application. These groups will be for exclusive use of the application
  * until they are freed.
- * @param node The numa node for the allocation.
- * @param base_group Pointer to the initial group, -1 to allocate anywhere.
- * @param count  The number of consecutive groups to allocate.
- * @return 0 on success and -1 on failure.
+ * @node: The numa node for the allocation.
+ * @base_group: Pointer to the initial group, -1 to allocate anywhere.
+ * @count:  The number of consecutive groups to allocate.
+ * Returns 0 on success and -1 on failure.
  */
 int cvmx_sso_reserve_group_range(int node, int *base_group, int count);
 #define cvmx_sso_allocate_group_range cvmx_sso_reserve_group_range
@@ -3257,11 +3387,5 @@ int cvmx_sso_reserve_group(int node);
 #define cvmx_sso_allocate_group cvmx_sso_reserve_group
 int cvmx_sso_release_group_range(int node, int base_group, int count);
 int cvmx_sso_release_group(int node, int group);
-
-#ifdef  __cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 
 #endif /* __CVMX_POW_H__ */

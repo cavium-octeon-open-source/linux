@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2003-2013  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2003-2013 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -56,17 +44,12 @@
  * The second goal is accomplished by generating
  * cvmx_helper_cfg_init() from a high-level lanaguage.
  *
- * <hr>$Revision: 0 $<hr>
  */
 
 #ifndef __CVMX_HELPER_CFG_H__
 #define __CVMX_HELPER_CFG_H__
 
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx-helper-util.h>
-#else
-#include "cvmx-helper-util.h"
-#endif
 
 #define CVMX_HELPER_CFG_MAX_PKO_PORT		128
 #define CVMX_HELPER_CFG_MAX_PIP_BPID       	64
@@ -77,12 +60,6 @@
 #define CVMX_HELPER_CFG_INVALID_VALUE		-1	/* The default return
 							 * value upon failure
 							 */
-
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 #define cvmx_helper_cfg_assert(cond)					\
 	do {								\
@@ -172,21 +149,16 @@ struct cvmx_cfg_pko_port_pair {
 	int8_t ccppp_nports;
 };
 
-typedef union cvmx_user_static_pko_queue_config
-{
-	struct
-	{
+typedef union cvmx_user_static_pko_queue_config {
+	struct {
 		struct pko_queues_cfg {
 			unsigned
-				queues_per_port:5,
-				qos_enable:1,
-				pfc_enable:1;
+			 queues_per_port:5, qos_enable:1, pfc_enable:1;
 		} pko_cfg_iface[6];
 		struct pko_queues_cfg pko_cfg_loop;
 		struct pko_queues_cfg pko_cfg_npi;
 	} pknd;
-	struct
-	{
+	struct {
 		uint8_t pko_ports_per_interface[2];
 		uint8_t pko_queues_per_port_interface[2];
 		uint8_t pko_queues_per_port_loop;
@@ -195,18 +167,22 @@ typedef union cvmx_user_static_pko_queue_config
 	} non_pknd;
 } cvmx_user_static_pko_queue_config_t;
 
-extern CVMX_SHARED cvmx_user_static_pko_queue_config_t __cvmx_pko_queue_static_config;
-extern CVMX_SHARED struct cvmx_cfg_pko_port_map cvmx_cfg_pko_port_map[CVMX_HELPER_CFG_MAX_PKO_PORT];
-extern CVMX_SHARED struct cvmx_cfg_port_param cvmx_cfg_port [CVMX_MAX_NODES][CVMX_HELPER_MAX_IFACE][CVMX_HELPER_CFG_MAX_PORT_PER_IFACE];
+extern CVMX_SHARED cvmx_user_static_pko_queue_config_t
+    __cvmx_pko_queue_static_config;
+extern CVMX_SHARED struct cvmx_cfg_pko_port_map
+    cvmx_cfg_pko_port_map[CVMX_HELPER_CFG_MAX_PKO_PORT];
+extern CVMX_SHARED struct cvmx_cfg_port_param
+    cvmx_cfg_port[CVMX_MAX_NODES][CVMX_HELPER_MAX_IFACE]
+    [CVMX_HELPER_CFG_MAX_PORT_PER_IFACE];
 extern CVMX_SHARED struct cvmx_cfg_pko_port_param cvmx_pko_queue_table[];
 extern CVMX_SHARED int cvmx_enable_helper_flag;
 /*
  * @INTERNAL
  * Return configured pknd for the port
  *
- * @param interface the interface number
- * @param index the port's index number
- * @return the pknd
+ * @interface: the interface number
+ * @index: the port's index number
+ * Returns the pknd
  */
 extern int __cvmx_helper_cfg_pknd(int interface, int index);
 
@@ -214,9 +190,9 @@ extern int __cvmx_helper_cfg_pknd(int interface, int index);
  * @INTERNAL
  * Return the configured bpid for the port
  *
- * @param interface the interface number
- * @param index the port's index number
- * @return the bpid
+ * @interface: the interface number
+ * @index: the port's index number
+ * Returns the bpid
  */
 extern int __cvmx_helper_cfg_bpid(int interface, int index);
 
@@ -224,9 +200,9 @@ extern int __cvmx_helper_cfg_bpid(int interface, int index);
  * @INTERNAL
  * Return the configured pko_port base for the port
  *
- * @param interface the interface number
- * @param index the port's index number
- * @return the pko_port base
+ * @interface: the interface number
+ * @index: the port's index number
+ * Returns the pko_port base
  */
 extern int __cvmx_helper_cfg_pko_port_base(int interface, int index);
 
@@ -234,9 +210,9 @@ extern int __cvmx_helper_cfg_pko_port_base(int interface, int index);
  * @INTERNAL
  * Return the configured number of pko_ports for the port
  *
- * @param interface the interface number
- * @param index the port's index number
- * @return the number of pko_ports
+ * @interface: the interface number
+ * @index: the port's index number
+ * Returns the number of pko_ports
  */
 extern int __cvmx_helper_cfg_pko_port_num(int interface, int index);
 
@@ -244,8 +220,8 @@ extern int __cvmx_helper_cfg_pko_port_num(int interface, int index);
  * @INTERNAL
  * Return the configured pko_queue base for the pko_port
  *
- * @param pko_port
- * @return the pko_queue base
+ * @pko_port:
+ * Returns the pko_queue base
  */
 extern int __cvmx_helper_cfg_pko_queue_base(int pko_port);
 
@@ -253,8 +229,8 @@ extern int __cvmx_helper_cfg_pko_queue_base(int pko_port);
  * @INTERNAL
  * Return the configured number of pko_queues for the pko_port
  *
- * @param pko_port
- * @return the number of pko_queues
+ * @pko_port:
+ * Returns the number of pko_queues
  */
 extern int __cvmx_helper_cfg_pko_queue_num(int pko_port);
 
@@ -262,8 +238,8 @@ extern int __cvmx_helper_cfg_pko_queue_num(int pko_port);
  * @INTERNAL
  * Return the interface the pko_port is configured for
  *
- * @param pko_port
- * @return the interface for the pko_port
+ * @pko_port:
+ * Returns the interface for the pko_port
  */
 extern int __cvmx_helper_cfg_pko_port_interface(int pko_port);
 
@@ -271,8 +247,8 @@ extern int __cvmx_helper_cfg_pko_port_interface(int pko_port);
  * @INTERNAL
  * Return the index of the port the pko_port is configured for
  *
- * @param pko_port
- * @return the index of the port
+ * @pko_port:
+ * Returns the index of the port
  */
 extern int __cvmx_helper_cfg_pko_port_index(int pko_port);
 
@@ -280,8 +256,8 @@ extern int __cvmx_helper_cfg_pko_port_index(int pko_port);
  * @INTERNAL
  * Return the pko_eid of the pko_port
  *
- * @param pko_port
- * @return the pko_eid
+ * @pko_port:
+ * Returns the pko_eid
  */
 extern int __cvmx_helper_cfg_pko_port_eid(int pko_port);
 
@@ -289,7 +265,7 @@ extern int __cvmx_helper_cfg_pko_port_eid(int pko_port);
  * @INTERNAL
  * Return the max# of pko queues allocated.
  *
- * @return the max# of pko queues
+ * Returns the max# of pko queues
  *
  * Note: there might be holes in the queue space depending on user
  * configuration. The function returns the highest queue's index in
@@ -301,7 +277,7 @@ extern int __cvmx_helper_cfg_pko_max_queue(void);
  * @INTERNAL
  * Return the max# of PKO DMA engines allocated.
  *
- * @return the max# of DMA engines
+ * Returns the max# of DMA engines
  *
  * NOTE: the DMA engines are allocated contiguously and starting from
  * 0.
@@ -311,8 +287,8 @@ extern int __cvmx_helper_cfg_pko_max_engine(void);
 /*
  * Get the value set for the config option ``opt''.
  *
- * @param opt is the config option.
- * @return the value set for the option
+ * @opt: is the config option.
+ * Returns the value set for the option
  *
  * LR: only used for DWB in NPI, POW, PKO1
  */
@@ -321,9 +297,9 @@ extern uint64_t cvmx_helper_cfg_opt_get(cvmx_helper_cfg_option_t opt);
 /*
  * Set the value for a config option.
  *
- * @param opt is the config option.
- * @param val is the value to set for the opt.
- * @return 0 for success and -1 on error
+ * @opt: is the config option.
+ * @val: is the value to set for the opt.
+ * Returns 0 for success and -1 on error
  *
  * Note an option here is a config-time parameter and this means that
  * it has to be set before calling the corresponding setup functions
@@ -336,8 +312,8 @@ extern int cvmx_helper_cfg_opt_set(cvmx_helper_cfg_option_t opt, uint64_t val);
 /*
  * Retrieve the pko_port base given ipd_port.
  *
- * @param ipd_port is the IPD eport
- * @return the corresponding PKO port base for the physical port
+ * @ipd_port: is the IPD eport
+ * Returns the corresponding PKO port base for the physical port
  * represented by the IPD eport or CVMX_HELPER_CFG_INVALID_VALUE.
  */
 extern int cvmx_helper_cfg_ipd2pko_port_base(int ipd_port);
@@ -345,8 +321,8 @@ extern int cvmx_helper_cfg_ipd2pko_port_base(int ipd_port);
 /*
  * Retrieve the number of pko_ports given ipd_port.
  *
- * @param ipd_port is the IPD eport
- * @return the corresponding number of PKO ports for the physical port
+ * @ipd_port: is the IPD eport
+ * Returns the corresponding number of PKO ports for the physical port
  *  represented by IPD eport or CVMX_HELPER_CFG_INVALID_VALUE.
  */
 extern int cvmx_helper_cfg_ipd2pko_port_num(int ipd_port);
@@ -355,8 +331,8 @@ extern int cvmx_helper_cfg_ipd2pko_port_num(int ipd_port);
  * @INTERNAL
  * The init function
  *
- * @param node
- * @return 0 for success.
+ * @node:
+ * Returns 0 for success.
  *
  * Note: this function is meant to be called to set the ``configured
  * parameters,'' e.g., pknd, bpid, etc. and therefore should be before
@@ -369,8 +345,8 @@ extern int __cvmx_helper_init_port_config_data(int node);
  * @INTERNAL
  * The local init function
  *
- * @param none
- * @return 0 for success.
+ * @none:
+ * Returns 0 for success.
  *
  * Note: this function is meant to be called to set the ``configured
  * parameters locally,'' e.g., pknd, bpid, etc. and therefore should be before
@@ -403,27 +379,27 @@ extern void cvmx_helper_cfg_store_short_packets_in_wqe(void);
  *                    port. This call will allocate a total of
  *		      (port_cnt * queue_cnt) queues
  *
- * @return  0 on success
+ * Returns  0 on success
  *         -1 on failure
  *
  * LR: Called ONLY from comfig-parse!
  */
- int cvmx_pko_alloc_iport_and_queues(int interface, int port, int port_cnt,
-				     int queue_cnt);
+int cvmx_pko_alloc_iport_and_queues(int interface, int port, int port_cnt,
+				    int queue_cnt);
 
 /*
  * Free the queues that are associated with the specified port
  *
  * @param  port   the internal port for which the queues are freed.
  *
- * @return  0 on success
+ * Returns  0 on success
  *         -1 on failure
  */
 int cvmx_pko_queue_free(uint64_t port);
 
 /*
  * Initializes the pko queue range data structure.
- * @return  0 on success
+ * Returns  0 on success
  *         -1 on failure
  */
 int init_cvmx_pko_que_range(void);
@@ -436,19 +412,19 @@ void cvmx_pko_queue_free_all(void);
 /**
  * Returns if port is valid for a given interface
  *
- * @param xiface     interface to check
- * @param index      port index in the interface
+ * @xiface:     interface to check
+ * @index:      port index in the interface
  *
- * @return status of the port present or not.
+ * Returns status of the port present or not.
  */
 int cvmx_helper_is_port_valid(int xiface, int index);
 
 /**
  * Set whether or not a port is valid
  *
- * @param interface interface to set
- * @param index     port index to set
- * @param valid     set 0 to make port invalid, 1 for valid
+ * @interface: interface to set
+ * @index:     port index to set
+ * @valid:     set 0 to make port invalid, 1 for valid
  */
 void cvmx_helper_set_port_valid(int interface, int index, bool valid);
 
@@ -456,10 +432,10 @@ void cvmx_helper_set_port_valid(int interface, int index, bool valid);
  * @INTERNAL
  * Return if port is in PHY mode
  *
- * @param interface the interface number
- * @param index the port's index number
+ * @interface: the interface number
+ * @index: the port's index number
  *
- * @return 1 if port is in PHY mode, 0 if port is in MAC mode
+ * Returns 1 if port is in PHY mode, 0 if port is in MAC mode
  */
 extern bool cvmx_helper_get_mac_phy_mode(int interface, int index);
 extern void cvmx_helper_set_mac_phy_mode(int interface, int index, bool valid);
@@ -468,10 +444,10 @@ extern void cvmx_helper_set_mac_phy_mode(int interface, int index, bool valid);
  * @INTERNAL
  * Return if port is in 1000Base X mode
  *
- * @param interface the interface number
- * @param index the port's index number
+ * @interface: the interface number
+ * @index: the port's index number
  *
- * @return 1 if port is in 1000Base X mode, 0 if port is in SGMII mode
+ * Returns 1 if port is in 1000Base X mode, 0 if port is in SGMII mode
  */
 extern bool cvmx_helper_get_1000x_mode(int interface, int index);
 extern void cvmx_helper_set_1000x_mode(int interface, int index, bool valid);
@@ -480,8 +456,8 @@ extern void cvmx_helper_set_1000x_mode(int interface, int index, bool valid);
  * @INTERNAL
  * Return if an AGL port should bypass the RX clock delay
  *
- * @param interface the interface number
- * @param index the port's index number
+ * @interface: the interface number
+ * @index: the port's index number
  */
 extern bool cvmx_helper_get_agl_rx_clock_delay_bypass(int interface, int index);
 extern void cvmx_helper_set_agl_rx_clock_delay_bypass(int interface, int index,
@@ -491,8 +467,8 @@ extern void cvmx_helper_set_agl_rx_clock_delay_bypass(int interface, int index,
  * @INTERNAL
  * Forces a link to always return that it is up ignoring the PHY (if present)
  *
- * @param interface the interface number
- * @param index the port's index
+ * @interface: the interface number
+ * @index: the port's index
  */
 extern bool cvmx_helper_get_port_force_link_up(int interface, int index);
 extern void cvmx_helper_set_port_force_link_up(int interface, int index,
@@ -502,76 +478,31 @@ extern void cvmx_helper_set_port_force_link_up(int interface, int index,
  * @INTERNAL
  * Return true if PHY is present to the passed xiface
  *
- * @param xiface the interface number
- * @param index the port's index
+ * @xiface: the interface number
+ * @index: the port's index
  */
 extern bool cvmx_helper_get_port_phy_present(int xiface, int index);
-extern void cvmx_helper_set_port_phy_present(int xiface, int index,
-					     bool value);
+extern void cvmx_helper_set_port_phy_present(int xiface, int index, bool value);
 
 /**
  * @INTERNAL
  * Return the AGL port rx clock skew, only used
  * if agl_rx_clock_delay_bypass is set.
  *
- * @param interface the interface number
- * @param index the port's index number
+ * @interface: the interface number
+ * @index: the port's index number
  */
 extern uint8_t cvmx_helper_get_agl_rx_clock_skew(int interface, int index);
 extern void cvmx_helper_set_agl_rx_clock_skew(int interface, int index,
 					      uint8_t value);
 
-#ifndef CVMX_BUILD_FOR_LINUX_KERNEL
-/**
- * @INTERNAL
- * Store the FDT node offset in the device tree of a port
- *
- * @param xiface	node and interface
- * @param index		port index
- * @param node_offset	node offset to store
- */
-extern void cvmx_helper_set_port_fdt_node_offset(int xiface, int index,
-						 int node_offset);
-
-/**
- * @INTERNAL
- * Return the FDT node offset in the device tree of a port
- *
- * @param xiface	node and interface
- * @param index		port index
- * @return		node offset of port or -1 if invalid
- */
-extern int cvmx_helper_get_port_fdt_node_offset(int xiface, int index);
-
-/**
- * @INTERNAL
- * Store the FDT node offset in the device tree of a phy
- *
- * @param xiface	node and interface
- * @param index		port index
- * @param node_offset	node offset to store
- */
-extern void cvmx_helper_set_phy_fdt_node_offset(int xiface, int index,
-						int node_offset);
-
-/**
- * @INTERNAL
- * Return the FDT node offset in the device tree of a phy
- *
- * @param xiface	node and interface
- * @param index		port index
- * @return		node offset of phy or -1 if invalid
- */
-extern int cvmx_helper_get_phy_fdt_node_offset(int xiface, int index);
-#endif /* !CVMX_BUILD_FOR_LINUX_KERNEL */
-
 /**
  * @INTERNAL
  * Override default autonegotiation for a port
  *
- * @param xiface	node and interface
- * @param index		port index
- * @param enable	true to enable autonegotiation, false to force full
+ * @xiface:	node and interface
+ * @index:		port index
+ * @enable:	true to enable autonegotiation, false to force full
  *			duplex, full speed.
  */
 extern void cvmx_helper_set_port_autonegotiation(int xiface, int index,
@@ -581,10 +512,10 @@ extern void cvmx_helper_set_port_autonegotiation(int xiface, int index,
  * @INTERNAL
  * Returns if autonegotiation is enabled or not.
  *
- * @param xiface	node and interface
- * @param index		port index
+ * @xiface:	node and interface
+ * @index:		port index
  *
- * @return 0 if autonegotiation is disabled, 1 if enabled.
+ * Returns 0 if autonegotiation is disabled, 1 if enabled.
  */
 extern bool cvmx_helper_get_port_autonegotiation(int xiface, int index);
 
@@ -592,8 +523,8 @@ extern bool cvmx_helper_get_port_autonegotiation(int xiface, int index);
  * @INTERNAL
  * Sets the PHY info data structure
  *
- * @param xiface	node and interface
- * @param index		port index
+ * @xiface:	node and interface
+ * @index:		port index
  * @param[in] phy_info	phy information data structure pointer
  */
 extern void cvmx_helper_set_port_phy_info(int xiface, int index,
@@ -602,12 +533,13 @@ extern void cvmx_helper_set_port_phy_info(int xiface, int index,
  * @INTERNAL
  * Returns the PHY information data structure for a port
  *
- * @param xiface	node and interface
- * @param index		port index
+ * @xiface:	node and interface
+ * @index:		port index
  *
- * @return pointer to PHY information data structure or NULL if not set
+ * Returns pointer to PHY information data structure or NULL if not set
  */
-extern struct cvmx_phy_info *cvmx_helper_get_port_phy_info(int xiface, int index);
+extern struct cvmx_phy_info *cvmx_helper_get_port_phy_info(int xiface,
+							   int index);
 
 /*
  * Initializes cvmx with user specified config info.
@@ -616,9 +548,4 @@ int cvmx_user_static_config(void);
 void cvmx_pko_queue_show(void);
 int cvmx_fpa_pool_init_from_cvmx_config(void);
 int __cvmx_helper_init_port_valid(void);
-#ifdef	__cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 #endif /* __CVMX_HELPER_CFG_H__ */

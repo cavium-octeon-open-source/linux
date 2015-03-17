@@ -1,40 +1,28 @@
 /***********************license start***************
- * Copyright (c) 2013  Cavium Inc. (support@cavium.com). All rights
- * reserved.
+ * Author: Cavium Inc.
  *
+ * Contact: support@cavium.com
+ * This file is part of the OCTEON SDK
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
+ * Copyright (c) 2013 Cavium Inc.
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
  *
- *   * Redistributions in binary form must reproduce the above
- *     copyright notice, this list of conditions and the following
- *     disclaimer in the documentation and/or other materials provided
- *     with the distribution.
-
- *   * Neither the name of Cavium Inc. nor the names of
- *     its contributors may be used to endorse or promote products
- *     derived from this software without specific prior written
- *     permission.
-
- * This Software, including technical data, may be subject to U.S. export  control
- * laws, including the U.S. Export Administration Act and its  associated
- * regulations, and may be subject to export or import  regulations in other
- * countries.
-
- * TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED "AS IS"
- * AND WITH ALL FAULTS AND CAVIUM INC. MAKES NO PROMISES, REPRESENTATIONS OR
- * WARRANTIES, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE, WITH RESPECT TO
- * THE SOFTWARE, INCLUDING ITS CONDITION, ITS CONFORMITY TO ANY REPRESENTATION OR
- * DESCRIPTION, OR THE EXISTENCE OF ANY LATENT OR PATENT DEFECTS, AND CAVIUM
- * SPECIFICALLY DISCLAIMS ALL IMPLIED (IF ANY) WARRANTIES OF TITLE,
- * MERCHANTABILITY, NONINFRINGEMENT, FITNESS FOR A PARTICULAR PURPOSE, LACK OF
- * VIRUSES, ACCURACY OR COMPLETENESS, QUIET ENJOYMENT, QUIET POSSESSION OR
- * CORRESPONDENCE TO DESCRIPTION. THE ENTIRE  RISK ARISING OUT OF USE OR
- * PERFORMANCE OF THE SOFTWARE LIES WITH YOU.
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
 /**
@@ -43,29 +31,15 @@
  * Functions for AGL (RGMII) initialization, configuration,
  * and monitoring.
  *
- * <hr>$Revision: 83639 $<hr>
  */
 
 #ifndef __CVMX_HELPER_AGL_H__
 #define __CVMX_HELPER_AGL_H__
 
-#ifdef CVMX_BUILD_FOR_LINUX_KERNEL
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-agl-defs.h>
-#else
-#include "cvmx.h"
-#include "cvmx-agl.h"
-#include "cvmx-helper.h"
-#include "cvmx-agl-defs.h"
-#endif
-
-#ifdef  __cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
 
 extern int __cvmx_helper_agl_enumerate(int interface);
 
@@ -77,9 +51,9 @@ extern int cvmx_helper_agl_get_port(int xiface);
  * connected to it. The RGMII interface should still be down
  * after this call.
  *
- * @param interface Interface to probe
+ * @interface: Interface to probe
  *
- * @return Number of ports on the interface. Zero to disable.
+ * Returns Number of ports on the interface. Zero to disable.
  */
 extern int __cvmx_helper_agl_probe(int interface);
 
@@ -89,9 +63,9 @@ extern int __cvmx_helper_agl_probe(int interface);
  * I/O should be fully functional. This is called with IPD
  * enabled but PKO disabled.
  *
- * @param interface Interface to bring up
+ * @interface: Interface to bring up
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 extern int __cvmx_helper_agl_enable(int interface);
 
@@ -102,9 +76,9 @@ extern int __cvmx_helper_agl_enable(int interface);
  * Octeon's link config if auto negotiation has changed since
  * the last call to cvmx_helper_link_set().
  *
- * @param ipd_port IPD/PKO port to query
+ * @ipd_port: IPD/PKO port to query
  *
- * @return Link state
+ * Returns Link state
  */
 extern cvmx_helper_link_info_t __cvmx_helper_agl_link_get(int ipd_port);
 
@@ -116,17 +90,12 @@ extern cvmx_helper_link_info_t __cvmx_helper_agl_link_get(int ipd_port);
  * by cvmx_helper_link_get(). It is normally best to use
  * cvmx_helper_link_autoconf() instead.
  *
- * @param ipd_port  IPD/PKO port to configure
- * @param link_info The new link state
+ * @ipd_port:  IPD/PKO port to configure
+ * @link_info: The new link state
  *
- * @return Zero on success, negative on failure
+ * Returns Zero on success, negative on failure
  */
 extern int __cvmx_helper_agl_link_set(int ipd_port,
 				      cvmx_helper_link_info_t link_info);
 
-#ifdef  __cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 #endif /* __CVMX_HELPER_AGL_H__ */

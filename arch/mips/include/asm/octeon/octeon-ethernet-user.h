@@ -39,16 +39,14 @@
  * one of the IOCTL numbers defined below.
  */
 
-#define CAVIUM_NET_IOCTL_SETPRIO   (SIOCDEVPRIVATE + 0) /* Priority 0-3. Default is 0 */
-#define CAVIUM_NET_IOCTL_GETPRIO   (SIOCDEVPRIVATE + 1) /* Priority 0-3 */
-#define CAVIUM_NET_IOCTL_SETIDSIZE (SIOCDEVPRIVATE + 2) /* 0 = 8 bit, 1 = 16 bit IDs. Default is 1 */
-#define CAVIUM_NET_IOCTL_GETIDSIZE (SIOCDEVPRIVATE + 3) /* 0 = 8 bit, 1 = 16 bit IDs */
-#define CAVIUM_NET_IOCTL_SETSRCID  (SIOCDEVPRIVATE + 4) /* 0 = primary ID, 1 = secondary ID. Default is 0 */
-#define CAVIUM_NET_IOCTL_GETSRCID  (SIOCDEVPRIVATE + 5) /* 0 = primary ID, 1 = secondary ID */
-#define CAVIUM_NET_IOCTL_SETLETTER (SIOCDEVPRIVATE + 6) /* Letter code 0-3, or -1 for auto. Default is -1 */
-#define CAVIUM_NET_IOCTL_GETLETTER (SIOCDEVPRIVATE + 7) /* Letter code 0-3, or -1 for auto */
-
-#ifdef __KERNEL__
+#define CAVIUM_NET_IOCTL_SETPRIO   (SIOCDEVPRIVATE + 0)	/* Priority 0-3. Default is 0 */
+#define CAVIUM_NET_IOCTL_GETPRIO   (SIOCDEVPRIVATE + 1)	/* Priority 0-3 */
+#define CAVIUM_NET_IOCTL_SETIDSIZE (SIOCDEVPRIVATE + 2)	/* 0 = 8 bit, 1 = 16 bit IDs. Default is 1 */
+#define CAVIUM_NET_IOCTL_GETIDSIZE (SIOCDEVPRIVATE + 3)	/* 0 = 8 bit, 1 = 16 bit IDs */
+#define CAVIUM_NET_IOCTL_SETSRCID  (SIOCDEVPRIVATE + 4)	/* 0 = primary ID, 1 = secondary ID. Default is 0 */
+#define CAVIUM_NET_IOCTL_GETSRCID  (SIOCDEVPRIVATE + 5)	/* 0 = primary ID, 1 = secondary ID */
+#define CAVIUM_NET_IOCTL_SETLETTER (SIOCDEVPRIVATE + 6)	/* Letter code 0-3, or -1 for auto. Default is -1 */
+#define CAVIUM_NET_IOCTL_GETLETTER (SIOCDEVPRIVATE + 7)	/* Letter code 0-3, or -1 for auto */
 
 /**
  * enum cvm_oct_callback_result -  Return codes for the Ethernet* driver intercept callback.
@@ -57,10 +55,10 @@
  * processing in different ways.
  */
 enum cvm_oct_callback_result {
-	CVM_OCT_PASS,               /**< The ethernet driver will pass the packet
+	CVM_OCT_PASS,		    /**< The ethernet driver will pass the packet
 					to the kernel, just as if the intercept
 					callback didn't exist */
-	CVM_OCT_DROP,               /**< The ethernet driver will drop the packet,
+	CVM_OCT_DROP,		    /**< The ethernet driver will drop the packet,
 					cleaning of the work queue entry and the
 					skbuff */
 	CVM_OCT_TAKE_OWNERSHIP_WORK,/**< The intercept callback takes over
@@ -90,15 +88,14 @@ typedef enum cvm_oct_callback_result cvm_oct_callback_result_t;
  *
  * The third parameter is the packet converted into a Linux skbuff.
  */
-typedef cvm_oct_callback_result_t (*cvm_oct_callback_t)(struct net_device *dev,
+typedef cvm_oct_callback_result_t(*cvm_oct_callback_t) (struct net_device * dev,
 							void *work_queue_entry,
-							struct sk_buff *skb);
+							struct sk_buff * skb);
 
-extern struct net_device *cvm_oct_register_callback(const char *, cvm_oct_callback_t);
+extern struct net_device *cvm_oct_register_callback(const char *,
+						    cvm_oct_callback_t);
 
 extern int cvm_oct_transmit_qos(struct net_device *dev, void *work_queue_entry,
-			 int do_free, int qos);
-
-#endif /* __KERNEL__ */
+				int do_free, int qos);
 
 #endif
