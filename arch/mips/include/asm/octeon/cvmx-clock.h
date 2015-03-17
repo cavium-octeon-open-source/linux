@@ -38,7 +38,7 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-lmcx-defs.h>
 #include <asm/octeon/cvmx-fpa-defs.h>
-#include <asm/octeon/cvmx-tim-defs.h>
+// #include <asm/octeon/cvmx-tim-defs.h>
 
 /**
  * Enumeration of different Clocks in Octeon.
@@ -52,7 +52,7 @@ typedef enum {
 			    /**< Clock used by DRAM */
 	CVMX_CLOCK_CORE,
 			    /**< Alias for CVMX_CLOCK_RCLK */
-	CVMX_CLOCK_TIM,
+//	CVMX_CLOCK_TIM,
 			    /**< Alias for CVMX_CLOCK_SCLK */
 	CVMX_CLOCK_IPD,
 			    /**< Alias for CVMX_CLOCK_SCLK */
@@ -81,12 +81,12 @@ static inline uint64_t cvmx_clock_get_count(cvmx_clock_t clock)
 		    || OCTEON_IS_MODEL(OCTEON_CN75XX))
 			return cvmx_read_csr(CVMX_FPA_CLK_COUNT);
 		return cvmx_read_csr(CVMX_IPD_CLK_COUNT);
-	case CVMX_CLOCK_TIM:
-		if (OCTEON_IS_MODEL(OCTEON_CN78XX)
-		    || OCTEON_IS_MODEL(OCTEON_CN73XX)
-		    || OCTEON_IS_MODEL(OCTEON_CN75XX))
-			return cvmx_read_csr(CVMX_TIM_FR_RN_CYCLES);
-		return cvmx_read_csr(CVMX_IPD_CLK_COUNT);
+//	case CVMX_CLOCK_TIM:
+//		if (OCTEON_IS_MODEL(OCTEON_CN78XX)
+//		    || OCTEON_IS_MODEL(OCTEON_CN73XX)
+//		    || OCTEON_IS_MODEL(OCTEON_CN75XX))
+//			return cvmx_read_csr(CVMX_TIM_FR_RN_CYCLES);
+//		return cvmx_read_csr(CVMX_IPD_CLK_COUNT);
 
 	case CVMX_CLOCK_DDR:
 		if (OCTEON_IS_OCTEON2() || OCTEON_IS_OCTEON3())
@@ -107,7 +107,7 @@ static inline uint64_t cvmx_clock_get_rate(cvmx_clock_t clock)
 	case CVMX_CLOCK_CORE:
 		return octeon_get_clock_rate();
 	case CVMX_CLOCK_SCLK:
-	case CVMX_CLOCK_TIM:
+//	case CVMX_CLOCK_TIM:
 	case CVMX_CLOCK_IPD:
 		return octeon_get_io_clock_rate();
 	default:
