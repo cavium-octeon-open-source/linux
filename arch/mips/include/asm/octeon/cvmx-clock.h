@@ -40,6 +40,8 @@
 #include <asm/octeon/cvmx-fpa-defs.h>
 // #include <asm/octeon/cvmx-tim-defs.h>
 
+#include <asm/bug.h>
+
 /**
  * Enumeration of different Clocks in Octeon.
  */
