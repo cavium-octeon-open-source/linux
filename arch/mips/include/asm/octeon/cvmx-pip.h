@@ -36,13 +36,13 @@
 #define __CVMX_PIP_H__
 
 #include "cvmx-wqe.h"
-#include "cvmx-pki.h"
-#include "cvmx-helper-pki.h"
+// #include "cvmx-pki.h"
+// #include "cvmx-helper-pki.h"
 #include "cvmx-pip-defs.h"
 
 #include "cvmx-helper.h"
 #include "cvmx-helper-util.h"
-#include "cvmx-pki-resources.h"
+// #include "cvmx-pki-resources.h"
 
 #define CVMX_PIP_NUM_INPUT_PORTS                46
 #define CVMX_PIP_NUM_WATCHERS                   8
@@ -283,6 +283,7 @@ static inline int cvmx_pip_config_watcher(int index, int type, uint16_t match,
 			     index);
 		return -1;
 	}
+#if 0
 	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
 		/* store in software for now, only when the watcher is enabled program the entry */
 		if (type == CVMX_PIP_QOS_WATCH_PROTNH) {
@@ -328,9 +329,11 @@ static inline int cvmx_pip_config_watcher(int index, int type, uint16_t match,
 	} else {
 		/* Implement it later */
 	}
+#endif
 	return 0;
 }
 
+#if 0
 static inline int __cvmx_pip_set_tag_type(int node, int style,
 					  int tag_type, int field)
 {
@@ -489,6 +492,8 @@ static inline int __cvmx_pip_enable_watcher_78xx(int node, int index, int style)
 	return 0;
 }
 
+#endif
+
 /**
  * Configure an ethernet input port
  *
@@ -500,6 +505,7 @@ static inline void cvmx_pip_config_port(uint64_t ipd_port,
 					cvmx_pip_prt_cfgx_t port_cfg,
 					cvmx_pip_prt_tagx_t port_tag_cfg)
 {
+#if 0
 	struct cvmx_pki_qpg_config qpg_cfg;
 	int qpg_offset;
 	uint8_t tcp_tag = 0xff;
@@ -719,6 +725,7 @@ static inline void cvmx_pip_config_port(uint64_t ipd_port,
 		/* This is only for backward compatibility, not all the parameters are supported in 78xx */
 		cvmx_pki_set_port_config(ipd_port, &pki_prt_cfg);
 	} else {
+#endif
 		if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
 			int interface, index, pknd;
 
@@ -730,7 +737,7 @@ static inline void cvmx_pip_config_port(uint64_t ipd_port,
 		}
 		cvmx_write_csr(CVMX_PIP_PRT_CFGX(ipd_port), port_cfg.u64);
 		cvmx_write_csr(CVMX_PIP_PRT_TAGX(ipd_port), port_tag_cfg.u64);
-	}
+//	}
 }
 
 /**
@@ -943,13 +950,13 @@ static inline void cvmx_pip_get_port_stats(uint64_t port_num, uint64_t clear,
 static inline void cvmx_pip_get_port_status(uint64_t port_num, uint64_t clear,
 					    cvmx_pip_port_status_t * status)
 {
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		unsigned int node = cvmx_get_node_num();
-		cvmx_pki_get_port_stats(node, port_num,
-					(struct cvmx_pki_port_stats *)status);
-	} else {
+//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//		unsigned int node = cvmx_get_node_num();
+//		cvmx_pki_get_port_stats(node, port_num,
+//					(struct cvmx_pki_port_stats *)status);
+//	} else {
 		cvmx_pip_get_port_stats(port_num, clear, status);
-	}
+//	}
 }
 
 /**
@@ -1048,12 +1055,12 @@ static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
 		int port;
 		int num_ports = cvmx_helper_ports_on_interface(interface);
 		for (port = 0; port < num_ports; port++) {
-			if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-				int ipd_port;
-				ipd_port =
-				    cvmx_helper_get_ipd_port(interface, port);
-				cvmx_pki_set_max_frm_len(ipd_port, max_size);
-			} else {
+//			if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
+//				int ipd_port;
+//				ipd_port =
+//				    cvmx_helper_get_ipd_port(interface, port);
+//				cvmx_pki_set_max_frm_len(ipd_port, max_size);
+//			} else {
 				int pknd;
 				int sel;
 				cvmx_pip_prt_cfgx_t config;
@@ -1066,7 +1073,7 @@ static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
 				frm_len.s.maxlen = max_size;
 				cvmx_write_csr(CVMX_PIP_FRM_LEN_CHKX(sel),
 					       frm_len.u64);
-			}
+//			}
 		}
 	}
 	/* Update for each interface */
@@ -1086,6 +1093,7 @@ static inline void cvmx_pip_set_frame_check(int interface, uint32_t max_size)
 	}
 }
 
+#if 0
 /**
  * Initialize Bit Select Extractor config. Their are 8 bit positions and valids
  * to be used when using the corresponding extractor.
@@ -1308,5 +1316,6 @@ static inline int cvmx_pip_get_bsel_tag(cvmx_wqe_t * work)
 	    tag | ((bsel_cfg.s.tag << 8) & 0xff00) | ((upper_tag << 16) &
 						      0xffff0000);
 }
+#endif
 
 #endif /*  __CVMX_PIP_H__ */
