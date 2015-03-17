@@ -35,7 +35,7 @@
 
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-app-init.h>
+// #include <asm/octeon/cvmx-app-init.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
@@ -44,7 +44,7 @@
 #include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-helper-board.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-twsi.h>
+// #include <asm/octeon/cvmx-twsi.h>
 
 /**
  * cvmx_override_board_link_get(int ipd_port) is a function
