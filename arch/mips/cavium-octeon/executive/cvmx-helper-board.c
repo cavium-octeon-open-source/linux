@@ -200,6 +200,7 @@ int cvmx_helper_board_get_mii_address(int ipd_port)
 			return ipd_port + 1;
 		else
 			return -1;
+#if 0
 	case CVMX_BOARD_TYPE_EBB5600:
 		{
 			static unsigned char qlm_switch_addr = 0;
@@ -228,6 +229,7 @@ int cvmx_helper_board_get_mii_address(int ipd_port)
 			} else
 				return -1;
 		}
+#endif
 	case CVMX_BOARD_TYPE_EBB6300:
 		/* Board has 2 management ports */
 		if ((ipd_port >= CVMX_HELPER_BOARD_MGMT_IPD_PORT)
@@ -604,7 +606,7 @@ cvmx_helper_link_info_t __cvmx_helper_board_link_get(int ipd_port)
 	int is_broadcom_phy = 0;
 	int is_vitesse_phy = 0;
 	int is_cortina_phy = 0;
-	int is_ti_phy;
+	int is_ti_phy = 0;
 
 	/* Give the user a chance to override the processing of this function */
 	if (cvmx_override_board_link_get)
@@ -657,7 +659,7 @@ cvmx_helper_link_info_t __cvmx_helper_board_link_get(int ipd_port)
 		    (ipd_port < (CVMX_HELPER_BOARD_MGMT_IPD_PORT + 2)))
 			is_broadcom_phy = 1;
 		break;
-	case CVMX_BOARD_TYPE_EBB6100:
+//	case CVMX_BOARD_TYPE_EBB6100:
 	case CVMX_BOARD_TYPE_EBB6300:	/* Only for MII mode, with PHY addresses 0/1. Default is RGMII */
 	case CVMX_BOARD_TYPE_EBB6600:	/* Only for MII mode, with PHY addresses 0/1. Default is RGMII */
 		if ((ipd_port >= CVMX_HELPER_BOARD_MGMT_IPD_PORT) &&
@@ -697,10 +699,10 @@ cvmx_helper_link_info_t __cvmx_helper_board_link_get(int ipd_port)
 	case CVMX_BOARD_TYPE_NIC2E:
 		is_broadcom_phy = 1;
 		break;
-	case CVMX_BOARD_TYPE_SNIC10E:
-		is_vitesse_phy = 1;
-		is_ti_phy = 1;
-		break;
+//	case CVMX_BOARD_TYPE_SNIC10E:
+//		is_vitesse_phy = 1;
+//		is_ti_phy = 1;
+//		break;
 	case CVMX_BOARD_TYPE_NIC10E_66:
 		if (cvmx_sysinfo_get()->board_rev_major >= 3)
 			is_vitesse_phy = 1;
@@ -1082,7 +1084,7 @@ int __cvmx_helper_board_hardware_enable(int interface)
  *
  * Returns USB clock type enumeration
  */
-cvmx_helper_board_usb_clock_types_t __cvmx_helper_board_usb_get_clock_type(void)
+enum cvmx_helper_board_usb_clock_types __cvmx_helper_board_usb_get_clock_type(void)
 {
 	switch (cvmx_sysinfo_get()->board_type) {
 	case CVMX_BOARD_TYPE_BBGW_REF:
@@ -1121,7 +1123,7 @@ int __cvmx_helper_board_usb_get_num_ports(int supported_ports)
 	switch (cvmx_sysinfo_get()->board_type) {
 	case CVMX_BOARD_TYPE_NIC_XLE_4G:
 	case CVMX_BOARD_TYPE_NIC2E:
-	case CVMX_BOARD_TYPE_SNIC10E:
+//	case CVMX_BOARD_TYPE_SNIC10E:
 		return 0;
 	case CVMX_BOARD_TYPE_NIC10E_66:
 		if (cvmx_sysinfo_get()->board_rev_major >= 3)
