@@ -35,12 +35,12 @@
 #ifndef __CVMX_HELPER_BOARD_H__
 #define __CVMX_HELPER_BOARD_H__
 
-typedef enum {
+enum cvmx_helper_board_usb_clock_types {
 	USB_CLOCK_TYPE_REF_12,
 	USB_CLOCK_TYPE_REF_24,
 	USB_CLOCK_TYPE_REF_48,
 	USB_CLOCK_TYPE_CRYSTAL_12,
-} cvmx_helper_board_usb_clock_types_t;
+};
 
 typedef enum cvmx_phy_type {
 	BROADCOM_GENERIC_PHY,
@@ -218,7 +218,7 @@ extern int __cvmx_helper_board_hardware_enable(int interface);
  *
  * Returns USB clock type enumeration
  */
-cvmx_helper_board_usb_clock_types_t
+enum cvmx_helper_board_usb_clock_types
 __cvmx_helper_board_usb_get_clock_type(void);
 
 /**
