@@ -41,7 +41,7 @@
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pcsxx-defs.h>
 #include <asm/octeon/cvmx-ciu-defs.h>
-#include <asm/octeon/cvmx-bgxx-defs.h>
+// #include <asm/octeon/cvmx-bgxx-defs.h>
 
 int __cvmx_helper_xaui_enumerate(int xiface)
 {
@@ -221,6 +221,7 @@ int __cvmx_helper_xaui_link_init(int interface)
 		xaui_ctl.s.reset = 1;
 	cvmx_write_csr(CVMX_PCSXX_CONTROL1_REG(interface), xaui_ctl.u64);
 
+#if 0
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX_PASS2_X) && (interface != 1)
 	    && (cvmx_sysinfo_get()->board_type != CVMX_BOARD_TYPE_SIM)) {
 		/*
@@ -261,16 +262,16 @@ int __cvmx_helper_xaui_link_init(int interface)
 		cvmx_dprintf("\n\n");
 #endif
 	}
-
+#endif
 	/* Wait for PCS to come out of reset */
 	if (CVMX_WAIT_FOR_FIELD64
-	    (CVMX_PCSXX_CONTROL1_REG(interface), cvmx_pcsxx_control1_reg_t,
+	    (CVMX_PCSXX_CONTROL1_REG(interface), union cvmx_pcsxx_control1_reg,
 	     reset, ==, 0, 10000))
 		return -1;
 	/* Wait for PCS to be aligned */
 	if (CVMX_WAIT_FOR_FIELD64
 	    (CVMX_PCSXX_10GBX_STATUS_REG(interface),
-	     cvmx_pcsxx_10gbx_status_reg_t, alignd, ==, 1, 10000))
+	     union cvmx_pcsxx_10gbx_status_reg, alignd, ==, 1, 10000))
 		return -1;
 	/* Wait for RX to be ready */
 	if (CVMX_WAIT_FOR_FIELD64
@@ -303,15 +304,15 @@ int __cvmx_helper_xaui_link_init(int interface)
 
 	/* Wait for receive link */
 	if (CVMX_WAIT_FOR_FIELD64
-	    (CVMX_PCSXX_STATUS1_REG(interface), cvmx_pcsxx_status1_reg_t,
+	    (CVMX_PCSXX_STATUS1_REG(interface), union cvmx_pcsxx_status1_reg,
 	     rcv_lnk, ==, 1, 10000))
 		return -1;
 	if (CVMX_WAIT_FOR_FIELD64
-	    (CVMX_PCSXX_STATUS2_REG(interface), cvmx_pcsxx_status2_reg_t,
+	    (CVMX_PCSXX_STATUS2_REG(interface), union cvmx_pcsxx_status2_reg,
 	     xmtflt, ==, 0, 10000))
 		return -1;
 	if (CVMX_WAIT_FOR_FIELD64
-	    (CVMX_PCSXX_STATUS2_REG(interface), cvmx_pcsxx_status2_reg_t,
+	    (CVMX_PCSXX_STATUS2_REG(interface), union cvmx_pcsxx_status2_reg,
 	     rcvflt, ==, 0, 10000))
 		return -1;
 
