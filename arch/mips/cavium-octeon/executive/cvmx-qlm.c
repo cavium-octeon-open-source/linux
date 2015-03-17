@@ -936,8 +936,9 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 		freq = (freq + 500000) / 1000000;
 
 		return freq;
-//	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
-//		return cvmx_qlm_get_gbaud_mhz_node(cvmx_get_node_num(), qlm);
+#if 0
+	} else if (OCTEON_IS_MODEL(OCTEON_CN78XX)) {
+		return cvmx_qlm_get_gbaud_mhz_node(cvmx_get_node_num(), qlm);
 	} else if (OCTEON_IS_MODEL(OCTEON_CN73XX)) {
 		cvmx_gserx_lane_mode_t lane_mode;
 		lane_mode.u64 = cvmx_read_csr(CVMX_GSERX_LANE_MODE(qlm));
@@ -969,6 +970,7 @@ int cvmx_qlm_get_gbaud_mhz(int qlm)
 		default:
 			return 0;
 		}
+#endif
 	}
 	return 0;
 }
@@ -1658,8 +1660,8 @@ enum cvmx_qlm_mode cvmx_qlm_get_mode(int qlm)
 		return __cvmx_qlm_get_mode_cn70xx(qlm);
 //	else if (OCTEON_IS_MODEL(OCTEON_CN78XX))
 //		return cvmx_qlm_get_mode_cn78xx(cvmx_get_node_num(), qlm);
-	else if (OCTEON_IS_MODEL(OCTEON_CN73XX))
-		return __cvmx_qlm_get_mode_cn73xx(qlm);
+//	else if (OCTEON_IS_MODEL(OCTEON_CN73XX))
+//		return __cvmx_qlm_get_mode_cn73xx(qlm);
 
 	return CVMX_QLM_MODE_DISABLED;
 }
