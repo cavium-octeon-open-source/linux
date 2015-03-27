@@ -37,7 +37,7 @@
 #include <asm/octeon/cvmx-spxx-defs.h>
 #include <asm/octeon/cvmx-stxx-defs.h>
 #include <asm/octeon/cvmx-srxx-defs.h>
-#include <asm/octeon/cvmx-hwpko.h>
+// #include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-spi.h>
 #include <asm/octeon/cvmx-clock.h>
 

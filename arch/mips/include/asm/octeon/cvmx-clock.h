@@ -37,8 +37,6 @@
 
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-lmcx-defs.h>
-#include <asm/octeon/cvmx-fpa-defs.h>
-// #include <asm/octeon/cvmx-tim-defs.h>
 
 #include <asm/bug.h>
 
@@ -59,6 +57,8 @@ typedef enum {
 	CVMX_CLOCK_IPD,
 			    /**< Alias for CVMX_CLOCK_SCLK */
 } cvmx_clock_t;
+
+#if 0
 
 /**
  * Get cycle count based on the clock type.
@@ -101,6 +101,15 @@ static inline uint64_t cvmx_clock_get_count(cvmx_clock_t clock)
 	cvmx_dprintf("cvmx_clock_get_count: Unknown clock type\n");
 	return 0;
 }
+#endif
+
+static inline uint64_t cvmx_clock_get_core_count(void)
+{
+	uint64_t cycle;
+	CVMX_RDHWR(cycle, 31);
+	return (cycle);
+}
+
 
 static inline uint64_t cvmx_clock_get_rate(cvmx_clock_t clock)
 {
