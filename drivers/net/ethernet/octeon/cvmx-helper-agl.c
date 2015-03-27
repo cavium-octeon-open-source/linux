@@ -38,7 +38,8 @@
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-agl-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
+
+#include "cvmx-pko-defs.h"
 
 int __cvmx_helper_agl_enumerate(int xiface)
 {

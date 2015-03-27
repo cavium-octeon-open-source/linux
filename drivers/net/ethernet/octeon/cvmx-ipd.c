@@ -39,11 +39,11 @@
 #include <asm/octeon/cvmx-helper-errata.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 
-#include "asm/octeon/cvmx-pip-defs.h"
-#include "asm/octeon/cvmx-fpa.h"
-#include "asm/octeon/cvmx-fpa1.h"
-#include "asm/octeon/cvmx-wqe.h"
-#include "asm/octeon/cvmx-ipd.h"
+#include "cvmx-pip-defs.h"
+#include "cvmx-fpa.h"
+#include "cvmx-fpa1.h"
+#include "cvmx-wqe.h"
+#include "cvmx-ipd.h"
 
 CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg = {.first_mbuf_skip = 184,
 	.ipd_enable = 1,

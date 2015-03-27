@@ -27,8 +27,9 @@
 
 #include "linux/export.h"
 #include "asm/octeon/cvmx.h"
-#include "asm/octeon/cvmx-fpa.h"
 #include "asm/octeon/cvmx-global-resources.h"
+
+#include "cvmx-fpa.h"
 
 static struct global_resource_tag get_fpa1_resource_tag(void)
 {

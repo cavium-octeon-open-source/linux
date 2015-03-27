@@ -56,6 +56,7 @@
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
+#include "cvmx-pow-defs.h"
 #include "cvmx-wqe.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-pow.h"

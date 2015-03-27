@@ -37,11 +37,12 @@
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pcsxx-defs.h>
 #include <asm/octeon/cvmx-ciu-defs.h>
 // #include <asm/octeon/cvmx-bgxx-defs.h>
+
+#include "cvmx-pko-defs.h"
 
 int __cvmx_helper_xaui_enumerate(int xiface)
 {

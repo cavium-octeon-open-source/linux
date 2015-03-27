@@ -33,14 +33,15 @@
  *
  */
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-board.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
 #include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
+
+#include "cvmx-hwpko.h"
+#include "cvmx-pko-defs.h"
 
 /**
  * @INTERNAL

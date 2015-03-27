@@ -38,9 +38,10 @@
 #include <asm/octeon/cvmx-npei-defs.h>
 #include <asm/octeon/cvmx-pexp-defs.h>
 #include <asm/octeon/cvmx-dpi-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
-#include <asm/octeon/cvmx-fpa.h>
 #include <asm/octeon/cvmx-cmd-queue.h>
+
+#include "cvmx-pko-defs.h"
+#include "cvmx-fpa.h"
 
 /**
  * This application uses this pointer to access the global queue

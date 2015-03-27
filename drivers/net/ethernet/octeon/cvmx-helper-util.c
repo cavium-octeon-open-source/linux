@@ -34,17 +34,16 @@
 #include <linux/export.h>
 
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
-#include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-sli-defs.h>
 #include <asm/octeon/cvmx-pexp-defs.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-// #include <asm/octeon/cvmx-ilk.h>
-// #include <asm/octeon/cvmx-pki.h>
+
+#include "cvmx-pip.h"
+#include "cvmx-ipd.h"
+#include "cvmx-pko-defs.h"
+#include "cvmx-hwpko.h"
 
 /**
  * @INTERNAL

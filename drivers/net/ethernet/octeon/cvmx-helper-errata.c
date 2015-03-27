@@ -37,10 +37,11 @@
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-jtag.h>
-#include <asm/octeon/cvmx-hwpko.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-ipd.h>
+
+#include "cvmx-hwpko.h"
+#include "cvmx-ipd.h"
 
 /**
  * @INTERNAL
