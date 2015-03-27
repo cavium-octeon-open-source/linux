@@ -36,8 +36,8 @@
 #ifndef __CVMX_FPA_H__
 #define __CVMX_FPA_H__
 
-#include "cvmx-scratch.h"
-#include "cvmx.h"
+#include <asm/octeon/cvmx-scratch.h>
+#include <asm/octeon/cvmx.h>
 
 #include "cvmx-fpa-defs.h"
 #include "cvmx-fpa1.h"

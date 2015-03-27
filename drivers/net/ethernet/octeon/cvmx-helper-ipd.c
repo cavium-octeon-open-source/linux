@@ -32,14 +32,14 @@
  */
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-ipd-defs.h>
-#include <asm/octeon/cvmx-ipd.h>
-#include <asm/octeon/cvmx-fpa.h>
-#include <asm/octeon/cvmx-ipd.h>
-#include <asm/octeon/cvmx-pip.h>
-// #include <asm/octeon/cvmx-helper-pki.h>
 #include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
+
+#include "cvmx-ipd-defs.h"
+#include "cvmx-ipd.h"
+#include "cvmx-fpa.h"
+#include "cvmx-ipd.h"
+#include "cvmx-pip.h"
 
 /** It allocate pools for packet and wqe pools
  * and sets up the FPA hardware

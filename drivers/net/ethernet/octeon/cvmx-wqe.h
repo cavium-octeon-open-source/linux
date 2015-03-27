@@ -44,9 +44,9 @@
 #ifndef __CVMX_WQE_H__
 #define __CVMX_WQE_H__
 
-// #include "cvmx-pki-defs.h"
+#include <asm/octeon/cvmx-csr-enums.h>
+
 #include "cvmx-pip-defs.h"
-#include "cvmx-csr-enums.h"
 
 #define OCT_TAG_TYPE_STRING(x) (((x) == CVMX_POW_TAG_TYPE_ORDERED) ?  "ORDERED" : \
                                 (((x) == CVMX_POW_TAG_TYPE_ATOMIC) ?  "ATOMIC" : \

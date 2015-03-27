@@ -36,17 +36,16 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-srio.h>
 #include <asm/octeon/octeon-ethernet-user.h>
+#include <asm/octeon/cvmx-helper-board.h>
+#include <asm/octeon/cvmx-smix-defs.h>
+#include <asm/octeon/cvmx-gmxx-defs.h>
+#include <asm/octeon/cvmx-pcsx-defs.h>
+
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
-
-#include <asm/octeon/cvmx-helper-board.h>
-
-#include <asm/octeon/cvmx-smix-defs.h>
-#include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-pip-defs.h>
-#include <asm/octeon/cvmx-pko-defs.h>
-#include <asm/octeon/cvmx-pcsx-defs.h>
+#include "cvmx-pip-defs.h"
+#include "cvmx-pko-defs.h"
 
 static void cvm_oct_get_drvinfo(struct net_device *dev,
 				struct ethtool_drvinfo *info)

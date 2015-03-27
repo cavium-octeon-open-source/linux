@@ -34,18 +34,16 @@
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
-#include <asm/octeon/cvmx-pip-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
-
-#include <asm/octeon/cvmx-fpa.h>
-#include <asm/octeon/cvmx-fpa1.h>
-#include <asm/octeon/cvmx-wqe.h>
-#include <asm/octeon/cvmx-ipd.h>
-// #include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-helper-errata.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
-// #include <asm/octeon/cvmx-helper-pki.h>
+
+#include "asm/octeon/cvmx-pip-defs.h"
+#include "asm/octeon/cvmx-fpa.h"
+#include "asm/octeon/cvmx-fpa1.h"
+#include "asm/octeon/cvmx-wqe.h"
+#include "asm/octeon/cvmx-ipd.h"
 
 CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg = {.first_mbuf_skip = 184,
 	.ipd_enable = 1,

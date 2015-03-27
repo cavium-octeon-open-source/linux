@@ -37,13 +37,6 @@
 
 #include <asm/octeon/octeon.h>
 
-#include "ethernet-defines.h"
-#include "octeon-ethernet.h"
-
-#include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-hwpko.h>
-#include <asm/octeon/cvmx-hwfau.h>
-#include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-srio.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
@@ -54,6 +47,13 @@
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-agl-defs.h>
+
+#include "ethernet-defines.h"
+#include "octeon-ethernet.h"
+#include "cvmx-pip.h"
+#include "cvmx-hwpko.h"
+#include "cvmx-hwfau.h"
+#include "cvmx-ipd.h"
 
 int rx_cpu_factor = 8;
 module_param(rx_cpu_factor, int, S_IRUGO | S_IWUSR | S_IWGRP);

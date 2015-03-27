@@ -34,10 +34,11 @@
  */
 
 #include <asm/octeon/octeon.h>
-#include <asm/octeon/cvmx-hwpko.h>
-#include <asm/octeon/cvmx-fpa1.h>
 #include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
+
+#include "cvmx-hwpko.h"
+#include "cvmx-fpa1.h"
 
 //XXX- these config data structures will go away soon!
 static CVMX_SHARED int64_t pko_fpa_config_pool = -1;

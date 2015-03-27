@@ -19,11 +19,12 @@
 
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-fpa1.h>
-#include <asm/octeon/cvmx-pow.h>
-#include <asm/octeon/cvmx-wqe.h>
-#include <asm/octeon/cvmx-pow-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
+
+#include "cvmx-fpa1.h"
+#include "cvmx-pow.h"
+#include "cvmx-wqe.h"
+#include "cvmx-pow-defs.h"
 
 #define VIRTUAL_PORT    63	/* Value to put in work->ipprt */
 

@@ -33,14 +33,13 @@
  */
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-hwpko.h>
-// #include <asm/octeon/cvmx-pko3.h>
-// #include <asm/octeon/cvmx-pko3-queue.h>
 #include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-helper-cfg.h>
 #include <asm/octeon/cvmx-helper-util.h>
-#include <asm/octeon/cvmx-fpa1.h>
 #include <asm/octeon/cvmx-clock.h>
+
+#include "cvmx-hwpko.h"
+#include "cvmx-fpa1.h"
 
 #define CVMX_PKO_NQ_PER_PORT_MAX	32
 

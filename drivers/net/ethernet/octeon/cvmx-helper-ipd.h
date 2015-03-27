@@ -35,7 +35,8 @@
 #define __CVMX_HELPER_IPD_H__
 
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-ipd.h>
+
+#include "cvmx-ipd.h"
 
 void cvmx_helper_ipd_set_wqe_no_ptr_mode(bool mode);
 void cvmx_helper_ipd_pkt_wqe_le_mode(bool mode);

@@ -46,21 +46,21 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/octeon-hw-status.h>
 
-#include "ethernet-defines.h"
-#include "octeon-ethernet.h"
-
 #include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-wqe.h>
-#include <asm/octeon/cvmx-hwfau.h>
-#include <asm/octeon/cvmx-pow.h>
-#include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-srio.h>
 #include <asm/octeon/cvmx-scratch.h>
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
 #include <asm/octeon/cvmx-agl-defs.h>
+
+#include "ethernet-defines.h"
+#include "octeon-ethernet.h"
+#include "cvmx-wqe.h"
+#include "cvmx-hwfau.h"
+#include "cvmx-pow.h"
+#include "cvmx-pip.h"
+#include "cvmx-ipd.h"
 
 struct cvm_napi_wrapper {
 	struct napi_struct napi;

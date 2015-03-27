@@ -36,8 +36,9 @@
 #include "octeon_common.h"
 
 #include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-hwfau.h>
 #include <asm/octeon/octeon-ethernet-user.h>
+
+#include "cvmx-hwfau.h"
 
 /**
  * This is the definition of the Ethernet driver's private

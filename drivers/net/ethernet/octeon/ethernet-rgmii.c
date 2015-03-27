@@ -33,15 +33,15 @@
 
 #include <asm/octeon/octeon-hw-status.h>
 #include <asm/octeon/octeon.h>
+#include <asm/octeon/cvmx-helper.h>
+
+#include <asm/octeon/cvmx-npi-defs.h>
+#include <asm/octeon/cvmx-gmxx-defs.h>
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
+#include "cvmx-ipd-defs.h"
 
-#include <asm/octeon/cvmx-helper.h>
-
-#include <asm/octeon/cvmx-ipd-defs.h>
-#include <asm/octeon/cvmx-npi-defs.h>
-#include <asm/octeon/cvmx-gmxx-defs.h>
 
 #define INT_BIT_PHY_LINK 16
 #define INT_BIT_PHY_SPD 17

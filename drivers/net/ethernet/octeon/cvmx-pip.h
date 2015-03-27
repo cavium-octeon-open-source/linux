@@ -35,14 +35,11 @@
 #ifndef __CVMX_PIP_H__
 #define __CVMX_PIP_H__
 
-#include "cvmx-wqe.h"
-// #include "cvmx-pki.h"
-// #include "cvmx-helper-pki.h"
-#include "cvmx-pip-defs.h"
+#include <asm/octeon/cvmx-helper.h>
+#include <asm/octeon/cvmx-helper-util.h>
 
-#include "cvmx-helper.h"
-#include "cvmx-helper-util.h"
-// #include "cvmx-pki-resources.h"
+#include "cvmx-wqe.h"
+#include "cvmx-pip-defs.h"
 
 #define CVMX_PIP_NUM_INPUT_PORTS                46
 #define CVMX_PIP_NUM_WATCHERS                   8

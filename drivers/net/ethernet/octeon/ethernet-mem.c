@@ -30,10 +30,10 @@
 #include <linux/slab.h>
 
 #include <asm/octeon/octeon.h>
-#include <asm/octeon/cvmx-fpa1.h>
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
+#include "cvmx-fpa1.h"
 
 struct fpa_pool {
 	int pool;
