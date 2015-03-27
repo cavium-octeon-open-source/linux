@@ -1768,13 +1768,13 @@ int cvmx_qlm_measure_clock(int qlm)
 	ptp_clock.u64 = cvmx_read_csr(CVMX_MIO_PTP_CLOCK_CFG);	/* For CN63XXp1 errata */
 	ptp_clock.s.evcnt_en = 1;
 	cvmx_write_csr(CVMX_MIO_PTP_CLOCK_CFG, ptp_clock.u64);
-	start_cycle = cvmx_clock_get_count(CVMX_CLOCK_CORE);
+	start_cycle = cvmx_clock_get_core_count();
 	/* Wait for 50ms */
 	cvmx_wait_usec(50000);
 	/* Read the counter */
 	cvmx_read_csr(CVMX_MIO_PTP_EVT_CNT);	/* For CN63XXp1 errata */
 	count = cvmx_read_csr(CVMX_MIO_PTP_EVT_CNT);
-	stop_cycle = cvmx_clock_get_count(CVMX_CLOCK_CORE);
+	stop_cycle = cvmx_clock_get_core_count();
 	/* Disable the PTP event counter */
 	ptp_clock.u64 = cvmx_read_csr(CVMX_MIO_PTP_CLOCK_CFG);	/* For CN63XXp1 errata */
 	ptp_clock.s.evcnt_en = 0;
