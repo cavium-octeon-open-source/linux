@@ -56,8 +56,8 @@
 #include <asm/octeon/cvmx-scratch.h>
 #include <asm/octeon/cvmx-address.h>
 
-#include <asm/octeon/cvmx-wqe.h>
 #include <asm/octeon/cvmx-sso-defs.h>
+#include "cvmx-wqe.h"
 
 /* Default to having all POW constancy checks turned on */
 #ifndef CVMX_ENABLE_POW_CHECKS

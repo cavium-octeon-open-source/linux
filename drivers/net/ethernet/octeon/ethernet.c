@@ -54,6 +54,7 @@
 #include "cvmx-hwpko.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-ipd.h"
+#include "cvmx-pow-defs.h"
 
 int rx_cpu_factor = 8;
 module_param(rx_cpu_factor, int, S_IRUGO | S_IWUSR | S_IWGRP);

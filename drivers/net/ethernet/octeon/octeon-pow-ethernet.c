@@ -21,6 +21,7 @@
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-sso-defs.h>
 
+#include "cvmx-ipd-defs.h"
 #include "cvmx-fpa1.h"
 #include "cvmx-pow.h"
 #include "cvmx-wqe.h"
