@@ -5,10 +5,15 @@
  *
  * Copyright (C) 2003, 2004 Ralf Baechle
  */
-#ifndef __ASM_MACH_GENERIC_MANGLE_PORT_H
-#define __ASM_MACH_GENERIC_MANGLE_PORT_H
+#ifndef __ASM_MACH_OCTEON_MANGLE_PORT_H
+#define __ASM_MACH_OCTEON_MANGLE_PORT_H
 
 #include <asm/byteorder.h>
+
+static inline bool __attribute__((const)) __oct_addr_is_RSL(unsigned long p)
+{
+	return ((p >> 40) & 0x7ffff) == 0x118;
+}
 
 #ifdef __BIG_ENDIAN
 
@@ -19,18 +24,17 @@
 
 #else /* __LITTLE_ENDIAN */
 
-static inline bool __should_swizzle_addr(unsigned long p)
+static inline bool __attribute__((const)) __oct_addr_is_bootbus(unsigned long p)
 {
-	/* boot bus? */
 	return ((p >> 40) & 0xff) == 0;
 }
 
 # define __swizzle_addr_b(port)	\
-	(__should_swizzle_addr(port) ? (port) ^ 7 : (port))
+	(__oct_addr_is_bootbus(port) ? (port) ^ 7 : (port))
 # define __swizzle_addr_w(port)	\
-	(__should_swizzle_addr(port) ? (port) ^ 6 : (port))
+	(__oct_addr_is_bootbus(port) ? (port) ^ 6 : (port))
 # define __swizzle_addr_l(port)	\
-	(__should_swizzle_addr(port) ? (port) ^ 4 : (port))
+	(__oct_addr_is_bootbus(port) ? (port) ^ 4 : (port))
 # define __swizzle_addr_q(port)	(port)
 
 #endif /* __BIG_ENDIAN */
@@ -47,28 +51,20 @@ static inline bool __should_swizzle_addr(unsigned long p)
  * typically used for moving raw data between a peripheral and memory (cf.
  * string I/O functions), hence the "__mem_" prefix.
  */
-#if defined(CONFIG_SWAP_IO_SPACE)
-
-# define ioswabb(a, x)		(x)
-# define __mem_ioswabb(a, x)	(x)
-# define ioswabw(a, x)		le16_to_cpu(x)
-# define __mem_ioswabw(a, x)	(x)
-# define ioswabl(a, x)		le32_to_cpu(x)
-# define __mem_ioswabl(a, x)	(x)
-# define ioswabq(a, x)		le64_to_cpu(x)
-# define __mem_ioswabq(a, x)	(x)
-
-#else
-
-# define ioswabb(a, x)		(x)
-# define __mem_ioswabb(a, x)	(x)
-# define ioswabw(a, x)		(x)
-# define __mem_ioswabw(a, x)	cpu_to_le16(x)
-# define ioswabl(a, x)		(x)
-# define __mem_ioswabl(a, x)	cpu_to_le32(x)
-# define ioswabq(a, x)		(x)
-# define __mem_ioswabq(a, x)	cpu_to_le32(x)
-
+#if !defined(CONFIG_SWAP_IO_SPACE)
+# error "CONFIG_SWAP_IO_SPACE should be defined"
 #endif
 
-#endif /* __ASM_MACH_GENERIC_MANGLE_PORT_H */
+#define ioswabb(a, x)		(x)
+#define __mem_ioswabb(a, x)	(x)
+#define ioswabw(a, x) \
+	(__oct_addr_is_RSL((unsigned long)a) ? (x) : le16_to_cpu(x))
+#define __mem_ioswabw(a, x)	(x)
+#define ioswabl(a, x) \
+	(__oct_addr_is_RSL((unsigned long)a) ? (x) : le32_to_cpu(x))
+#define __mem_ioswabl(a, x)	(x)
+#define ioswabq(a, x) \
+	(__oct_addr_is_RSL((unsigned long)a) ? (x) : le64_to_cpu(x))
+#define __mem_ioswabq(a, x)	(x)
+
+#endif /* __ASM_MACH_OCTEON_MANGLE_PORT_H */
