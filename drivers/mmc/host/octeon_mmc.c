@@ -26,8 +26,9 @@
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
 #include <linux/mmc/sd.h>
-#include <net/irda/parameters.h>
+
 #include <linux/gpio/consumer.h>
+#include <linux/regulator/consumer.h>
 
 #include <asm/byteorder.h>
 #include <asm/octeon/octeon.h>
@@ -74,7 +75,7 @@ struct octeon_mmc_host {
 	bool dma_active;
 
 	struct platform_device	*pdev;
-	struct gpio_desc *global_pwr_gpiod;
+	struct regulator *global_power;
 	bool dma_err_pending;
 	bool need_bootbus_lock;
 	bool big_dma_addr;
@@ -1203,7 +1204,7 @@ static int octeon_mmc_slot_remove(struct platform_device *pdev)
 }
 
 static const struct of_device_id octeon_mmc_slot_match[] = {
-	{ .compatible = "cavium,octeon-6130-mmc-slot", },
+	{ .compatible = "cavium,octeon-6130-mmc", },
 	{},
 };
 MODULE_DEVICE_TABLE(of, octeon_mmc_slot_match);
@@ -1236,7 +1237,8 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	spin_lock_init(&host->irq_handler_lock);
 	sema_init(&host->mmc_serializer, 1);
 
-	cn78xx_style = of_device_is_compatible(node, "cavium,octeon-7890-mmc");
+	cn78xx_style = of_device_is_compatible(node,
+		"cavium,octeon-7890-mmc-unit");
 	if (cn78xx_style) {
 		host->need_bootbus_lock = false;
 		host->big_dma_addr = true;
@@ -1323,11 +1325,19 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 		}
 	}
 
-	host->global_pwr_gpiod = devm_gpiod_get_optional(&pdev->dev, "power",
-								GPIOD_OUT_HIGH);
-	if (IS_ERR(host->global_pwr_gpiod)) {
-		dev_err(&host->pdev->dev, "Invalid POWER GPIO\n");
-		return PTR_ERR(host->global_pwr_gpiod);
+	host->global_power = devm_regulator_get_optional(&pdev->dev,
+							 "vmmc-global");
+	if (PTR_ERR(host->global_power) == -EPROBE_DEFER) {
+		return -EPROBE_DEFER;
+	} else if (IS_ERR(host->global_power)) {
+		dev_err(&host->pdev->dev, "Invalid global power supply\n");
+		return PTR_ERR(host->global_power);
+	} else if (host->global_power) {
+		ret = regulator_enable(host->global_power);
+		if (ret) {
+			dev_err(&host->pdev->dev, "Invalid global power supply\n");
+			return ret;
+		}
 	}
 
 	platform_set_drvdata(pdev, host);
@@ -1335,7 +1345,6 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	ret = of_platform_populate(node, NULL, NULL, &pdev->dev);
 	if (ret) {
 		dev_err(&host->pdev->dev, "Error populating slots\n");
-		gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
 		return ret;
 	}
 
@@ -1351,17 +1360,18 @@ static int octeon_mmc_remove(struct platform_device *pdev)
 	ndf_dma_cfg.s.en = 0;
 	writeq(ndf_dma_cfg.u64, host->ndf_base + OCT_MIO_NDF_DMA_CFG);
 
-	gpiod_set_value_cansleep(host->global_pwr_gpiod, 0);
+	if (host->global_power)
+		regulator_disable(host->global_power);
 
 	return 0;
 }
 
 static const struct of_device_id octeon_mmc_match[] = {
 	{
-		.compatible = "cavium,octeon-6130-mmc",
+		.compatible = "cavium,octeon-6130-mmc-unit",
 	},
 	{
-		.compatible = "cavium,octeon-7890-mmc",
+		.compatible = "cavium,octeon-7890-mmc-unit",
 	},
 	{},
 };
