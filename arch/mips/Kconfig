@@ -794,7 +794,7 @@ config CAVIUM_OCTEON_SOC
 	select SYS_SUPPORTS_SMP
 	select NR_CPUS_DEFAULT_16
 	select BUILTIN_DTB
-	select MTD_COMPLEX_MAPPINGS
+	select MTD_COMPLEX_MAPPINGS if MTD && HAS_IOMEM
 	select PINCTRL
 	help
 	  This option supports all of the Octeon reference boards from Cavium
