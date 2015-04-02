@@ -63,13 +63,11 @@
 #include <asm/octeon/cvmx-ciu-defs.h>
 #include <asm/octeon/cvmx-gpio-defs.h>
 #include <asm/octeon/cvmx-iob-defs.h>
-#include <asm/octeon/cvmx-ipd-defs.h>
 #include <asm/octeon/cvmx-l2c-defs.h>
 #include <asm/octeon/cvmx-l2d-defs.h>
 #include <asm/octeon/cvmx-l2t-defs.h>
 #include <asm/octeon/cvmx-led-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
-#include <asm/octeon/cvmx-pow-defs.h>
 
 #include <asm/octeon/cvmx-bootinfo.h>
 #include <asm/octeon/cvmx-bootmem.h>
@@ -418,6 +416,7 @@ static inline void cvmx_wait(uint64_t cycles)
  */
 #define cvmx_wait_usec(usec) udelay(usec)
 
+#if 0
 /**
  * Reads a chip global cycle counter.  This counts CPU cycles since
  * chip reset.	The counter is 64 bit.
@@ -432,6 +431,7 @@ static inline uint64_t cvmx_get_cycle_global(void)
 	else
 		return cvmx_read64(CVMX_IPD_CLK_COUNT);
 }
+#endif
 
 /**
  * This macro spins on a field waiting for it to reach a value. It
