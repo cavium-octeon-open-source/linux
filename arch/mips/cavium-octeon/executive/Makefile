@@ -14,7 +14,6 @@ obj-y += cvmx-spi.o \
 	cvmx-helper-board.o \
 	cvmx-interrupt-decodes.o cvmx-interrupt-rsl.o \
 	cvmx-global-resources.o \
-	cvmx-range.o \
-	cvmx-qlm.o
+	cvmx-range.o
 
 obj-y += cvmx-helper-jtag.o
