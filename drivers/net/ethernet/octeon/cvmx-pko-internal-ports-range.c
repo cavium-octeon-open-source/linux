@@ -29,9 +29,10 @@
 #include <asm/octeon/cvmx-range.h>
 #include <asm/octeon/cvmx-global-resources.h>
 #include <asm/octeon/cvmx-bootmem.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-util.h>
+
+#include "cvmx-helper-cfg.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-util.h"
 
 union interface_port {
 	struct {

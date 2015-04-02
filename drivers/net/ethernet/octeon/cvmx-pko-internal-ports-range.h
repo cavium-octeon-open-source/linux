@@ -28,7 +28,7 @@
 #ifndef __CVMX_INTERNAL_PORTS_RANGE__
 #define __CVMX_INTERNAL_PORTS_RANGE__
 
-#include "cvmx.h"
+#include <asm/octeon/cvmx.h>
 
 /*
  * Allocated a block of internal ports for the specified interface/port

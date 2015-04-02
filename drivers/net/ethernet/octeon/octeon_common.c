@@ -12,8 +12,9 @@
 #include "octeon_common.h"
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-agl-defs.h>
-#include <asm/octeon/cvmx-pip-defs.h>
+
+#include "cvmx-agl-defs.h"
+#include "cvmx-pip-defs.h"
 
 struct cvm_oct_cam_state {
 	u64 cam[6];

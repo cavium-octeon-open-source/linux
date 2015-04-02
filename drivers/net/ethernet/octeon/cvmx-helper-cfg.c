@@ -37,7 +37,7 @@
 
 #include "cvmx-helper.h"
 #include "cvmx-pko-internal-ports-range.h"
-#include "cvmx-helper-board.h"
+#include "cvmx-helper-board-ethernet.h"
 #include "cvmx-helper-util.h"
 #include "cvmx-helper-cfg.h"
 

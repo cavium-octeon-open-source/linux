@@ -38,12 +38,12 @@
 #include <asm/octeon/octeon.h>
 
 #include <asm/octeon/cvmx-srio.h>
-#include <asm/octeon/cvmx-pko-internal-ports-range.h>
 #include <asm/octeon/cvmx-app-config.h>
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 
+#include "cvmx-pko-internal-ports-range.h"
 #include "cvmx-agl-defs.h"
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
