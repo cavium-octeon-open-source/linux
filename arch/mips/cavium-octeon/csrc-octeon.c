@@ -16,9 +16,10 @@
 #include <asm/time.h>
 
 #include <asm/octeon/octeon.h>
-#include <asm/octeon/cvmx-ipd-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
 #include <asm/octeon/cvmx-rst-defs.h>
+
+#define CVMX_IPD_CLK_COUNT (CVMX_ADD_IO_SEG(0x00014F0000000338ull))
 
 static u64 f;
 static u64 rdiv;
