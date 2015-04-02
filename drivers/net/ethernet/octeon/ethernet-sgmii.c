@@ -35,8 +35,7 @@
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
-
-#include <asm/octeon/cvmx-helper.h>
+#include "cvmx-helper.h"
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-npei-defs.h>

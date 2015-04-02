@@ -59,12 +59,11 @@
 #ifndef __CVMX_HWPKO_H__
 #define __CVMX_HWPKO_H__
 
-#include <asm/octeon/cvmx-helper-cfg.h>
-
-#include "cvmx-pko-defs.h"
-#include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-cmd-queue.h>
 
+#include "cvmx-helper-cfg.h"
+#include "cvmx-helper.h"
+#include "cvmx-pko-defs.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-fpa.h"
 #include "cvmx-pow.h"

@@ -35,42 +35,34 @@
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
-// #include <asm/octeon/cvmx-bgxx-defs.h>
 #include <asm/octeon/cvmx-sriox-defs.h>
 #include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pexp-defs.h>
-#include <asm/octeon/cvmx-pip-defs.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-// #include <asm/octeon/cvmx-gserx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
-// #include <asm/octeon/cvmx-sso-defs.h>
-
-#include <asm/octeon/cvmx-agl.h>
-#include <asm/octeon/cvmx-gmx.h>
-#include <asm/octeon/cvmx-fpa.h>
-#include <asm/octeon/cvmx-pip.h>
-#include <asm/octeon/cvmx-hwpko.h>
-// #include <asm/octeon/cvmx-pko3.h>
-#include <asm/octeon/cvmx-ipd.h>
 #include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-spi.h>
-// #include <asm/octeon/cvmx-clock.h>
-#include <asm/octeon/cvmx-helper.h>
-// s#include <asm/octeon/cvmx-helper-bgx.h>
-#include <asm/octeon/cvmx-helper-agl.h>
-#include <asm/octeon/cvmx-helper-board.h>
-#include <asm/octeon/cvmx-helper-errata.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-// #include <asm/octeon/cvmx-helper-pki.h>
-//#include <asm/octeon/cvmx-pki.h>
-#include <asm/octeon/cvmx-helper-pko.h>
-// #include <asm/octeon/cvmx-helper-pko3.h>
-#include <asm/octeon/cvmx-helper-ipd.h>
+
+#include <asm/octeon/cvmx-gmx.h>
 #include <asm/octeon/octeon.h>
+
+#include "cvmx-pip-defs.h"
+#include "cvmx-agl.h"
+#include "cvmx-fpa.h"
+#include "cvmx-pip.h"
+#include "cvmx-hwpko.h"
+#include "cvmx-ipd.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-agl.h"
+#include "cvmx-helper-board-ethernet.h"
+#include "cvmx-helper-errata-ethernet.h"
+#include "cvmx-helper-cfg.h"
+#include "cvmx-helper-pko.h"
+#include "cvmx-helper-ipd.h"
 
 /**
  * @INTERNAL

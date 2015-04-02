@@ -33,8 +33,6 @@
  *
  */
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-board.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-npi-defs.h>
@@ -42,6 +40,8 @@
 
 #include "cvmx-hwpko.h"
 #include "cvmx-pko-defs.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-board-ethernet.h"
 
 /**
  * @INTERNAL

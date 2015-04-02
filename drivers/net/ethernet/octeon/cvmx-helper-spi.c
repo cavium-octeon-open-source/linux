@@ -37,8 +37,8 @@ void __cvmx_interrupt_stxx_int_msk_enable(int index);
 
 #include <asm/octeon/cvmx-config.h>
 #include <asm/octeon/cvmx-spi.h>
-#include <asm/octeon/cvmx-helper.h>
 
+#include "cvmx-helper.h"
 #include "cvmx-pip-defs.h"
 #include "cvmx-pko-defs.h"
 

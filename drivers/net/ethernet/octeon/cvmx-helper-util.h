@@ -35,8 +35,9 @@
 #ifndef __CVMX_HELPER_UTIL_H__
 #define __CVMX_HELPER_UTIL_H__
 
-#include "cvmx.h"
-#include "cvmx-mio-defs.h"
+#include <asm/octeon/cvmx.h>
+
+// #include "cvmx-mio-defs.h"
 #include "cvmx-helper.h"
 #include "cvmx-fpa.h"
 

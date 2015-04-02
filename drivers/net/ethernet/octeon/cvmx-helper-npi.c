@@ -31,8 +31,8 @@
  */
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-config.h>
-#include <asm/octeon/cvmx-helper.h>
 
+#include "cvmx-helper.h"
 #include "cvmx-pip-defs.h"
 
 /**

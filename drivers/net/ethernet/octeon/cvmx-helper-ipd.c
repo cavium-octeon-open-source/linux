@@ -32,9 +32,9 @@
  */
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-helper-util.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
 
+#include "cvmx-helper-util.h"
+#include "cvmx-helper-cfg.h"
 #include "cvmx-ipd-defs.h"
 #include "cvmx-ipd.h"
 #include "cvmx-fpa.h"

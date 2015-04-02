@@ -37,7 +37,6 @@
 #include <net/dst.h>
 
 #include <asm/octeon/octeon.h>
-#include <asm/octeon/cvmx-helper.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 
 #include "ethernet-defines.h"
@@ -47,6 +46,7 @@
 #include "cvmx-ipd.h"
 #include "cvmx-pip.h"
 #include "cvmx-hwpko.h"
+#include "cvmx-helper.h"
 
 /*
  * You can define GET_SKBUFF_QOS() to override how the skbuff output

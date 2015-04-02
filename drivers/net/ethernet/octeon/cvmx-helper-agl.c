@@ -34,11 +34,11 @@
  */
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-clock.h>
-#include <asm/octeon/cvmx-agl.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-agl-defs.h>
 
+#include "cvmx-agl.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-cfg.h"
+#include "cvmx-agl-defs.h"
 #include "cvmx-pko-defs.h"
 
 int __cvmx_helper_agl_enumerate(int xiface)

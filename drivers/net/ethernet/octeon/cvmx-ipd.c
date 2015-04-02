@@ -36,9 +36,9 @@
 #include <asm/octeon/cvmx-bootmem.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
 #include <asm/octeon/cvmx-sso-defs.h>
-#include <asm/octeon/cvmx-helper-errata.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
 
+#include "cvmx-helper-errata-ethernet.h"
+#include "cvmx-helper-cfg.h"
 #include "cvmx-pip-defs.h"
 #include "cvmx-fpa.h"
 #include "cvmx-fpa1.h"

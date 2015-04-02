@@ -36,7 +36,8 @@
 #define __CVMX_AGL_H__
 
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-helper.h>
+
+#include "cvmx-helper.h"
 
 /*
  * @port: port to enable

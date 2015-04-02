@@ -35,9 +35,8 @@
 #ifndef __CVMX_PIP_H__
 #define __CVMX_PIP_H__
 
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-util.h>
-
+#include "cvmx-helper.h"
+#include "cvmx-helper-util.h"
 #include "cvmx-wqe.h"
 #include "cvmx-pip-defs.h"
 

@@ -35,8 +35,8 @@
 
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-clock.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
 
+#include "cvmx-helper-cfg.h"
 #include "cvmx-hwpko.h"
 #include "cvmx-fpa1.h"
 

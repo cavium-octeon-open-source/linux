@@ -49,7 +49,7 @@
 #ifndef __CVMX_HELPER_CFG_H__
 #define __CVMX_HELPER_CFG_H__
 
-#include <asm/octeon/cvmx-helper-util.h>
+#include "cvmx-helper-util.h"
 
 #define CVMX_HELPER_CFG_MAX_PKO_PORT		128
 #define CVMX_HELPER_CFG_MAX_PIP_BPID       	64
