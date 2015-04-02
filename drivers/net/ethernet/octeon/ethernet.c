@@ -38,9 +38,6 @@
 #include <asm/octeon/octeon.h>
 
 #include <asm/octeon/cvmx-srio.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-pko-internal-ports-range.h>
 #include <asm/octeon/cvmx-app-config.h>
 
@@ -55,6 +52,9 @@
 #include "cvmx-hwfau.h"
 #include "cvmx-ipd.h"
 #include "cvmx-pow-defs.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-cfg.h"
+#include "cvmx-helper-util.h"
 
 int rx_cpu_factor = 8;
 module_param(rx_cpu_factor, int, S_IRUGO | S_IWUSR | S_IWGRP);
