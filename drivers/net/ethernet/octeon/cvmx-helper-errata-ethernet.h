@@ -34,8 +34,8 @@
  * these functions directly.
  *
  */
-#ifndef __CVMX_HELPER_ERRATA_H__
-#define __CVMX_HELPER_ERRATA_H__
+#ifndef __CVMX_HELPER_ERRATA_ETHERNET_H__
+#define __CVMX_HELPER_ERRATA_ETHERNET_H__
 
 #include "cvmx-wqe.h"
 
