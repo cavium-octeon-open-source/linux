@@ -825,6 +825,12 @@ static int cvm_oct_probe(struct platform_device *pdev)
 	int qos, r;
 	struct device_node *pip;
 
+	union cvmx_pow_nw_tim nm_tim;
+	nm_tim.u64 = 0;
+	/* 4096 cycles */
+	nm_tim.s.nw_tim = 3;
+	cvmx_write_csr(CVMX_POW_NW_TIM, nm_tim.u64);
+
 	octeon_mdiobus_force_mod_depencency();
 	pr_notice("octeon-ethernet %s\n", OCTEON_ETHERNET_VERSION);
 
