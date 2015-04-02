@@ -38,7 +38,6 @@
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-helper-board.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
 
 /**
  * @INTERNAL
