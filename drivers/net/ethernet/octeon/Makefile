@@ -18,4 +18,4 @@ octeon-ethernet-objs += ethernet-tx.o
 ifdef CONFIG_RAPIDIO
 octeon-ethernet-objs += ethernet-srio.o
 endif
-octeon-ethernet-objs += cvmx-helper-pko.o cvmx-helper-ipd.o cvmx-pko.o cvmx-ipd.o cvmx-cmd-queue.o cvmx-helper-xaui.o cvmx-helper-rgmii.o cvmx-helper-sgmii.o cvmx-helper-npi.o cvmx-helper-loop.o cvmx-helper-spi.o cvmx-helper-util.o cvmx-helper-agl.o cvmx-fpa-resource.o cvmx-helper-errata.o cvmx-helper.o cvmx-helper-board-ethernet.c cvmx-helper-cfg.o
+octeon-ethernet-objs += cvmx-helper-pko.o cvmx-helper-ipd.o cvmx-pko.o cvmx-ipd.o cvmx-cmd-queue.o cvmx-helper-xaui.o cvmx-helper-rgmii.o cvmx-helper-sgmii.o cvmx-helper-npi.o cvmx-helper-loop.o cvmx-helper-spi.o cvmx-helper-util.o cvmx-helper-agl.o cvmx-fpa-resource.o cvmx-helper-errata.o cvmx-helper.o cvmx-helper-board-ethernet.c cvmx-helper-cfg.o cvmx-helper-agl.o

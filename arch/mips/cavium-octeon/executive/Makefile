@@ -13,7 +13,6 @@ obj-y += cvmx-bootmem.o cvmx-l2c.o cvmx-sysinfo.o octeon-model.o
 obj-y += cvmx-spi.o \
 	cvmx-helper-board.o \
 	cvmx-interrupt-decodes.o cvmx-interrupt-rsl.o \
-	cvmx-agl.o \
 	cvmx-global-resources.o cvmx-pko-internal-ports-range.o \
 	cvmx-range.o
 	# cvmx-appcfg-transport.o
