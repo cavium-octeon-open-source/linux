@@ -33,6 +33,8 @@
 #include <asm/octeon/cvmx-helper-jtag.h>
 #include <asm/octeon/cvmx-sriox-defs.h>
 
+#include "cvmx-helper-util.h"
+
 #if 0
 
 /**

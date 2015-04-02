@@ -28,12 +28,13 @@
 #include <linux/export.h>
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
-#include <asm/octeon/cvmx-fpa.h>
-#include <asm/octeon/cvmx-ipd.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-helper-util.h>
 #include <asm/octeon/cvmx-app-config.h>
+
+#include "cvmx-fpa.h"
+#include "cvmx-ipd.h"
+#include "cvmx-helper.h"
+#include "cvmx-helper-cfg.h"
+#include "cvmx-helper-util.h"
 
 #define MAX_IFACE CVMX_HELPER_MAX_IFACE
 #define MAX_PORT_PER_IFACE CVMX_HELPER_CFG_MAX_PORT_PER_IFACE
