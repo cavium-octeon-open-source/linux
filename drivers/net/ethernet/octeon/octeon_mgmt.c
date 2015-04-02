@@ -25,7 +25,8 @@
 
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-mixx-defs.h>
-#include <asm/octeon/cvmx-agl-defs.h>
+
+#include "cvmx-agl-defs.h"
 #include "octeon_common.h"
 
 #define DRV_NAME "octeon_mgmt"

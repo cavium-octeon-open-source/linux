@@ -43,8 +43,8 @@
 
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
-#include <asm/octeon/cvmx-agl-defs.h>
 
+#include "cvmx-agl-defs.h"
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
 #include "cvmx-pip.h"
