@@ -34,11 +34,12 @@
  */
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-clock.h>
-#include <asm/octeon/cvmx-helper.h>
-#include <asm/octeon/cvmx-helper-board.h>
-#include <asm/octeon/cvmx-helper-cfg.h>
-#include <asm/octeon/cvmx-agl-defs.h>
-#include <asm/octeon/cvmx-agl.h>
+
+#include "cvmx-helper.h"
+#include "cvmx-helper-board-ethernet.h"
+#include "cvmx-helper-cfg.h"
+#include "cvmx-agl-defs.h"
+#include "cvmx-agl.h"
 /*
  * @port: port to enable
  *
