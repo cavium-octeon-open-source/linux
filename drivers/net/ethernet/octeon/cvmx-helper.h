@@ -132,7 +132,7 @@ void cvmx_rgmii_set_back_pressure(uint64_t backpressure_dis);
 
 // #include <asm/octeon/cvmx-helper-fpa.h>
 
-#include <asm/octeon/cvmx-helper-agl.h>
+#include "cvmx-helper-agl.h"
 #include <asm/octeon/cvmx-helper-errata.h>
 // #include <asm/octeon/cvmx-helper-ilk.h>
 #include <asm/octeon/cvmx-helper-loop.h>
@@ -141,7 +141,7 @@ void cvmx_rgmii_set_back_pressure(uint64_t backpressure_dis);
 #include <asm/octeon/cvmx-helper-sgmii.h>
 #include <asm/octeon/cvmx-helper-spi.h>
 // #include <asm/octeon/cvmx-helper-srio.h>
-#include <asm/octeon/cvmx-helper-util.h>
+#include "cvmx-helper-util.h"
 #include <asm/octeon/cvmx-helper-xaui.h>
 
 /**
