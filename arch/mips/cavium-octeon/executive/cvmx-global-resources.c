@@ -3,7 +3,6 @@
 #include "asm/octeon/cvmx-global-resources.h"
 #include "asm/octeon/cvmx-bootmem.h"
 #include "asm/octeon/cvmx.h"
-#include "asm/octeon/cvmx-helper-cfg.h"
 #include "asm/octeon/cvmx-range.h"
 
 #define CVMX_MAX_GLOBAL_RESOURCES 128
