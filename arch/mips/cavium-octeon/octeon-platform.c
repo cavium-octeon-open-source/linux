@@ -605,11 +605,13 @@ static void __init octeon_fdt_pip_iface(int pip, int idx, u64 *pmac)
 int __init octeon_prune_device_tree(void)
 {
 	int i, max_port, uart_mask;
-	const char *pip_path;
 	const char *alias_prop;
 	char name_buffer[20];
 	int aliases;
+#ifdef CONFIG_OCTEON_ETHERNET
+	const char *pip_path;
 	u64 mac_addr_base;
+#endif
 
 	if (fdt_check_header(initial_boot_params))
 		panic("Corrupt Device Tree.");
