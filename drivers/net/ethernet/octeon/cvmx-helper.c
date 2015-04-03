@@ -574,27 +574,6 @@ extern cvmx_helper_link_info_t __cvmx_helper_get_link_info(int interface,
 							   int port);
 
 /**
- * cvmx_override_iface_phy_mode(int interface, int index) is a function pointer.
- * It is meant to allow customization of interfaces which do not have a PHY.
- *
- * Returnss 0 if MAC decides TX_CONFIG_REG or 1 if PHY decides  TX_CONFIG_REG.
- *
- * If this function pointer is NULL then it defaults to the MAC.
- */
-CVMX_SHARED int (*cvmx_override_iface_phy_mode) (int interface, int index);
-EXPORT_SYMBOL(cvmx_override_iface_phy_mode);
-
-/**
- * cvmx_override_ipd_port_setup(int ipd_port) is a function
- * pointer. It is meant to allow customization of the IPD
- * port/port kind setup before packet input/output comes online.
- * It is called after cvmx-helper does the default IPD configuration,
- * but before IPD is enabled. Users should set this pointer to a
- * function before calling any cvmx-helper operations.
- */
-CVMX_SHARED void (*cvmx_override_ipd_port_setup) (int ipd_port) = NULL;
-
-/**
  * Return the number of interfaces the chip has. Each interface
  * may have multiple ports. Most chips support two interfaces,
  * but the CNX0XX and CNX1XX are exceptions. These only support
@@ -2618,27 +2597,3 @@ int cvmx_helper_configure_loopback(int xipd_port, int enable_internal,
 	return result;
 }
 
-void cvmx_helper_setup_simulator_io_buffer_counts(int node,
-						  int num_packet_buffers,
-						  int pko_buffers)
-{
-//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-//		cvmx_helper_pki_set_dflt_pool_buffer(node, num_packet_buffers);
-//		cvmx_helper_pki_set_dflt_aura_buffer(node, num_packet_buffers);
-//
-//	} else {
-		cvmx_ipd_set_packet_pool_buffer_count(num_packet_buffers);
-		cvmx_ipd_set_wqe_pool_buffer_count(num_packet_buffers);
-		cvmx_pko_set_cmd_queue_pool_buffer_count(pko_buffers);
-//	}
-}
-
-void *cvmx_helper_mem_alloc(int node, uint64_t alloc_size, uint64_t align)
-{
-	return kmalloc(alloc_size, GFP_NOIO | GFP_DMA);
-}
-
-void cvmx_helper_mem_free(void *buffer, uint64_t size)
-{
-	kfree(buffer);
-}

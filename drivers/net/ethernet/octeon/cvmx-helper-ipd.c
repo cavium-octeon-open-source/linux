@@ -198,10 +198,6 @@ static int __cvmx_helper_ipd_port_setup(int ipd_port)
 
 	cvmx_pip_config_port(ipd_port, port_config, tag_config);
 
-	/* Give the user a chance to override our setting for each port */
-	if (cvmx_override_ipd_port_setup)
-		cvmx_override_ipd_port_setup(ipd_port);
-
 	return 0;
 }
 
