@@ -57,7 +57,6 @@
 #include <asm/octeon/cvmx-csr-enums.h>
 #include <asm/octeon/cvmx-address.h>
 #include <asm/octeon/cvmx-asm.h>
-#include <asm/octeon/cvmx-packet.h>
 #include <asm/octeon/cvmx-sysinfo.h>
 
 #include <asm/octeon/cvmx-ciu-defs.h>

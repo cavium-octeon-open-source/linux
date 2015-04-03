@@ -35,7 +35,7 @@
 #ifndef __CVMX_QLM_H__
 #define __CVMX_QLM_H__
 
-#include "cvmx.h"
+#include <asm/octeon/cvmx.h>
 
 /*
  * Interface 0 on the 78xx can be connected to qlm 0 or qlm 2. When interface

@@ -35,9 +35,9 @@
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
-#include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
 
+#include "cvmx-npi-defs.h"
 #include "cvmx-hwpko.h"
 #include "cvmx-pko-defs.h"
 #include "cvmx-helper.h"

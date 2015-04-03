@@ -134,15 +134,15 @@ void cvmx_rgmii_set_back_pressure(uint64_t backpressure_dis);
 
 #include "cvmx-helper-agl.h"
 #include <asm/octeon/cvmx-helper-errata.h>
-// #include <asm/octeon/cvmx-helper-ilk.h>
-#include <asm/octeon/cvmx-helper-loop.h>
-#include <asm/octeon/cvmx-helper-npi.h>
-#include <asm/octeon/cvmx-helper-rgmii.h>
-#include <asm/octeon/cvmx-helper-sgmii.h>
-#include <asm/octeon/cvmx-helper-spi.h>
-// #include <asm/octeon/cvmx-helper-srio.h>
+
+#include "cvmx-helper-loop.h"
+#include "cvmx-helper-npi.h"
+#include "cvmx-helper-rgmii.h"
+#include "cvmx-helper-sgmii.h"
+#include "cvmx-helper-spi.h"
+#include "cvmx-helper-xaui.h"
+
 #include "cvmx-helper-util.h"
-#include <asm/octeon/cvmx-helper-xaui.h>
 
 /**
  * cvmx_override_iface_phy_mode(int interface, int index) is a function pointer.

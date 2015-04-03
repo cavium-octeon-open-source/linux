@@ -25,7 +25,6 @@
  * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
-#include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-clock.h>
 #include <asm/octeon/cvmx-gserx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
@@ -33,6 +32,7 @@
 #include <asm/octeon/cvmx-helper-jtag.h>
 #include <asm/octeon/cvmx-sriox-defs.h>
 
+#include "cvmx-qlm.h"
 #include "cvmx-helper-util.h"
 
 #if 0

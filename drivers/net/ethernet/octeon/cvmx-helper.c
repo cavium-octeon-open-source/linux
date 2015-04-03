@@ -36,7 +36,6 @@
 #include <asm/octeon/cvmx.h>
 #include <asm/octeon/cvmx-bootmem.h>
 #include <asm/octeon/cvmx-sriox-defs.h>
-#include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-mio-defs.h>
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pexp-defs.h>
@@ -44,13 +43,11 @@
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-smix-defs.h>
 #include <asm/octeon/cvmx-dbg-defs.h>
-#include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-spi.h>
 
 #include <asm/octeon/cvmx-gmx.h>
 #include <asm/octeon/octeon.h>
 
-#include "cvmx-pip-defs.h"
 #include "cvmx-agl.h"
 #include "cvmx-fpa.h"
 #include "cvmx-pip.h"
@@ -63,6 +60,9 @@
 #include "cvmx-helper-cfg.h"
 #include "cvmx-helper-pko.h"
 #include "cvmx-helper-ipd.h"
+#include "cvmx-pip-defs.h"
+#include "cvmx-npi-defs.h"
+#include "cvmx-qlm.h"
 
 /**
  * @INTERNAL

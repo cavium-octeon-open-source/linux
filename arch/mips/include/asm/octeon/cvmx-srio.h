@@ -554,6 +554,7 @@ uint64_t cvmx_srio_physical_map(int srio_port, cvmx_srio_write_mode_t write_op,
  */
 int cvmx_srio_physical_unmap(uint64_t physical_address, uint64_t size);
 
+#if 0
 /**
  * fill out outbound message descriptor
  *
@@ -569,4 +570,6 @@ int cvmx_srio_physical_unmap(uint64_t physical_address, uint64_t size);
 int cvmx_srio_omsg_desc(uint64_t port, cvmx_buf_ptr_t * buf_ptr,
 			cvmx_srio_tx_message_header_t * desc_ptr);
 
+
+#endif
 #endif

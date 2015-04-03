@@ -33,13 +33,12 @@
  *
  */
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-qlm.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 #include <asm/octeon/cvmx-pcsx-defs.h>
 #include <asm/octeon/cvmx-pcsxx-defs.h>
 #include <asm/octeon/cvmx-ciu-defs.h>
-// #include <asm/octeon/cvmx-bgxx-defs.h>
 
+#include "cvmx-qlm.h"
 #include "cvmx-pko-defs.h"
 #include "cvmx-helper.h"
 #include "cvmx-helper-cfg.h"

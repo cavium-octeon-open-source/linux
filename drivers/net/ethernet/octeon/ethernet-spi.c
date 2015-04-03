@@ -34,10 +34,10 @@
 
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
+#include "cvmx-npi-defs.h"
 
 #include <asm/octeon/cvmx-spi.h>
 
-#include <asm/octeon/cvmx-npi-defs.h>
 #include <asm/octeon/cvmx-spxx-defs.h>
 #include <asm/octeon/cvmx-stxx-defs.h>
 
