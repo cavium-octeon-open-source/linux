@@ -579,20 +579,20 @@
 			interrupts = <0 35>;
 		};
 
-		mmc: mmc@1180000002000 {
-			compatible = "cavium,octeon-6130-mmc";
+		mmc: mmc-unit@1180000002000 {
+
+			compatible = "cavium,octeon-6130-mmc-unit";
 			reg = <0x11800 0x00002000 0x0 0x100>,
 			      <0x11800 0x00000168 0x0 0x20>;
 			#address-cells = <1>;
 			#size-cells = <0>;
 			/* EMM irq, DMA irq */
 			interrupts = <1 19>, <0 63>;
-			/* Power on GPIO 8, active high */
-			power-gpios = <&gpio 8 0>;
+			vmmc-global-supply = <&regmmc>;
 
 			/* The board one slot and one soldered-on eMMC device */
-			mmc-slot@0 {
-				compatible = "cavium,octeon-6130-mmc-slot";
+			mmc@0 {
+				compatible = "cavium,octeon-6130-mmc";
 				reg = <0>;
 				voltage-ranges = <3300 3300>;
 				spi-max-frequency = <26000000>;
@@ -601,9 +601,10 @@
 				/* bus width can be 1, 4 or 8 */
 				cavium,bus-max-width = <8>;
 			};
-			mmc-slot@2 {
+
+			mmc@2 {
 				/* Soldered on eMMC device */
-				compatible = "cavium,octeon-6130-mmc-slot";
+				compatible = "cavium,octeon-6130-mmc";
 				reg = <2>;
 				voltage-ranges = <3300 3300>;
 				spi-max-frequency = <26000000>;
@@ -694,6 +695,22 @@
 			};
 		};
 
+	};
+
+	regulators {
+		compatible = "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		regmmc: fixedregulator@0 {
+			compatible = "regulator-fixed";
+			reg = <0>;
+			regulator-name = "vdd_3p3v";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			gpio = <&gpio 8 0>;
+			enable-active-high;
+		};
 	};
 
 	gpio-leds {
