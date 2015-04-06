@@ -161,7 +161,7 @@
 
 		gpio: gpio-controller@1070000000800 {
 			#gpio-cells = <2>;
-			compatible = "cavium,octeon-3860-gpio";
+			compatible = "cavium,octeon-7130-gpio", "cavium,octeon-3860-gpio";
 			reg = <0x10700 0x00000800 0x0 0x100>;
 			gpio-controller;
 			/* Interrupts are specified by two parts:
@@ -178,6 +178,15 @@
 				     <0 20>, <0 21>, <0 22>, <0 23>,
 				     <0 24>, <0 25>, <0 26>, <0 27>,
 				     <0 28>, <0 29>, <0 30>, <0 31>;
+			gpio-ranges = <&gpio 0 0 20>;
+			usb0_vbus_mode: usb0-vbus {
+				function = "USB0_VBUS_CTRL";
+				groups = "grp1";
+			};
+			usb1_vbus_mode: usb1-vbus {
+				function = "USB1_VBUS_CTRL";
+				groups = "grp2";
+			};
 		};
 
 		bootbus: bootbus@1180000000000 {
@@ -469,18 +478,14 @@
 			refclk-type-ss = "dlmc_ref_clk0";
 			/* Either "dlmc_ref_clk0" "dlmc_ref_clk1" or "pll_ref_clk" */
 			refclk-type-hs = "pll_ref_clk";
-			/* Power is specified by three parts:
-			 * 1) GPIO handle (must be &gpio)
-			 * 2) GPIO pin number
-			 * 3) Active high (0) or active low (1)
-			 */
-			power = <&gpio 1 1>;
 
 			xhci@1680000000000 {
 				compatible = "cavium,octeon-7130-xhci","synopsys,dwc3";
 				reg = <0x16800 0x00000000 0x10 0x0>;
 				interrupt-parent = <&cibusb0>;
 				interrupts = <9 4>; /* Bit: 9, level */
+				pinctrl-names = "default";
+				pinctrl-0 = <&usb0_vbus_mode>;
 			};
 		};
 
@@ -496,18 +501,14 @@
 			refclk-type-ss = "dlmc_ref_clk0";
 			/* Either "dlmc_ref_clk0" "dlmc_ref_clk1" or "pll_ref_clk" */
 			refclk-type-hs = "pll_ref_clk";
-			/* Power is specified by three parts:
-			 * 1) GPIO handle (must be &gpio)
-			 * 2) GPIO pin number
-			 * 3) Active high (0) or active low (1)
-			 */
-			power = <&gpio 2 1>;
 
 			xhci@1690000000000 {
 				compatible = "cavium,octeon-7130-xhci","synopsys,dwc3";
 				reg = <0x16900 0x00000000 0x10 0x0>;
 				interrupt-parent = <&cibusb1>;
 				interrupts = <9 4>; /* Bit: 9, level */
+				pinctrl-names = "default";
+				pinctrl-0 = <&usb1_vbus_mode>;
 			};
 		};
 
