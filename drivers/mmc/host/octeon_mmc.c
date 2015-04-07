@@ -82,10 +82,10 @@ struct octeon_mmc_unit {
 	bool need_irq_handler_lock;
 	spinlock_t irq_handler_lock;
 
-	struct octeon_mmc_slot	*slot[OCTEON_MAX_MMC];
+	struct octeon_mmc_host	*host[OCTEON_MAX_MMC];
 };
 
-struct octeon_mmc_slot {
+struct octeon_mmc_host {
 	struct mmc_host         *mmc;	/* mmc core object */
 	struct octeon_mmc_unit	*unit;	/* common hw for all 4 slots */
 
@@ -362,19 +362,19 @@ static struct octeon_mmc_cr_mods octeon_mmc_get_cr_mods(struct mmc_command *cmd)
 	return r;
 }
 
-static bool octeon_mmc_switch_val_changed(struct octeon_mmc_slot *slot,
+static bool octeon_mmc_switch_val_changed(struct octeon_mmc_host *host,
 					  u64 new_val)
 {
 	/* Match BUS_ID, HS_TIMING, BUS_WIDTH, POWER_CLASS, CLK_HI, CLK_LO */
 	u64 m = 0x3001070fffffffffull;
 
-	return (slot->cached_switch & m) != (new_val & m);
+	return (host->cached_switch & m) != (new_val & m);
 }
 
-static unsigned int octeon_mmc_timeout_to_wdog(struct octeon_mmc_slot *slot,
+static unsigned int octeon_mmc_timeout_to_wdog(struct octeon_mmc_host *host,
 					       unsigned int ns)
 {
-	u64 bt = (u64)slot->clock * (u64)ns;
+	u64 bt = (u64)host->clock * (u64)ns;
 
 	return (unsigned int)(bt / 1000000000);
 }
@@ -547,42 +547,42 @@ out:
 	return IRQ_RETVAL(emm_int.u64 != 0);
 }
 
-static void octeon_mmc_switch_to(struct octeon_mmc_slot	*slot)
+static void octeon_mmc_switch_to(struct octeon_mmc_host	*host)
 {
-	struct octeon_mmc_unit	*unit = slot->unit;
-	struct octeon_mmc_slot	*old_slot;
+	struct octeon_mmc_unit	*unit = host->unit;
+	struct octeon_mmc_host	*old_slot;
 	union cvmx_mio_emm_switch sw;
 	union cvmx_mio_emm_sample samp;
 
-	if (slot->bus_id == unit->last_host)
+	if (host->bus_id == unit->last_host)
 		goto out;
 
-	if (unit->last_host >= 0 && unit->slot[unit->last_host]) {
-		old_slot = unit->slot[unit->last_host];
+	if (unit->last_host >= 0 && unit->host[unit->last_host]) {
+		old_slot = unit->host[unit->last_host];
 		old_slot->cached_switch =
 			readq(unit->base + OCT_MIO_EMM_SWITCH);
 		old_slot->cached_rca =
 			readq(unit->base + OCT_MIO_EMM_RCA);
 	}
-	writeq(slot->cached_rca, unit->base + OCT_MIO_EMM_RCA);
-	sw.u64 = slot->cached_switch;
+	writeq(host->cached_rca, unit->base + OCT_MIO_EMM_RCA);
+	sw.u64 = host->cached_switch;
 	sw.s.bus_id = 0;
 	writeq(sw.u64, unit->base + OCT_MIO_EMM_SWITCH);
-	sw.s.bus_id = slot->bus_id;
+	sw.s.bus_id = host->bus_id;
 	writeq(sw.u64, unit->base + OCT_MIO_EMM_SWITCH);
 
 	samp.u64 = 0;
-	samp.s.cmd_cnt = slot->cmd_cnt;
-	samp.s.dat_cnt = slot->dat_cnt;
+	samp.s.cmd_cnt = host->cmd_cnt;
+	samp.s.dat_cnt = host->dat_cnt;
 	writeq(samp.u64, unit->base + OCT_MIO_EMM_SAMPLE);
 out:
-	unit->last_host = slot->bus_id;
+	unit->last_host = host->bus_id;
 }
 
 static void octeon_mmc_dma_request(struct mmc_host *mmc,
 				   struct mmc_request *mrq)
 {
-	struct octeon_mmc_slot	*slot;
+	struct octeon_mmc_host	*host;
 	struct octeon_mmc_unit	*unit;
 	struct mmc_command *cmd;
 	struct mmc_data *data;
@@ -601,18 +601,18 @@ static void octeon_mmc_dma_request(struct mmc_host *mmc,
 		return;
 	}
 
-	slot = mmc_priv(mmc);
-	unit = slot->unit;
+	host = mmc_priv(mmc);
+	unit = host->unit;
 
 	/* Only a single user of the bootbus at a time. */
 	octeon_mmc_acquire_bus(unit);
 
-	octeon_mmc_switch_to(slot);
+	octeon_mmc_switch_to(host);
 
 	data = mrq->data;
 
 	if (data->timeout_ns) {
-		writeq(octeon_mmc_timeout_to_wdog(slot, data->timeout_ns),
+		writeq(octeon_mmc_timeout_to_wdog(host, data->timeout_ns),
 			unit->base + OCT_MIO_EMM_WDOG);
 		octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
 			readq(unit->base + OCT_MIO_EMM_WDOG));
@@ -660,7 +660,7 @@ static void octeon_mmc_dma_request(struct mmc_host *mmc,
 	}
 
 	emm_dma.u64 = 0;
-	emm_dma.s.bus_id = slot->bus_id;
+	emm_dma.s.bus_id = host->bus_id;
 	emm_dma.s.dma_val = 1;
 	emm_dma.s.sector = mmc_card_blockaddr(mmc->card) ? 1 : 0;
 	emm_dma.s.rw = (data->flags & MMC_DATA_WRITE) ? 1 : 0;
@@ -699,7 +699,7 @@ static void octeon_mmc_dma_request(struct mmc_host *mmc,
 
 static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 {
-	struct octeon_mmc_slot	*slot;
+	struct octeon_mmc_host	*host;
 	struct octeon_mmc_unit	*unit;
 	struct mmc_command *cmd;
 	union cvmx_mio_emm_int emm_int;
@@ -716,13 +716,13 @@ static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 
 	mods = octeon_mmc_get_cr_mods(cmd);
 
-	slot = mmc_priv(mmc);
-	unit = slot->unit;
+	host = mmc_priv(mmc);
+	unit = host->unit;
 
 	/* Only a single user of the bootbus at a time. */
 	octeon_mmc_acquire_bus(unit);
 
-	octeon_mmc_switch_to(slot);
+	octeon_mmc_switch_to(host);
 
 	WARN_ON(unit->current_req);
 	unit->current_req = mrq;
@@ -778,14 +778,14 @@ static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 			sg_miter_stop(smi);
 		}
 		if (cmd->data->timeout_ns) {
-			writeq(octeon_mmc_timeout_to_wdog(slot,
+			writeq(octeon_mmc_timeout_to_wdog(host,
 				cmd->data->timeout_ns),
 				unit->base + OCT_MIO_EMM_WDOG);
 			octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
 				       readq(unit->base + OCT_MIO_EMM_WDOG));
 		}
 	} else {
-		writeq(((u64)slot->clock * 850ull) / 1000ull,
+		writeq(((u64)host->clock * 850ull) / 1000ull,
 			unit->base + OCT_MIO_EMM_WDOG);
 		octeon_mmc_dbg("OCT_MIO_EMM_WDOG %llu\n",
 			       readq(unit->base + OCT_MIO_EMM_WDOG));
@@ -802,7 +802,7 @@ static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	if (mmc_cmd_type(cmd) == MMC_CMD_ADTC)
 		emm_cmd.s.offset = 64 -
 			((cmd->data->blksz * cmd->data->blocks) / 8);
-	emm_cmd.s.bus_id = slot->bus_id;
+	emm_cmd.s.bus_id = host->bus_id;
 	emm_cmd.s.cmd_idx = cmd->opcode;
 	emm_cmd.s.arg = cmd->arg;
 	writeq(0, unit->base + OCT_MIO_EMM_STS_MASK);
@@ -810,35 +810,35 @@ static void octeon_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
 	octeon_mmc_dbg("MIO_EMM_CMD: %llx\n", emm_cmd.u64);
 }
 
-static void octeon_mmc_reset_bus(struct octeon_mmc_slot *slot)
+static void octeon_mmc_reset_bus(struct octeon_mmc_host *host)
 {
 	union cvmx_mio_emm_cfg emm_cfg;
 	union cvmx_mio_emm_switch emm_switch;
 	u64 wdog = 0;
 
-	emm_cfg.u64 = readq(slot->unit->base + OCT_MIO_EMM_CFG);
-	emm_switch.u64 = readq(slot->unit->base + OCT_MIO_EMM_SWITCH);
-	wdog = readq(slot->unit->base + OCT_MIO_EMM_WDOG);
+	emm_cfg.u64 = readq(host->unit->base + OCT_MIO_EMM_CFG);
+	emm_switch.u64 = readq(host->unit->base + OCT_MIO_EMM_SWITCH);
+	wdog = readq(host->unit->base + OCT_MIO_EMM_WDOG);
 
 	emm_switch.s.switch_exe = 0;
 	emm_switch.s.switch_err0 = 0;
 	emm_switch.s.switch_err1 = 0;
 	emm_switch.s.switch_err2 = 0;
 	emm_switch.s.bus_id = 0;
-	writeq(emm_switch.u64, slot->unit->base + OCT_MIO_EMM_SWITCH);
-	emm_switch.s.bus_id = slot->bus_id;
-	writeq(emm_switch.u64, slot->unit->base + OCT_MIO_EMM_SWITCH);
+	writeq(emm_switch.u64, host->unit->base + OCT_MIO_EMM_SWITCH);
+	emm_switch.s.bus_id = host->bus_id;
+	writeq(emm_switch.u64, host->unit->base + OCT_MIO_EMM_SWITCH);
 
-	slot->cached_switch = emm_switch.u64;
+	host->cached_switch = emm_switch.u64;
 
 	msleep(20);
 
-	writeq(wdog, slot->unit->base + OCT_MIO_EMM_WDOG);
+	writeq(wdog, host->unit->base + OCT_MIO_EMM_WDOG);
 }
 
 static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 {
-	struct octeon_mmc_slot	*slot;
+	struct octeon_mmc_host	*host;
 	struct octeon_mmc_unit	*unit;
 	int bus_width;
 	int clock;
@@ -850,16 +850,16 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	union cvmx_mio_emm_switch emm_switch;
 	union cvmx_mio_emm_rsp_sts emm_sts;
 
-	slot = mmc_priv(mmc);
-	unit = slot->unit;
+	host = mmc_priv(mmc);
+	unit = host->unit;
 
 	/* Only a single user of the bootbus at a time. */
 	octeon_mmc_acquire_bus(unit);
 
-	octeon_mmc_switch_to(slot);
+	octeon_mmc_switch_to(host);
 
-	octeon_mmc_dbg("Calling set_ios: slot: clk = 0x%x, bus_width = %d\n",
-		       slot->clock, slot->bus_width);
+	octeon_mmc_dbg("Calling set_ios: host: clk = 0x%x, bus_width = %d\n",
+		       host->clock, host->bus_width);
 	octeon_mmc_dbg("Calling set_ios: ios: clk = 0x%x, vdd = %u, bus_width = %u, power_mode = %u, timing = %u\n",
 		       ios->clock, ios->vdd, ios->bus_width, ios->power_mode,
 		       ios->timing);
@@ -870,10 +870,10 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	 * Reset the chip on each power off
 	 */
 	if (ios->power_mode == MMC_POWER_OFF) {
-		octeon_mmc_reset_bus(slot);
-		gpiod_set_value_cansleep(slot->pwr_gpiod, 0);
+		octeon_mmc_reset_bus(host);
+		gpiod_set_value_cansleep(host->pwr_gpiod, 0);
 	} else {
-		gpiod_set_value_cansleep(slot->pwr_gpiod, 1);
+		gpiod_set_value_cansleep(host->pwr_gpiod, 1);
 	}
 
 	switch (ios->bus_width) {
@@ -899,10 +899,10 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		bus_width |= 4;
 
 	if (ios->clock) {
-		slot->clock = ios->clock;
-		slot->bus_width = bus_width;
+		host->clock = ios->clock;
+		host->bus_width = bus_width;
 
-		clock = slot->clock;
+		clock = host->clock;
 
 		if (clock > 52000000)
 			clock = 52000000;
@@ -921,7 +921,7 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		emm_switch.s.clk_hi = clk_period;
 		emm_switch.s.clk_lo = clk_period;
 
-		if (!octeon_mmc_switch_val_changed(slot, emm_switch.u64)) {
+		if (!octeon_mmc_switch_val_changed(host, emm_switch.u64)) {
 			octeon_mmc_dbg("No change from 0x%llx mio_emm_switch, returning.\n",
 				       emm_switch.u64);
 			goto out;
@@ -935,9 +935,9 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 				emm_switch.u64);
 
 		writeq(emm_switch.u64, unit->base + OCT_MIO_EMM_SWITCH);
-		emm_switch.s.bus_id = slot->bus_id;
+		emm_switch.s.bus_id = host->bus_id;
 		writeq(emm_switch.u64, unit->base + OCT_MIO_EMM_SWITCH);
-		slot->cached_switch = emm_switch.u64;
+		host->cached_switch = emm_switch.u64;
 
 		do {
 			emm_sts.u64 =
@@ -959,22 +959,22 @@ out:
 
 static int octeon_mmc_get_ro(struct mmc_host *mmc)
 {
-	struct octeon_mmc_slot	*slot = mmc_priv(mmc);
+	struct octeon_mmc_host	*host = mmc_priv(mmc);
 
-	if (!slot->ro_gpiod)
+	if (!host->ro_gpiod)
 		return -ENOSYS;
 
-	return gpiod_get_value_cansleep(slot->ro_gpiod);
+	return gpiod_get_value_cansleep(host->ro_gpiod);
 }
 
 static int octeon_mmc_get_cd(struct mmc_host *mmc)
 {
-	struct octeon_mmc_slot	*slot = mmc_priv(mmc);
+	struct octeon_mmc_host	*host = mmc_priv(mmc);
 
-	if (!slot->cd_gpiod >= 0)
+	if (!host->cd_gpiod >= 0)
 		return -ENOSYS;
 
-	return gpiod_get_value_cansleep(slot->cd_gpiod);
+	return gpiod_get_value_cansleep(host->cd_gpiod);
 }
 
 static const struct mmc_host_ops octeon_mmc_ops = {
@@ -984,49 +984,49 @@ static const struct mmc_host_ops octeon_mmc_ops = {
 	.get_cd		= octeon_mmc_get_cd,
 };
 
-static void octeon_mmc_set_clock(struct octeon_mmc_slot *slot,
+static void octeon_mmc_set_clock(struct octeon_mmc_host *host,
 				 unsigned int clock)
 {
-	struct mmc_host *mmc = slot->mmc;
+	struct mmc_host *mmc = host->mmc;
 
 	clock = min(clock, mmc->f_max);
 	clock = max(clock, mmc->f_min);
-	slot->clock = clock;
+	host->clock = clock;
 }
 
-static int octeon_mmc_initlowlevel(struct octeon_mmc_slot *slot,
+static int octeon_mmc_initlowlevel(struct octeon_mmc_host *host,
 				   int bus_width)
 {
 	union cvmx_mio_emm_switch emm_switch;
-	struct octeon_mmc_unit *unit = slot->unit;
+	struct octeon_mmc_unit *unit = host->unit;
 
-	unit->emm_cfg |= 1ull << slot->bus_id;
-	writeq(unit->emm_cfg, slot->unit->base + OCT_MIO_EMM_CFG);
-	octeon_mmc_set_clock(slot, 400000);
+	unit->emm_cfg |= 1ull << host->bus_id;
+	writeq(unit->emm_cfg, host->unit->base + OCT_MIO_EMM_CFG);
+	octeon_mmc_set_clock(host, 400000);
 
 	/* Program initial clock speed and power */
 	emm_switch.u64 = 0;
 	emm_switch.s.power_class = 10;
-	emm_switch.s.clk_hi = (slot->sclock / slot->clock) / 2;
-	emm_switch.s.clk_lo = (slot->sclock / slot->clock) / 2;
+	emm_switch.s.clk_hi = (host->sclock / host->clock) / 2;
+	emm_switch.s.clk_lo = (host->sclock / host->clock) / 2;
 
 	writeq(emm_switch.u64, unit->base + OCT_MIO_EMM_SWITCH);
-	emm_switch.s.bus_id = slot->bus_id;
+	emm_switch.s.bus_id = host->bus_id;
 	writeq(emm_switch.u64, unit->base + OCT_MIO_EMM_SWITCH);
-	slot->cached_switch = emm_switch.u64;
+	host->cached_switch = emm_switch.u64;
 
-	writeq(((u64)slot->clock * 850ull) / 1000ull,
+	writeq(((u64)host->clock * 850ull) / 1000ull,
 		unit->base + OCT_MIO_EMM_WDOG);
 	writeq(0xe4f90080ull, unit->base + OCT_MIO_EMM_STS_MASK);
 	writeq(1, unit->base + OCT_MIO_EMM_RCA);
 	return 0;
 }
 
-static int octeon_mmc_slot_probe(struct platform_device *pdev)
+static int octeon_mmc_probe(struct platform_device *pdev)
 {
 	struct mmc_host *mmc;
 	struct octeon_mmc_unit *unit;
-	struct octeon_mmc_slot *slot;
+	struct octeon_mmc_host *host;
 	struct device *dev = &pdev->dev;
 	struct device_node *node = pdev->dev.of_node;
 	struct platform_device *ppdev = to_platform_device(pdev->dev.parent);
@@ -1045,26 +1045,26 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	if (id >= OCTEON_MAX_MMC || unit->slot[id]) {
+	if (id >= OCTEON_MAX_MMC || unit->host[id]) {
 		dev_err(dev, "Invalid reg property on %s\n",
 			of_node_full_name(node));
 		return -EINVAL;
 	}
 
-	mmc = mmc_alloc_host(sizeof(struct octeon_mmc_slot), dev);
+	mmc = mmc_alloc_host(sizeof(struct octeon_mmc_host), dev);
 	if (!mmc) {
 		dev_err(dev, "alloc unit failed\n");
 		return -ENOMEM;
 	}
 
-	slot = mmc_priv(mmc);
-	slot->mmc = mmc;
-	slot->unit = unit;
+	host = mmc_priv(mmc);
+	host->mmc = mmc;
+	host->unit = unit;
 
 	ret = of_property_read_u32(node, "cavium,bus-max-width", &bus_width);
 	if (ret) {
 		bus_width = 8;
-		dev_info(dev, "Bus width not found for slot %u, defaulting to %u\n",
+		dev_info(dev, "Bus width not found for host %u, defaulting to %u\n",
 			id, bus_width);
 	} else {
 		switch (bus_width) {
@@ -1073,7 +1073,7 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 		case 8:
 			break;
 		default:
-			dev_err(dev, "Invalid bus width for slot %u\n", id);
+			dev_err(dev, "Invalid bus width for host %u\n", id);
 			ret = -EINVAL;
 			goto err;
 		}
@@ -1090,28 +1090,28 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 	ret = of_property_read_u32(node, "spi-max-frequency", &max_freq);
 	if (ret) {
 		max_freq = 52000000;
-		dev_info(dev, "No spi-max-frequency for slot %u, defaulting to %u\n",
+		dev_info(dev, "No spi-max-frequency for host %u, defaulting to %u\n",
 			id, max_freq);
 	}
 
-	slot->ro_gpiod  = devm_gpiod_get_optional(dev, "wp", GPIOD_IN);
-	if (IS_ERR(slot->ro_gpiod)) {
+	host->ro_gpiod  = devm_gpiod_get_optional(dev, "wp", GPIOD_IN);
+	if (IS_ERR(host->ro_gpiod)) {
 		dev_err(dev, "Invalid WP GPIO\n");
-		ret = PTR_ERR(slot->ro_gpiod);
+		ret = PTR_ERR(host->ro_gpiod);
 		goto err;
 	}
 
-	slot->cd_gpiod  = devm_gpiod_get_optional(dev, "cd", GPIOD_IN);
-	if (IS_ERR(slot->cd_gpiod)) {
+	host->cd_gpiod  = devm_gpiod_get_optional(dev, "cd", GPIOD_IN);
+	if (IS_ERR(host->cd_gpiod)) {
 		dev_err(dev, "Invalid CD GPIO\n");
-		ret = PTR_ERR(slot->cd_gpiod);
+		ret = PTR_ERR(host->cd_gpiod);
 		goto err;
 	}
 
-	slot->pwr_gpiod = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
-	if (IS_ERR(slot->pwr_gpiod)) {
+	host->pwr_gpiod = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
+	if (IS_ERR(host->pwr_gpiod)) {
 		dev_err(dev, "Invalid POWER GPIO\n");
-		ret = PTR_ERR(slot->pwr_gpiod);
+		ret = PTR_ERR(host->pwr_gpiod);
 		goto err;
 	}
 
@@ -1135,7 +1135,7 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 		((mmc->f_max >= 50000000) * MMC_CAP_UHS_SDR50) |
 		MMC_CAP_CMD23;
 
-	if (slot->pwr_gpiod)
+	if (host->pwr_gpiod)
 		mmc->caps |= MMC_CAP_POWER_OFF_CARD;
 
 	/* "1.8v" capability is actually 1.8-or-3.3v */
@@ -1148,26 +1148,26 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 	mmc->max_blk_size = 512;
 	mmc->max_blk_count = mmc->max_req_size / 512;
 
-	slot->clock = mmc->f_min;
-	slot->sclock = octeon_get_io_clock_rate();
+	host->clock = mmc->f_min;
+	host->sclock = octeon_get_io_clock_rate();
 
-	clock_period = 1000000000000ull / slot->sclock; /* period in pS */
-	slot->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
-	slot->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
+	clock_period = 1000000000000ull / host->sclock; /* period in pS */
+	host->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
+	host->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
 
-	slot->bus_width = bus_width;
-	slot->bus_id = id;
-	slot->cached_rca = 1;
+	host->bus_width = bus_width;
+	host->bus_id = id;
+	host->cached_rca = 1;
 
-	platform_set_drvdata(pdev, slot);
+	platform_set_drvdata(pdev, host);
 
 	/* Only a single user of the bootbus at a time. */
 	octeon_mmc_acquire_bus(unit);
-	unit->slot[id] = slot;
+	unit->host[id] = host;
 
-	octeon_mmc_switch_to(slot);
+	octeon_mmc_switch_to(host);
 	/* Initialize MMC Block. */
-	octeon_mmc_initlowlevel(slot, bus_width);
+	octeon_mmc_initlowlevel(host, bus_width);
 
 	octeon_mmc_release_bus(unit);
 
@@ -1180,45 +1180,45 @@ static int octeon_mmc_slot_probe(struct platform_device *pdev)
 	return 0;
 
 err:
-	slot->unit->slot[id] = NULL;
+	host->unit->host[id] = NULL;
 
-	gpiod_set_value_cansleep(slot->pwr_gpiod, 0);
+	gpiod_set_value_cansleep(host->pwr_gpiod, 0);
 
-	mmc_free_host(slot->mmc);
+	mmc_free_host(host->mmc);
 	return ret;
 }
 
-static int octeon_mmc_slot_remove(struct platform_device *pdev)
+static int octeon_mmc_remove(struct platform_device *pdev)
 {
-	struct octeon_mmc_slot *slot = platform_get_drvdata(pdev);
+	struct octeon_mmc_host *host = platform_get_drvdata(pdev);
 
-	mmc_remove_host(slot->mmc);
+	mmc_remove_host(host->mmc);
 
-	slot->unit->slot[slot->bus_id] = NULL;
+	host->unit->host[host->bus_id] = NULL;
 
-	gpiod_set_value_cansleep(slot->pwr_gpiod, 0);
+	gpiod_set_value_cansleep(host->pwr_gpiod, 0);
 
-	mmc_free_host(slot->mmc);
+	mmc_free_host(host->mmc);
 
 	return 0;
 }
 
-static const struct of_device_id octeon_mmc_slot_match[] = {
+static const struct of_device_id octeon_mmc_match[] = {
 	{ .compatible = "cavium,octeon-6130-mmc", },
 	{},
 };
-MODULE_DEVICE_TABLE(of, octeon_mmc_slot_match);
+MODULE_DEVICE_TABLE(of, octeon_mmc_match);
 
-static struct platform_driver octeon_mmc_slot_driver = {
-	.probe		= octeon_mmc_slot_probe,
-	.remove		= octeon_mmc_slot_remove,
+static struct platform_driver octeon_mmc_driver = {
+	.probe		= octeon_mmc_probe,
+	.remove		= octeon_mmc_remove,
 	.driver		= {
-		.name	= "octeon_mmc_slot",
-		.of_match_table = octeon_mmc_slot_match,
+		.name	= "octeon_mmc",
+		.of_match_table = octeon_mmc_match,
 	},
 };
 
-static int octeon_mmc_probe(struct platform_device *pdev)
+static int octeon_mmc_unit_probe(struct platform_device *pdev)
 {
 	struct octeon_mmc_unit *unit;
 	struct resource	*res;
@@ -1351,7 +1351,7 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int octeon_mmc_remove(struct platform_device *pdev)
+static int octeon_mmc_unit_remove(struct platform_device *pdev)
 {
 	union cvmx_mio_ndf_dma_cfg ndf_dma_cfg;
 	struct octeon_mmc_unit *unit = platform_get_drvdata(pdev);
@@ -1366,7 +1366,7 @@ static int octeon_mmc_remove(struct platform_device *pdev)
 	return 0;
 }
 
-static const struct of_device_id octeon_mmc_match[] = {
+static const struct of_device_id octeon_mmc_unit_match[] = {
 	{
 		.compatible = "cavium,octeon-6130-mmc-unit",
 	},
@@ -1375,14 +1375,14 @@ static const struct of_device_id octeon_mmc_match[] = {
 	},
 	{},
 };
-MODULE_DEVICE_TABLE(of, octeon_mmc_match);
+MODULE_DEVICE_TABLE(of, octeon_mmc_unit_match);
 
-static struct platform_driver octeon_mmc_driver = {
-	.probe		= octeon_mmc_probe,
-	.remove		= octeon_mmc_remove,
+static struct platform_driver octeon_mmc_unit_driver = {
+	.probe		= octeon_mmc_unit_probe,
+	.remove		= octeon_mmc_unit_remove,
 	.driver		= {
 		.name	= DRV_NAME,
-		.of_match_table = octeon_mmc_match,
+		.of_match_table = octeon_mmc_unit_match,
 	},
 };
 
@@ -1390,13 +1390,13 @@ static int __init octeon_mmc_init(void)
 {
 	int ret;
 
-	ret = platform_driver_register(&octeon_mmc_driver);
+	ret = platform_driver_register(&octeon_mmc_unit_driver);
 	if (ret)
 		return ret;
 
-	ret = platform_driver_register(&octeon_mmc_slot_driver);
+	ret = platform_driver_register(&octeon_mmc_driver);
 	if (ret) {
-		platform_driver_unregister(&octeon_mmc_driver);
+		platform_driver_unregister(&octeon_mmc_unit_driver);
 		return ret;
 	}
 
@@ -1405,8 +1405,8 @@ static int __init octeon_mmc_init(void)
 
 static void __exit octeon_mmc_cleanup(void)
 {
-	platform_driver_unregister(&octeon_mmc_slot_driver);
 	platform_driver_unregister(&octeon_mmc_driver);
+	platform_driver_unregister(&octeon_mmc_unit_driver);
 }
 
 module_init(octeon_mmc_init);
