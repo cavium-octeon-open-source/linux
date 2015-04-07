@@ -258,7 +258,6 @@
 			reg = <0x11800 0x00001800 0x0 0x40>;
 
 			phy0: ethernet-phy@0 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <0>;
 				interrupt-parent = <&gpio>;
@@ -266,21 +265,18 @@
 				coma = <&gpio2 5 0>;	/* pin 5, not inverted */
 			};
 			phy1: ethernet-phy@1 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <1>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
 			phy2: ethernet-phy@2 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <2>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
 			phy3: ethernet-phy@3 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <3>;
 				interrupt-parent = <&gpio>;
@@ -310,7 +306,6 @@
 			#size-cells = <0>;
 			reg = <0x11800 0x00001900 0x0 0x40>;
 			phy8: ethernet-phy@8 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <4>;
 				interrupt-parent = <&gpio>;
@@ -318,28 +313,24 @@
 				coma = <&gpio2 6 0>;	/* pin 6, not inverted */
 			};
 			phy9: ethernet-phy@9 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <5>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
 			phy10: ethernet-phy@10 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <6>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
 			phy11: ethernet-phy@11 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <7>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
 			phy16: ethernet-phy@16 {
-				cavium,qlm-trim = "0,xaui";
 				compatible = "marvell,88x3140", "ethernet-phy-ieee802.3-c45";
 				reg = <0x10>;
 				interrupt-parent = <&gpio>;
@@ -354,7 +345,6 @@
 			reg = <0x11800 0xa0000000 0x0 0x2000>;
 
 			interface@Q1 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "cavium,octeon-3860-pip-interface";
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -386,7 +376,6 @@
 				};
 			};
 			interface@Q2 {
-				cavium,qlm-trim = "0,qsgmii";
 				compatible = "cavium,octeon-3860-pip-interface";
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -420,7 +409,6 @@
 			};
 
 			interface@X {
-				cavium,qlm-trim = "0,xaui";
 				compatible = "cavium,octeon-3860-pip-interface";
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -461,8 +449,6 @@
 				reg = <0x16c00 0x00000000 0x0 0x200>;
 				interrupt-parent = <&cibsata>;
 				interrupts = <2 4>; /* Bit: 2, level */
-				cavium,qlm-trim = "2,sata";
-				cavium,qlm-trim-alias = "sata";
 			};
 		};
 
@@ -631,7 +617,6 @@
 				pagesize = <256>;
 				size = <0x1000000>;
 				address-width = <24>;
-				cavium,pcm-trim = "0,not-pcm";
 			};
 		};
 
