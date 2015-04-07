@@ -257,32 +257,32 @@
 			#size-cells = <0>;
 			reg = <0x11800 0x00001800 0x0 0x40>;
 
-			phy0: ethernet-phy@0 {
+			phy0_0: ethernet-phy@0 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <0>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 				coma = <&gpio2 5 0>;	/* pin 5, not inverted */
 			};
-			phy1: ethernet-phy@1 {
+			phy0_1: ethernet-phy@1 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <1>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy2: ethernet-phy@2 {
+			phy0_2: ethernet-phy@2 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <2>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy3: ethernet-phy@3 {
+			phy0_3: ethernet-phy@3 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <3>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy4: ethernet-phy@4 {
+			phy0_4: ethernet-phy@4 {
 				compatible = "marvell,88e1118";
 				reg = <4>;
 				marvell,reg-init =
@@ -305,32 +305,33 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <0x11800 0x00001900 0x0 0x40>;
-			phy8: ethernet-phy@8 {
+			phy1_4: ethernet-phy@4 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <4>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 				coma = <&gpio2 6 0>;	/* pin 6, not inverted */
 			};
-			phy9: ethernet-phy@9 {
+			phy1_5: ethernet-phy@5 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <5>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy10: ethernet-phy@10 {
+			phy1_6: ethernet-phy@6 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <6>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy11: ethernet-phy@11 {
+			phy1_7: ethernet-phy@7 {
 				compatible = "vitesse,vsc8574", "ethernet-phy-ieee802.3-c22";
 				reg = <7>;
 				interrupt-parent = <&gpio>;
 				interrupts = <6 8>;	/* pin 6, active low */
 			};
-			phy16: ethernet-phy@16 {
+			phy1_10: ethernet-phy@10 {
+				status = "disabled";
 				compatible = "marvell,88x3140", "ethernet-phy-ieee802.3-c45";
 				reg = <0x10>;
 				interrupt-parent = <&gpio>;
@@ -344,7 +345,7 @@
 			#size-cells = <0>;
 			reg = <0x11800 0xa0000000 0x0 0x2000>;
 
-			interface@Q1 {
+			interface@0 {
 				compatible = "cavium,octeon-3860-pip-interface";
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -354,28 +355,29 @@
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x0>; /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy0>;
+					phy-handle = <&phy0_0>;
 				};
 				ethernet@1 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x1>; /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy1>;
+					phy-handle = <&phy0_1>;
 				};
 				ethernet@2 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x2>;
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy2>;
+					phy-handle = <&phy0_2>;
 				};
 				ethernet@3 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x3>;
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy3>;
+					phy-handle = <&phy0_3>;
 				};
 			};
-			interface@Q2 {
+
+			interface@1 {
 				compatible = "cavium,octeon-3860-pip-interface";
 				#address-cells = <1>;
 				#size-cells = <0>;
@@ -386,30 +388,31 @@
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x0>;  /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy8>;
+					phy-handle = <&phy1_4>;
 				};
 				ethernet@1 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x1>;  /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy9>;
+					phy-handle = <&phy1_5>;
 				};
 				ethernet@2 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x2>;
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy10>;
+					phy-handle = <&phy1_6>;
 				};
 				ethernet@3 {
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x3>;
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy11>;
+					phy-handle = <&phy1_7>;
 				};
 			};
 
 			interface@X {
 				compatible = "cavium,octeon-3860-pip-interface";
+				status = "disabled";
 				#address-cells = <1>;
 				#size-cells = <0>;
 				reg = <0>; /* interface */
@@ -418,7 +421,7 @@
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0x0>; /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy16>;
+					phy-handle = <&phy1_10>;
 				};
 			};
 
@@ -432,10 +435,10 @@
 					compatible = "cavium,octeon-3860-pip-port";
 					reg = <0>; /* Port */
 					local-mac-address = [ 00 00 00 00 00 00 ];
-					phy-handle = <&phy4>;
+					phy-handle = <&phy0_4>;
 				};
 			};
-                };
+		};
 
 		uctl@118006c000000 {
 			compatible = "cavium,octeon-7130-sata-uctl";
