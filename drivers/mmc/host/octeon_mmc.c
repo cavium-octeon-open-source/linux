@@ -34,7 +34,7 @@
 #include <asm/octeon/octeon.h>
 #include <asm/octeon/cvmx-mio-defs.h>
 
-#define DRV_NAME	"octeon_mmc"
+#define DRV_NAME	"octeon_mmc_unit"
 
 #define OCTEON_MAX_MMC			4
 
@@ -1335,7 +1335,7 @@ static int octeon_mmc_unit_probe(struct platform_device *pdev)
 	} else if (unit->global_power) {
 		ret = regulator_enable(unit->global_power);
 		if (ret) {
-			dev_err(&unit->pdev->dev, "Invalid global power supply\n");
+			dev_err(&unit->pdev->dev, "Error enabling global power supply\n");
 			return ret;
 		}
 	}
