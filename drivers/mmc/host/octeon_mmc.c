@@ -26,8 +26,8 @@
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
 #include <linux/mmc/sd.h>
+#include <linux/mmc/slot-gpio.h>
 
-#include <linux/gpio/consumer.h>
 #include <linux/regulator/consumer.h>
 
 #include <asm/byteorder.h>
@@ -60,33 +60,36 @@
 #define CVMX_MIO_BOOT_CTL CVMX_ADD_IO_SEG(0x00011800000000D0ull)
 
 struct octeon_mmc_unit {
-	void __iomem *base;
-	void __iomem *ndf_base;
-	u64	emm_cfg;
-	u64	n_minus_one;  /* OCTEON II workaround location */
-	int	last_host;
+	void __iomem		*base;
+	void __iomem		*ndf_base;
+	u64			emm_cfg;
 
-	struct semaphore mmc_serializer;
+	/* OCTEON II workaround location */
+	u64			n_minus_one;
+
+	int			last_host;
+
+	struct semaphore	mmc_serializer;
 	struct mmc_request	*current_req;
 	unsigned int		linear_buf_size;
 	void			*linear_buf;
-	struct sg_mapping_iter smi;
-	int sg_idx;
-	bool dma_active;
+	struct sg_mapping_iter	smi;
+	int			sg_idx;
+	bool			dma_active;
 
 	struct platform_device	*pdev;
-	struct regulator *global_power;
-	bool dma_err_pending;
-	bool need_bootbus_lock;
-	bool big_dma_addr;
-	bool need_irq_handler_lock;
-	spinlock_t irq_handler_lock;
+	struct regulator	*global_power;
+	bool			dma_err_pending;
+	bool			need_bootbus_lock;
+	bool			big_dma_addr;
+	bool			need_irq_handler_lock;
+	spinlock_t		irq_handler_lock;
 
 	struct octeon_mmc_host	*host[OCTEON_MAX_MMC];
 };
 
 struct octeon_mmc_host {
-	struct mmc_host         *mmc;	/* mmc core object */
+	struct mmc_host		*mmc;	/* mmc core object */
 	struct octeon_mmc_unit	*unit;	/* common hw for all 4 slots */
 
 	unsigned int		clock;
@@ -98,12 +101,7 @@ struct octeon_mmc_host {
 	unsigned int		cmd_cnt; /* sample delay */
 	unsigned int		dat_cnt; /* sample delay */
 
-	int			bus_width;
 	int			bus_id;
-
-	struct gpio_desc	*ro_gpiod;
-	struct gpio_desc	*cd_gpiod;
-	struct gpio_desc	*pwr_gpiod;
 };
 
 static int bb_size = 1 << 18;
@@ -858,8 +856,7 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	octeon_mmc_switch_to(host);
 
-	octeon_mmc_dbg("Calling set_ios: host: clk = 0x%x, bus_width = %d\n",
-		       host->clock, host->bus_width);
+	octeon_mmc_dbg("Calling set_ios: host: clk = 0x%x\n", host->clock);
 	octeon_mmc_dbg("Calling set_ios: ios: clk = 0x%x, vdd = %u, bus_width = %u, power_mode = %u, timing = %u\n",
 		       ios->clock, ios->vdd, ios->bus_width, ios->power_mode,
 		       ios->timing);
@@ -869,11 +866,26 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	/*
 	 * Reset the chip on each power off
 	 */
-	if (ios->power_mode == MMC_POWER_OFF) {
+	switch (ios->power_mode) {
+	case MMC_POWER_UP:
+		if (!IS_ERR(mmc->supply.vmmc)) {
+			int ret = mmc_regulator_set_ocr(mmc, mmc->supply.vmmc,
+					ios->vdd);
+			if (ret) {
+				dev_err(&unit->pdev->dev,
+					"failed to enable vmmc regulator\n");
+				/*return, if failed turn on vmmc*/
+				return;
+			}
+		}
+		break;
+	case MMC_POWER_OFF:
 		octeon_mmc_reset_bus(host);
-		gpiod_set_value_cansleep(host->pwr_gpiod, 0);
-	} else {
-		gpiod_set_value_cansleep(host->pwr_gpiod, 1);
+		if (!IS_ERR(mmc->supply.vmmc))
+			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+		break;
+	default:
+		break;
 	}
 
 	switch (ios->bus_width) {
@@ -900,7 +912,6 @@ static void octeon_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 
 	if (ios->clock) {
 		host->clock = ios->clock;
-		host->bus_width = bus_width;
 
 		clock = host->clock;
 
@@ -957,31 +968,11 @@ out:
 	octeon_mmc_release_bus(unit);
 }
 
-static int octeon_mmc_get_ro(struct mmc_host *mmc)
-{
-	struct octeon_mmc_host	*host = mmc_priv(mmc);
-
-	if (!host->ro_gpiod)
-		return -ENOSYS;
-
-	return gpiod_get_value_cansleep(host->ro_gpiod);
-}
-
-static int octeon_mmc_get_cd(struct mmc_host *mmc)
-{
-	struct octeon_mmc_host	*host = mmc_priv(mmc);
-
-	if (!host->cd_gpiod >= 0)
-		return -ENOSYS;
-
-	return gpiod_get_value_cansleep(host->cd_gpiod);
-}
-
 static const struct mmc_host_ops octeon_mmc_ops = {
 	.request        = octeon_mmc_request,
 	.set_ios        = octeon_mmc_set_ios,
-	.get_ro		= octeon_mmc_get_ro,
-	.get_cd		= octeon_mmc_get_cd,
+	.get_ro		= mmc_gpio_get_ro,
+	.get_cd		= mmc_gpio_get_cd,
 };
 
 static void octeon_mmc_set_clock(struct octeon_mmc_host *host,
@@ -994,8 +985,7 @@ static void octeon_mmc_set_clock(struct octeon_mmc_host *host,
 	host->clock = clock;
 }
 
-static int octeon_mmc_initlowlevel(struct octeon_mmc_host *host,
-				   int bus_width)
+static int octeon_mmc_initlowlevel(struct octeon_mmc_host *host)
 {
 	union cvmx_mio_emm_switch emm_switch;
 	struct octeon_mmc_unit *unit = host->unit;
@@ -1030,7 +1020,7 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	struct device *dev = &pdev->dev;
 	struct device_node *node = pdev->dev.of_node;
 	struct platform_device *ppdev = to_platform_device(pdev->dev.parent);
-	u32 id, bus_width, max_freq, cmd_skew, dat_skew;
+	u32 id, cmd_skew, dat_skew;
 	u64 clock_period;
 	int ret;
 
@@ -1053,31 +1043,13 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 
 	mmc = mmc_alloc_host(sizeof(struct octeon_mmc_host), dev);
 	if (!mmc) {
-		dev_err(dev, "alloc unit failed\n");
+		dev_err(dev, "Host allocation failed\n");
 		return -ENOMEM;
 	}
 
 	host = mmc_priv(mmc);
 	host->mmc = mmc;
 	host->unit = unit;
-
-	ret = of_property_read_u32(node, "cavium,bus-max-width", &bus_width);
-	if (ret) {
-		bus_width = 8;
-		dev_info(dev, "Bus width not found for host %u, defaulting to %u\n",
-			id, bus_width);
-	} else {
-		switch (bus_width) {
-		case 1:
-		case 4:
-		case 8:
-			break;
-		default:
-			dev_err(dev, "Invalid bus width for host %u\n", id);
-			ret = -EINVAL;
-			goto err;
-		}
-	}
 
 	ret = of_property_read_u32(node, "cavium,cmd-clk-skew", &cmd_skew);
 	if (ret)
@@ -1087,60 +1059,34 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	if (ret)
 		dat_skew = 0;
 
-	ret = of_property_read_u32(node, "spi-max-frequency", &max_freq);
-	if (ret) {
-		max_freq = 52000000;
-		dev_info(dev, "No spi-max-frequency for host %u, defaulting to %u\n",
-			id, max_freq);
-	}
-
-	host->ro_gpiod  = devm_gpiod_get_optional(dev, "wp", GPIOD_IN);
-	if (IS_ERR(host->ro_gpiod)) {
-		dev_err(dev, "Invalid WP GPIO\n");
-		ret = PTR_ERR(host->ro_gpiod);
+	ret = mmc_regulator_get_supply(mmc);
+	if (ret)
 		goto err;
-	}
 
-	host->cd_gpiod  = devm_gpiod_get_optional(dev, "cd", GPIOD_IN);
-	if (IS_ERR(host->cd_gpiod)) {
-		dev_err(dev, "Invalid CD GPIO\n");
-		ret = PTR_ERR(host->cd_gpiod);
-		goto err;
-	}
+	if (!mmc->ocr_avail)
+		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 
-	host->pwr_gpiod = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
-	if (IS_ERR(host->pwr_gpiod)) {
-		dev_err(dev, "Invalid POWER GPIO\n");
-		ret = PTR_ERR(host->pwr_gpiod);
-		goto err;
-	}
-
-	/*
-	 * Set up host parameters.
-	 */
-	mmc->ops = &octeon_mmc_ops;
 	mmc->f_min = 400000;
-	mmc->f_max = max_freq;
-	mmc->caps = MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-		    MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA |
-		    MMC_CAP_ERASE;
-	mmc->ocr_avail = MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 |
-			 MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 |
-			 MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36;
+	mmc->f_max = 52000000;
 
-	/* post-sdk23 caps */
+	mmc->ops = &octeon_mmc_ops;
+
+	mmc->caps = MMC_CAP_ERASE | MMC_CAP_CMD23;
 	mmc->caps |=
+		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
 		((mmc->f_max >= 12000000) * MMC_CAP_UHS_SDR12) |
 		((mmc->f_max >= 25000000) * MMC_CAP_UHS_SDR25) |
-		((mmc->f_max >= 50000000) * MMC_CAP_UHS_SDR50) |
-		MMC_CAP_CMD23;
-
-	if (host->pwr_gpiod)
-		mmc->caps |= MMC_CAP_POWER_OFF_CARD;
+		((mmc->f_max >= 50000000) * MMC_CAP_UHS_SDR50);
 
 	/* "1.8v" capability is actually 1.8-or-3.3v */
 	if (ddr)
 		mmc->caps |= MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR;
+
+	ret = mmc_of_parse(mmc);
+	if (ret) {
+		dev_err(dev, "Error parsing device tree\n");
+		goto err;
+	}
 
 	mmc->max_segs = 64;
 	mmc->max_seg_size = unit->linear_buf_size;
@@ -1155,7 +1101,6 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 	host->cmd_cnt = (cmd_skew + clock_period / 2) / clock_period;
 	host->dat_cnt = (dat_skew + clock_period / 2) / clock_period;
 
-	host->bus_width = bus_width;
 	host->bus_id = id;
 	host->cached_rca = 1;
 
@@ -1167,7 +1112,7 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 
 	octeon_mmc_switch_to(host);
 	/* Initialize MMC Block. */
-	octeon_mmc_initlowlevel(host, bus_width);
+	octeon_mmc_initlowlevel(host);
 
 	octeon_mmc_release_bus(unit);
 
@@ -1182,8 +1127,6 @@ static int octeon_mmc_probe(struct platform_device *pdev)
 err:
 	host->unit->host[id] = NULL;
 
-	gpiod_set_value_cansleep(host->pwr_gpiod, 0);
-
 	mmc_free_host(host->mmc);
 	return ret;
 }
@@ -1195,8 +1138,6 @@ static int octeon_mmc_remove(struct platform_device *pdev)
 	mmc_remove_host(host->mmc);
 
 	host->unit->host[host->bus_id] = NULL;
-
-	gpiod_set_value_cansleep(host->pwr_gpiod, 0);
 
 	mmc_free_host(host->mmc);
 
@@ -1326,13 +1267,10 @@ static int octeon_mmc_unit_probe(struct platform_device *pdev)
 	}
 
 	unit->global_power = devm_regulator_get_optional(&pdev->dev,
-							 "vmmc-global");
+							 "cavium,vmmc-global");
 	if (PTR_ERR(unit->global_power) == -EPROBE_DEFER) {
 		return -EPROBE_DEFER;
-	} else if (IS_ERR(unit->global_power)) {
-		dev_err(&unit->pdev->dev, "Invalid global power supply\n");
-		return PTR_ERR(unit->global_power);
-	} else if (unit->global_power) {
+	} else if (!IS_ERR(unit->global_power)) {
 		ret = regulator_enable(unit->global_power);
 		if (ret) {
 			dev_err(&unit->pdev->dev, "Error enabling global power supply\n");

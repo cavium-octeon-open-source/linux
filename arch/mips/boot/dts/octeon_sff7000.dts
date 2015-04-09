@@ -577,30 +577,25 @@
 			#size-cells = <0>;
 			/* EMM irq, DMA irq */
 			interrupts = <1 19>, <0 63>;
-			vmmc-global-supply = <&regmmc>;
+			cavium,vmmc-global-supply = <&regmmc>;
 
 			/* The board one slot and one soldered-on eMMC device */
 			mmc@0 {
 				compatible = "cavium,octeon-6130-mmc";
 				reg = <0>;
-				voltage-ranges = <3300 3300>;
-				spi-max-frequency = <26000000>;
+				max-frequency = <26000000>;
 				wp-gpios = <&gpio 4 0>;
 				cd-gpios = <&gpio 3 1>;
-				/* bus width can be 1, 4 or 8 */
-				cavium,bus-max-width = <8>;
+				bus-width = <8>;
 			};
 
 			mmc@2 {
 				/* Soldered on eMMC device */
 				compatible = "cavium,octeon-6130-mmc";
 				reg = <2>;
-				voltage-ranges = <3300 3300>;
-				spi-max-frequency = <26000000>;
+				max-frequency = <26000000>;
 				non-removable;
 				bus-width = <8>;
-				/* bus width can be 1, 4 or 8 */
-				cavium,bus-max-width = <8>;
 			};
 		};
 
