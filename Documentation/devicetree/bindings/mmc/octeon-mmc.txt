@@ -2,12 +2,13 @@
 
 This controller is present on some members of the Cavium OCTEON SoC
 family, provide an interface for eMMC, MMC and SD devices.  There is a
-single controller that may have several "slots" connected.  These
-slots appear as children of the main controller node.
+single controller ("unit") that may have several hosts connected.  These
+hosts appear as children of the main controller node.
 The DMA engine is an integral part of the controller block.
 
 Required properties:
-- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
+- compatible :
+	Should be "cavium,octeon-6130-mmc-unit" or "cavium,octeon-7890-mmc-unit"
 - reg : Two entries:
 	1) The base address of the MMC controller register bank.
 	2) The base address of the MMC DMA engine register bank.
@@ -28,42 +29,41 @@ Required properties:
 - #address-cells : Must be <1>
 - #size-cells : Must be <0>
 
+Optional properties:
+- cavium,vmmc-global-supply : phandle to the regulator device tree node
+	that supplies power to all hosts
+
+
 Required properties of child nodes:
-- compatible : Should be "cavium,octeon-6130-mmc-slot".
+- compatible : Should be "cavium,octeon-6130-mmc".
 - reg : The slot number.
 
 Optional properties of child nodes:
-- cd-gpios : Specify GPIOs for card detection
-- wp-gpios : Specify GPIOs for write protection
-- power-gpios : Specify GPIOs for power control
-- cavium,bus-max-width : The number of data lines present in the slot.
-	Default is 8.
-- spi-max-frequency : The maximum operating frequency of the slot.
-	Default is 52000000.
 - cavium,cmd-clk-skew : the amount of delay (in pS) past the clock edge
 	to sample the command pin.
 - cavium,dat-clk-skew : the amount of delay (in pS) past the clock edge
 	to sample the data pin.
+- vmmc-supply: phandle to the regulator device tree node
+- other mmc properties as described in mmc.txt
 
 Example:
 	mmc@1180000002000 {
-		compatible = "cavium,octeon-6130-mmc";
+		compatible = "cavium,octeon-6130-mmc-unit";
 		reg = <0x11800 0x00002000 0x0 0x100>,
 		      <0x11800 0x00000168 0x0 0x20>;
 		#address-cells = <1>;
 		#size-cells = <0>;
 		/* EMM irq, DMA irq */
 		interrupts = <1 19>, <0 63>;
+		cavium,vmmc-global-supply = <&regmmc>;
 
 		/* The board only has a single MMC slot */
 		mmc-slot@0 {
-			compatible = "cavium,octeon-6130-mmc-slot";
+			compatible = "cavium,octeon-6130-mmc";
 			reg = <0>;
-			spi-max-frequency = <20000000>;
-			/* bus width can be 1, 4 or 8 */
-			cavium,bus-max-width = <8>;
-			cd-gpios = <&gpio 9 0>;
-			wp-gpios = <&gpio 10 0>;
-			power-gpios = <&gpio 8 0>;
+			max-frequency = <26000000>;
+			wp-gpios = <&gpio 4 0>;
+			cd-gpios = <&gpio 3 1>;
+			bus-width = <8>;
 		};
 	};
