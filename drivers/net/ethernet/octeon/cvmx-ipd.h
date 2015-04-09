@@ -152,17 +152,6 @@ static inline uint64_t cvmx_fpa_get_wqe_pool_buffer_count(void)
 }
 
 /**
- * Sets the ipd related configuration in internal structure which is then used
- * for seting IPD hardware block
- */
-int cvmx_ipd_set_config(cvmx_ipd_config_t ipd_config);
-
-/**
- * Gets the ipd related configuration from internal structure.
- */
-void cvmx_ipd_get_config(cvmx_ipd_config_t * ipd_config);
-
-/**
  * Sets the internal FPA pool data structure for packet buffer pool.
  * @pool:	fpa pool number yo use
  * @buffer_size:	buffer size of pool
@@ -215,24 +204,6 @@ void cvmx_ipd_enable(void);
 void cvmx_ipd_disable(void);
 
 void __cvmx_ipd_free_ptr(void);
-
-void cvmx_ipd_set_packet_pool_buffer_count(uint64_t buffer_count);
-void cvmx_ipd_set_wqe_pool_buffer_count(uint64_t buffer_count);
-
-/**
- * Setup Random Early Drop on a specific input queue
- *
- * @queue:  Input queue to setup RED on (0-7)
- * @pass_thresh:
- *               Packets will begin slowly dropping when there are less than
- *               this many packet buffers free in FPA 0.
- * @drop_thresh:
- *               All incomming packets will be dropped when there are less
- *               than this many free packet buffers in FPA 0.
- * Returns Zero on success. Negative on failure
- */
-extern int cvmx_ipd_setup_red_queue(int queue, int pass_thresh,
-				    int drop_thresh);
 
 /**
  * Setup Random Early Drop to automatically begin dropping packets.

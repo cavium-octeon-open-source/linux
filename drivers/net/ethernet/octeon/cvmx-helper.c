@@ -1706,7 +1706,7 @@ EXPORT_SYMBOL(cvmx_helper_ipd_and_packet_input_enable_node);
  *
  * Returns Zero on success, non-zero on failure
  */
-int cvmx_helper_initialize_packet_io_node(unsigned int node)
+int cvmx_helper_initialize_packet_io_global(void)
 {
 	int result = 0;
 	int interface;
@@ -1728,10 +1728,10 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 	 */
 	if (OCTEON_IS_OCTEON2() || OCTEON_IS_OCTEON3()) {
 		union cvmx_l2c_ctl l2c_ctl;
-		l2c_ctl.u64 = cvmx_read_csr_node(node, CVMX_L2C_CTL);
+		l2c_ctl.u64 = cvmx_read_csr(CVMX_L2C_CTL);
 		l2c_ctl.s.rsp_arb_mode = 1;
 		l2c_ctl.s.xmc_arb_mode = 0;
-		cvmx_write_csr_node(node, CVMX_L2C_CTL, l2c_ctl.u64);
+		cvmx_write_csr(CVMX_L2C_CTL, l2c_ctl.u64);
 	} else {
 		l2c_cfg.u64 = cvmx_read_csr(CVMX_L2C_CFG);
 		l2c_cfg.s.lrf_arb_mode = 0;
@@ -1742,7 +1742,7 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 	__cvmx_helper_init_port_valid();	//vinita_to_do ask it need to be modify for multinode
 
 	for (interface = 0; interface < num_interfaces; interface++) {
-		xiface = cvmx_helper_node_interface_to_xiface(node, interface);
+		xiface = cvmx_helper_node_interface_to_xiface(0, interface);
 		result |= cvmx_helper_interface_probe(xiface);
 	}
 
@@ -1758,12 +1758,11 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 		return result;
 
 	for (interface = 0; interface < num_interfaces; interface++) {
-		xiface = cvmx_helper_node_interface_to_xiface(node, interface);
+		xiface = cvmx_helper_node_interface_to_xiface(0, interface);
 		/* Skip invalid/disabled interfaces */
 		if (cvmx_helper_ports_on_interface(xiface) <= 0)
 			continue;
-		cvmx_printf("Node %d Interface %d has %d ports (%s)\n", node,
-			    interface,
+		cvmx_printf("Interface %d has %d ports (%s)\n", interface,
 			    cvmx_helper_ports_on_interface(xiface),
 			    cvmx_helper_interface_mode_to_string
 			    (cvmx_helper_interface_get_mode(xiface)));
@@ -1781,7 +1780,7 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 		result |= __cvmx_helper_ipd_global_setup();
 
 	/* Enable any flow control and backpressure */
-	result |= __cvmx_helper_global_setup_backpressure(node);
+	result |= __cvmx_helper_global_setup_backpressure(0);
 
 	/* export app config if set */
 	if (cvmx_export_app_config) {
@@ -1793,37 +1792,7 @@ int cvmx_helper_initialize_packet_io_node(unsigned int node)
 	return result;
 }
 
-EXPORT_SYMBOL(cvmx_helper_initialize_packet_io_node);
-
-/**
- * Initialize the PIP, IPD, and PKO hardware to support
- * simple priority based queues for the ethernet ports. Each
- * port is configured with a number of priority queues based
- * on CVMX_PKO_QUEUES_PER_PORT_* where each queue is lower
- * priority than the previous.
- *
- * Returns Zero on success, non-zero on failure
- */
-int cvmx_helper_initialize_packet_io_global(void)
-{
-	unsigned int node = cvmx_get_node_num();
-	return cvmx_helper_initialize_packet_io_node(node);
-}
-
 EXPORT_SYMBOL(cvmx_helper_initialize_packet_io_global);
-
-/**
- * Does core local initialization for packet io
- *
- * Returns Zero on success, non-zero on failure
- */
-int cvmx_helper_initialize_packet_io_local(void)
-{
-//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-//		__cvmx_pko3_dq_table_setup();
-//	}
-	return 0;
-}
 
 struct cvmx_buffer_list {
 	struct cvmx_buffer_list *next;
@@ -1886,86 +1855,6 @@ int cvmx_agl_set_backpressure_override(uint32_t interface, uint32_t port_mask)
 	cvmx_write_csr(CVMX_GMXX_TX_OVR_BP(port), agl_gmx_tx_ovr_bp.u64);
 	return 0;
 }
-
-#if 0
-/**
- * Helper function for global packet IO shutdown
- */
-int cvmx_helper_shutdown_packet_io_global_cn78xx(int node)
-{
-	int num_interfaces = cvmx_helper_get_number_of_interfaces();
-	int interface;
-	int result = 0;
-
-	/* Shut down all interfaces and disable TX and RX on all ports */
-	for (interface = 0; interface < num_interfaces; interface++) {
-		int xiface =
-		    cvmx_helper_node_interface_to_xiface(node, interface);
-		int index;
-		int num_ports = cvmx_helper_ports_on_interface(xiface);
-
-		for (index = 0; index < num_ports; index++) {
-			if (!cvmx_helper_is_port_valid(xiface, index))
-				continue;
-
-			cvmx_bgx_set_backpressure_override(xiface, 1 << index);
-			cvmx_helper_bgx_shutdown_port(xiface, index);
-		}
-	}
-
-	cvmx_helper_pki_shutdown(node);
-
-	/* Shutdown PKO interfaces */
-	for (interface = 0; interface < num_interfaces; interface++) {
-		int xiface =
-		    cvmx_helper_node_interface_to_xiface(node, interface);
-		cvmx_helper_pko3_shut_interface(xiface);
-	}
-
-	/* Disable MAC address filtering */
-	for (interface = 0; interface < num_interfaces; interface++) {
-		int xiface =
-		    cvmx_helper_node_interface_to_xiface(node, interface);
-		switch (cvmx_helper_interface_get_mode(xiface)) {
-		case CVMX_HELPER_INTERFACE_MODE_XAUI:
-		case CVMX_HELPER_INTERFACE_MODE_RXAUI:
-		case CVMX_HELPER_INTERFACE_MODE_XLAUI:
-		case CVMX_HELPER_INTERFACE_MODE_XFI:
-		case CVMX_HELPER_INTERFACE_MODE_10G_KR:
-		case CVMX_HELPER_INTERFACE_MODE_40G_KR4:
-		case CVMX_HELPER_INTERFACE_MODE_SGMII:
-			{
-				int index;
-				int num_ports =
-				    cvmx_helper_ports_on_interface(xiface);
-
-				for (index = 0; index < num_ports; index++) {
-					if (!cvmx_helper_is_port_valid
-					    (xiface, index))
-						continue;
-
-					/* Reset MAC filtering */
-					cvmx_helper_bgx_rx_adr_ctl(node,
-								   interface,
-								   index, 0, 0,
-								   0);
-				}
-				break;
-			}
-		default:
-			break;
-		}
-	}
-
-	/* Shutdown the PKO unit */
-	result = cvmx_helper_pko3_shutdown(node);
-
-	/* Release interface structures */
-	__cvmx_helper_shutdown_interfaces();
-
-	return result;
-}
-#endif
 
 /**
  * Undo the initialization performed in
@@ -2437,20 +2326,6 @@ step2:
 }
 
 EXPORT_SYMBOL(cvmx_helper_shutdown_packet_io_global);
-
-/**
- * Does core local shutdown of packet io
- *
- * Returns Zero on success, non-zero on failure
- */
-int cvmx_helper_shutdown_packet_io_local(void)
-{
-	/*
-	 * Currently there is nothing to do per core. This may change
-	 * in the future.
-	 */
-	return 0;
-}
 
 /**
  * Auto configure an IPD/PKO port link state and speed. This

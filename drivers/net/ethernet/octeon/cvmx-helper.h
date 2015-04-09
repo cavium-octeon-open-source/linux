@@ -204,25 +204,6 @@ extern int cvmx_helper_uninitialize_sso_node(unsigned node);
  * Returns Zero on success, non-zero on failure
  */
 int cvmx_helper_initialize_packet_io_global(void);
-/**
- * Initialize the PIP, IPD, and PKO hardware to support
- * simple priority based queues for the ethernet ports. Each
- * port is configured with a number of priority queues based
- * on CVMX_PKO_QUEUES_PER_PORT_* where each queue is lower
- * priority than the previous.
- *
- * @node: Node on which to initialize packet io hardware
- *
- * Returns Zero on success, non-zero on failure
- */
-int cvmx_helper_initialize_packet_io_node(unsigned int node);
-
-/**
- * Does core local initialization for packet io
- *
- * Returns Zero on success, non-zero on failure
- */
-extern int cvmx_helper_initialize_packet_io_local(void);
 
 /**
  * Undo the initialization performed in
@@ -236,18 +217,6 @@ extern int cvmx_helper_initialize_packet_io_local(void);
  * Returns Zero on success, negative on failure.
  */
 extern int cvmx_helper_shutdown_packet_io_global(void);
-
-/**
- * Helper function for 78xx global packet IO shutdown
- */
-extern int cvmx_helper_shutdown_packet_io_global_cn78xx(int node);
-
-/**
- * Does core local shutdown of packet io
- *
- * Returns Zero on success, non-zero on failure
- */
-extern int cvmx_helper_shutdown_packet_io_local(void);
 
 /**
  * Returns the number of ports on the given interface.

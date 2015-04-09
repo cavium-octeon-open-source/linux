@@ -64,105 +64,15 @@ EXPORT_SYMBOL(cvmx_ipd_cfg);
 #define IPD_RED_AVG_DLY	1000
 #define IPD_RED_PRB_DLY	1000
 
-#if 0
-void cvmx_ipd_convert_to_newcfg(cvmx_ipd_config_t ipd_config)
-{
-	int pkind;
-	unsigned int node = cvmx_get_node_num();
-
-	/*Set all the styles to same parameters since old config does not have per port config */
-	pki_dflt_style[node].parm_cfg.cache_mode = ipd_config.cache_mode;
-	pki_dflt_style[node].parm_cfg.first_skip = ipd_config.first_mbuf_skip;
-	pki_dflt_style[node].parm_cfg.later_skip =
-	    ipd_config.not_first_mbuf_skip;
-	pki_dflt_style[node].parm_cfg.mbuff_size =
-	    ipd_config.packet_pool.buffer_size;
-	pki_dflt_style[node].parm_cfg.tag_type =
-	    ipd_config.port_config.tag_type;
-
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_src =
-	    ipd_config.port_config.tag_fields.ipv6_src_ip | ipd_config.
-	    port_config.tag_fields.ipv4_src_ip;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_c_dst =
-	    ipd_config.port_config.tag_fields.ipv6_dst_ip | ipd_config.
-	    port_config.tag_fields.ipv4_dst_ip;
-	pki_dflt_style[node].tag_cfg.tag_fields.ip_prot_nexthdr =
-	    ipd_config.port_config.tag_fields.ipv6_next_header | ipd_config.
-	    port_config.tag_fields.ipv4_protocol;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_src =
-	    ipd_config.port_config.tag_fields.ipv6_src_port | ipd_config.
-	    port_config.tag_fields.ipv4_src_port;
-	pki_dflt_style[node].tag_cfg.tag_fields.layer_d_dst =
-	    ipd_config.port_config.tag_fields.ipv6_dst_port | ipd_config.
-	    port_config.tag_fields.ipv4_dst_port;
-	pki_dflt_style[node].tag_cfg.tag_fields.input_port =
-	    ipd_config.port_config.tag_fields.input_port;
-
-	if (ipd_config.port_config.parse_mode == 0x1)
-		pki_dflt_pkind[node].initial_parse_mode =
-		    CVMX_PKI_PARSE_LA_TO_LG;
-	else if (ipd_config.port_config.parse_mode == 0x2)
-		pki_dflt_pkind[node].initial_parse_mode =
-		    CVMX_PKI_PARSE_LC_TO_LG;
-	else
-		pki_dflt_pkind[node].initial_parse_mode =
-		    CVMX_PKI_PARSE_NOTHING;
-
-	/* For compatibility make style = pkind so old software can modify style */
-	for (pkind = 0; pkind < CVMX_PKI_NUM_PKIND; pkind++)
-		pkind_style_map[node][pkind] = pkind;
-	/*setup packet pool */
-	cvmx_helper_pki_set_dflt_pool(node, ipd_config.packet_pool.pool_num,
-				      ipd_config.packet_pool.buffer_size,
-				      ipd_config.packet_pool.buffer_count);
-	cvmx_helper_pki_set_dflt_aura(node, ipd_config.packet_pool.pool_num,
-				      ipd_config.packet_pool.pool_num,
-				      ipd_config.packet_pool.buffer_count);
-}
-#endif
-
-int cvmx_ipd_set_config(cvmx_ipd_config_t ipd_config)
-{
-	cvmx_ipd_cfg = ipd_config;
-//	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-//		cvmx_ipd_convert_to_newcfg(ipd_config);
-	return 0;
-}
-
-void cvmx_ipd_get_config(cvmx_ipd_config_t * ipd_config)
-{
-	*ipd_config = cvmx_ipd_cfg;
-}
-
-void cvmx_ipd_set_packet_pool_buffer_count(uint64_t buffer_count)
-{
-	cvmx_ipd_cfg.packet_pool.buffer_count = buffer_count;
-}
-
 void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 				     uint64_t buffer_count)
 {
-#if 0
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		int node = cvmx_get_node_num();
-		int64_t aura = pool;
-		cvmx_helper_pki_set_dflt_pool(node, pool, buffer_size,
-					      buffer_count);
-		cvmx_helper_pki_set_dflt_aura(node, aura, pool, buffer_count);
-	} else {
-#endif
 		cvmx_ipd_cfg.packet_pool.pool_num = pool;
 		cvmx_ipd_cfg.packet_pool.buffer_size = buffer_size;
 		cvmx_ipd_cfg.packet_pool.buffer_count = buffer_count;
-//	}
 }
 
 EXPORT_SYMBOL(cvmx_ipd_set_packet_pool_config);
-
-void cvmx_ipd_set_wqe_pool_buffer_count(uint64_t buffer_count)
-{
-	cvmx_ipd_cfg.wqe_pool.buffer_count = buffer_count;
-}
 
 void cvmx_ipd_set_wqe_pool_config(int64_t pool, uint64_t buffer_size,
 				  uint64_t buffer_count)
@@ -516,7 +426,7 @@ void cvmx_ipd_config(uint64_t mbuff_size,
  *               than this many free packet buffers in FPA 0.
  * Returns Zero on success. Negative on failure
  */
-int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
+static int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
 {
 	union cvmx_ipd_qosx_red_marks red_marks;
 	union cvmx_ipd_red_quex_param red_param;
@@ -559,8 +469,6 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 	int interface;
 	int port;
 
-	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-		return -1;
 	/*
 	 * Disable backpressure based on queued buffers. It needs SW support
 	 */
@@ -703,13 +611,6 @@ EXPORT_SYMBOL(cvmx_ipd_enable);
 void cvmx_ipd_disable(void)
 {
 	cvmx_ipd_ctl_status_t ipd_reg;
-#if 0
-	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-		unsigned int node = cvmx_get_node_num();
-		cvmx_pki_disable(node);
-		return;
-	}
-#endif
 	ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 	ipd_reg.s.ipd_en = 0;
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);

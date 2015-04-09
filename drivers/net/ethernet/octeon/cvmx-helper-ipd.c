@@ -81,15 +81,9 @@ static int cvmx_helper_fcs_op(int interface, int nports, int has_fcs)
 	int pknd;
 	union cvmx_pip_sub_pkind_fcsx pkind_fcsx;
 	union cvmx_pip_prt_cfgx port_cfg;
-//	struct cvmx_xiface xi = cvmx_helper_xiface_to_node_interface(interface);
 
 	if (!octeon_has_feature(OCTEON_FEATURE_PKND))
 		return 0;
-//	if (octeon_has_feature(OCTEON_FEATURE_PKI)) {
-//		cvmx_helper_pki_set_fcs_op(xi.node, xi.interface, nports,
-//					   has_fcs);
-//		return 0;
-//	}
 
 	port_bit = 0;
 	for (index = 0; index < nports; index++)
