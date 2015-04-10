@@ -1258,16 +1258,16 @@ int __cvmx_helper_interface_setup_pko(int interface)
 // buf the reason for that is not clear.
 }
 
-/**
- * wait for the pko queue to drain
- *
+/*
+ * cvmx_wait_pko_queue_drain() - Wait for the pko queue to drain
  * @queue: a valid pko queue
- * Returns count is the length of the queue after calling this
- * function
+ *
+ * Return: count is the length of the queue after calling this function
  */
-static int cvmx_helper_wait_pko_queue_drain(int queue)
+static int cvmx_wait_pko_queue_drain(int queue)
 {
-	const int timeout = 5;	/* Wait up to 5 seconds for timeouts */
+	/* Wait up to 5 seconds for timeouts */
+	const int timeout = 5;
 	int count;
 	uint64_t start_cycle, stop_cycle;
 
@@ -1286,55 +1286,55 @@ static int cvmx_helper_wait_pko_queue_drain(int queue)
 	return count;
 }
 
-/**
- * @INTERNAL
- *
- * Drain and wait until all PKO queues are empty.
- */
-int __cvmx_helper_pko_drain(void)
+static int cvmx_pko_drain_no_pknd(void)
 {
-	int result = 0;
 
-	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
-		int queue, max_queue;
+	int num_interfaces = cvmx_helper_get_number_of_interfaces();
+	int interface, num_ports, index;
 
-		/* PKO2 */
-		max_queue = __cvmx_helper_cfg_pko_max_queue();
-		for (queue = 0; queue < max_queue; queue++) {
-			if (cvmx_helper_wait_pko_queue_drain(queue)) {
-				result = -1;
-				return result;
-			}
-		}
-	} else {
-		int num_interfaces = cvmx_helper_get_number_of_interfaces();
-		int interface, num_ports, index;
+	for (interface = 0; interface < num_interfaces; interface++) {
+		num_ports = cvmx_helper_ports_on_interface(interface);
+		for (index = 0; index < num_ports; index++) {
+			int pko_port;
+			int queue;
+			int max_queue;
 
-		/* PKO1 */
-		for (interface = 0; interface < num_interfaces; interface++) {
-			num_ports = cvmx_helper_ports_on_interface(interface);
-			for (index = 0; index < num_ports; index++) {
-				int pko_port;
-				int queue;
-				int max_queue;
-				if (!cvmx_helper_is_port_valid
-				    (interface, index))
-					continue;
-				pko_port =
-				    cvmx_helper_get_ipd_port(interface, index);
-				queue = cvmx_pko_get_base_queue(pko_port);
-				max_queue =
-				    queue + cvmx_pko_get_num_queues(pko_port);
-				while (queue < max_queue) {
-					if (cvmx_helper_wait_pko_queue_drain
-					    (queue)) {
-						result = -1;
-						return result;
-					}
-					queue++;
-				}
+			if (!cvmx_helper_is_port_valid(interface, index))
+				continue;
+			pko_port = cvmx_helper_get_ipd_port(interface, index);
+			queue = cvmx_pko_get_base_queue(pko_port);
+			max_queue = queue + cvmx_pko_get_num_queues(pko_port);
+			while (queue < max_queue) {
+				if (cvmx_wait_pko_queue_drain(queue))
+					return -1;
+				queue++;
 			}
 		}
 	}
-	return result;
+	return 0;
+}
+
+static int cvmx_pko_drain_pknd(void)
+{
+	int queue, max_queue;
+
+	max_queue = __cvmx_helper_cfg_pko_max_queue();
+	for (queue = 0; queue < max_queue; queue++) {
+		if (cvmx_wait_pko_queue_drain(queue))
+			return -1;
+	}
+	return 0;
+}
+
+/*
+ * cvmx_pko_drain() - Drain and wait until all PKO queues are empty.
+ *
+ * Return: 0 if success
+ */
+int cvmx_pko_drain(void)
+{
+	if (octeon_has_feature(OCTEON_FEATURE_PKND))
+		return cvmx_pko_drain_pknd();
+	else
+		return cvmx_pko_drain_no_pknd();
 }

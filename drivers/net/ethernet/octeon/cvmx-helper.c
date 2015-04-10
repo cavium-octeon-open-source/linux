@@ -1884,7 +1884,7 @@ int cvmx_helper_shutdown_packet_io_global(void)
 
 step2:
 	/* Step 2: Wait for the PKO queues to drain */
-	result = __cvmx_helper_pko_drain();
+	result = cvmx_pko_drain();
 	if (result < 0)
 		cvmx_dprintf("WARNING: %s: "
 			     "Failed to drain some PKO queues\n", __func__);
