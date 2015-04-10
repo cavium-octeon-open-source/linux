@@ -39,6 +39,7 @@
 #include <asm/octeon/cvmx-asxx-defs.h>
 #include <asm/octeon/cvmx-gmxx-defs.h>
 
+#include "cvmx-ipd-defs.h"
 #include "cvmx-helper.h"
 #include "cvmx-hwpko.h"
 #include "cvmx-ipd.h"
@@ -52,13 +53,16 @@
  */
 int __cvmx_helper_errata_fix_ipd_ptr_alignment(void)
 {
-#define FIX_IPD_FIRST_BUFF_PAYLOAD_BYTES     (cvmx_fpa_get_packet_pool_block_size() \
-						- 8 - cvmx_ipd_cfg.first_mbuf_skip )
-#define FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES (cvmx_fpa_get_packet_pool_block_size() \
-                                              - 8 - cvmx_ipd_cfg.not_first_mbuf_skip )
+#define FIX_IPD_FIRST_BUFF_PAYLOAD_BYTES \
+	(cvmx_fpa_get_packet_pool_block_size() - 8 - CVMX_IPD_FIRST_MBUF_SKIP)
+#define FIX_IPD_NON_FIRST_BUFF_PAYLOAD_BYTES \
+	(cvmx_fpa_get_packet_pool_block_size() - 8 - \
+		CVMX_IPD_NOT_FIRST_MBUF_SKIP)
+
 #define FIX_IPD_OUTPORT 0
 #define INTERFACE(port) (port >> 4)	/* Ports 0-15 are interface 0, 16-31 are interface 1 */
 #define INDEX(port) (port & 0xf)
+
 	uint64_t *p64;
 	cvmx_pko_command_word0_t pko_command;
 	cvmx_buf_ptr_t g_buffer, pkt_buffer;

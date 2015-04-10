@@ -59,9 +59,9 @@
 #include "cvmx-helper-errata-ethernet.h"
 #include "cvmx-helper-cfg.h"
 #include "cvmx-helper-pko.h"
-#include "cvmx-helper-ipd.h"
 #include "cvmx-pip-defs.h"
 #include "cvmx-npi-defs.h"
+#include "cvmx-ipd-defs.h"
 #include "cvmx-qlm.h"
 
 /**
@@ -1746,13 +1746,7 @@ int cvmx_helper_initialize_packet_io_global(void)
 		result |= cvmx_helper_interface_probe(xiface);
 	}
 
-	/* PKO3 init precedes that of interfaces */
-//	if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE)) {
-//		__cvmx_helper_init_port_config_data(node);
-//		result = cvmx_helper_pko3_init_global(node);
-//	} else {
-		result = cvmx_helper_pko_init();
-//	}
+	result = cvmx_helper_pko_init();
 
 	if (result < 0)
 		return result;
@@ -1767,17 +1761,11 @@ int cvmx_helper_initialize_packet_io_global(void)
 			    cvmx_helper_interface_mode_to_string
 			    (cvmx_helper_interface_get_mode(xiface)));
 
-		result |= __cvmx_helper_ipd_setup_interface(xiface);
-//		if (octeon_has_feature(OCTEON_FEATURE_CN78XX_WQE))
-//			result |= cvmx_helper_pko3_init_interface(xiface);
-//		else
+		cvmx_ipd_setup_interface(xiface);
 			result |= __cvmx_helper_interface_setup_pko(interface);
 	}
 
-//	if (octeon_has_feature(OCTEON_FEATURE_PKI))
-//		result |= __cvmx_helper_pki_global_setup(node);
-//	else
-		result |= __cvmx_helper_ipd_global_setup();
+	cvmx_ipd_init();
 
 	/* Enable any flow control and backpressure */
 	result |= __cvmx_helper_global_setup_backpressure(0);
@@ -2156,7 +2144,7 @@ step2:
 
 	/* Step 6: Drain all prefetched buffers from IPD/PIP. Note that IPD/PIP
 	   have not been reset yet */
-	__cvmx_ipd_free_ptr();
+	cvmx_ipd_free_ptr();
 
 	/* Step 7: Free the PKO command buffers and put PKO in reset */
 	cvmx_pko_shutdown();

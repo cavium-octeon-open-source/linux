@@ -4,7 +4,7 @@
  * Contact: support@cavium.com
  * This file is part of the OCTEON SDK
  *
- * Copyright (c) 2003-2010 Cavium Inc.
+ * Copyright (c) 2003-2015 Cavium Inc.
  *
  * This file is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License, Version 2, as
@@ -25,41 +25,26 @@
  * Contact Cavium Inc. for more information
  ***********************license end**************************************/
 
-/**
- * @file
- *
- * IPD Support.
- *
- */
 #include <linux/module.h>
 #include <asm/octeon/cvmx.h>
-#include <asm/octeon/cvmx-bootmem.h>
-#include <asm/octeon/cvmx-dbg-defs.h>
-#include <asm/octeon/cvmx-sso-defs.h>
 
-#include "cvmx-helper-errata-ethernet.h"
 #include "cvmx-helper-cfg.h"
 #include "cvmx-pip-defs.h"
-#include "cvmx-fpa.h"
-#include "cvmx-fpa1.h"
-#include "cvmx-wqe.h"
+#include "cvmx-ipd-defs.h"
 #include "cvmx-ipd.h"
+#include "cvmx-pip.h"
 
-CVMX_SHARED cvmx_ipd_config_t cvmx_ipd_cfg = {.first_mbuf_skip = 184,
-	.ipd_enable = 1,
-	.cache_mode = CVMX_IPD_OPC_MODE_STT,
-	.packet_pool = {0, 2048, 0}
-	,
-	.wqe_pool = {1, 128, 0}
-	,
-	.port_config = {CVMX_PIP_PORT_CFG_MODE_SKIPL2,
-			CVMX_POW_TAG_TYPE_ORDERED,
-			CVMX_PIP_TAG_MODE_TUPLE,
-			.tag_fields = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
-			}
+struct cvmx_fpa_pool_config _cvmx_ipd_packet_pool = {
+	.pool_num = 0,
+	.buffer_size = 2048,
+	.buffer_count = 0,
 };
 
-EXPORT_SYMBOL(cvmx_ipd_cfg);
+struct cvmx_fpa_pool_config _cvmx_ipd_wqe_pool = {
+	.pool_num = 1,
+	.buffer_size = 128,
+	.buffer_count = 0,
+};
 
 #define IPD_RED_AVG_DLY	1000
 #define IPD_RED_PRB_DLY	1000
@@ -67,9 +52,9 @@ EXPORT_SYMBOL(cvmx_ipd_cfg);
 void cvmx_ipd_set_packet_pool_config(int64_t pool, uint64_t buffer_size,
 				     uint64_t buffer_count)
 {
-		cvmx_ipd_cfg.packet_pool.pool_num = pool;
-		cvmx_ipd_cfg.packet_pool.buffer_size = buffer_size;
-		cvmx_ipd_cfg.packet_pool.buffer_count = buffer_count;
+	_cvmx_ipd_packet_pool.pool_num = pool;
+	_cvmx_ipd_packet_pool.buffer_size = buffer_size;
+	_cvmx_ipd_packet_pool.buffer_count = buffer_count;
 }
 
 EXPORT_SYMBOL(cvmx_ipd_set_packet_pool_config);
@@ -77,14 +62,14 @@ EXPORT_SYMBOL(cvmx_ipd_set_packet_pool_config);
 void cvmx_ipd_set_wqe_pool_config(int64_t pool, uint64_t buffer_size,
 				  uint64_t buffer_count)
 {
-	cvmx_ipd_cfg.wqe_pool.pool_num = pool;
-	cvmx_ipd_cfg.wqe_pool.buffer_size = buffer_size;
-	cvmx_ipd_cfg.wqe_pool.buffer_count = buffer_count;
+	_cvmx_ipd_wqe_pool.pool_num = pool;
+	_cvmx_ipd_wqe_pool.buffer_size = buffer_size;
+	_cvmx_ipd_wqe_pool.buffer_count = buffer_count;
 }
 
 EXPORT_SYMBOL(cvmx_ipd_set_wqe_pool_config);
 
-static void __cvmx_ipd_free_ptr_v1(void)
+static void cvmx_ipd_free_ptr_no_pknd(void)
 {
 	unsigned wqe_pool = cvmx_fpa_get_wqe_pool();
 	int i;
@@ -208,7 +193,7 @@ static void __cvmx_ipd_free_ptr_v1(void)
 	}
 }
 
-static void __cvmx_ipd_free_ptr_v2(void)
+static void cvmx_ipd_free_ptr_pknd(void)
 {
 	int no_wptr = 0;
 	int i;
@@ -341,8 +326,9 @@ static void __cvmx_ipd_free_ptr_v2(void)
 	}
 }
 
-/**
- * @INTERNAL
+/*
+ * cvmx_ipd_free_ptr() - extract FPA buffers out of the IPD and PIP
+ *
  * This function is called by cvmx_helper_shutdown() to extract
  * all FPA buffers out of the IPD and PIP. After this function
  * completes, all FPA buffers that were prefetched by IPD and PIP
@@ -351,30 +337,31 @@ static void __cvmx_ipd_free_ptr_v2(void)
  * be performed. WARNING: It is very important that IPD and PIP be
  * reset soon after a call to this function.
  */
-void __cvmx_ipd_free_ptr(void)
+void cvmx_ipd_free_ptr(void)
 {
 	if (octeon_has_feature(OCTEON_FEATURE_PKND))
-		__cvmx_ipd_free_ptr_v2();
+		cvmx_ipd_free_ptr_pknd();
 	else
-		__cvmx_ipd_free_ptr_v1();
+		cvmx_ipd_free_ptr_no_pknd();
 }
 
-void cvmx_ipd_config(uint64_t mbuff_size,
-		     uint64_t first_mbuff_skip,
-		     uint64_t not_first_mbuff_skip,
-		     uint64_t first_back, uint64_t second_back,
-		     uint64_t wqe_fpa_pool, cvmx_ipd_mode_t cache_mode,
-		     uint64_t back_pres_enable_flag)
+/*
+ * cvmx_ipd_init() - Setup IPD
+ *
+ * Setup global setting for IPD/PIP not related to a specific
+ * interface or port. This must be called before IPD is enabled.
+ */
+void cvmx_ipd_init(void)
 {
-	cvmx_ipd_1st_mbuff_skip_t first_skip;
-	cvmx_ipd_mbuff_not_first_skip_t not_first_skip;
+	cvmx_ipd_1st_mbuff_skip_t skip;
 	cvmx_ipd_packet_mbuff_size_t size;
-	cvmx_ipd_1st_next_ptr_back_t first_back_struct;
-	cvmx_ipd_second_next_ptr_back_t second_back_struct;
+	cvmx_ipd_1st_next_ptr_back_t back_struct;
 	cvmx_ipd_wqe_fpa_queue_t wqe_pool;
 	cvmx_ipd_ctl_status_t ipd_ctl_reg;
 
 	/* Enforce 1st skip minimum if WQE shares the buffer with packet */
+	uint64_t first_mbuff_skip = CVMX_IPD_FIRST_MBUF_SKIP / 8;
+
 	if (octeon_has_feature(OCTEON_FEATURE_NO_WPTR)) {
 		union cvmx_ipd_ctl_status ctl_status;
 		ctl_status.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
@@ -382,51 +369,48 @@ void cvmx_ipd_config(uint64_t mbuff_size,
 			first_mbuff_skip = 16;
 	}
 
-	first_skip.u64 = 0;
-	first_skip.s.skip_sz = first_mbuff_skip;
-	cvmx_write_csr(CVMX_IPD_1ST_MBUFF_SKIP, first_skip.u64);
+	skip.u64 = 0;
+	skip.s.skip_sz = first_mbuff_skip;
+	cvmx_write_csr(CVMX_IPD_1ST_MBUFF_SKIP, skip.u64);
 
-	not_first_skip.u64 = 0;
-	not_first_skip.s.skip_sz = not_first_mbuff_skip;
-	cvmx_write_csr(CVMX_IPD_NOT_1ST_MBUFF_SKIP, not_first_skip.u64);
+	skip.u64 = 0;
+	skip.s.skip_sz = CVMX_IPD_NOT_FIRST_MBUF_SKIP / 8;
+	cvmx_write_csr(CVMX_IPD_NOT_1ST_MBUFF_SKIP, skip.u64);
 
 	size.u64 = 0;
-	size.s.mb_size = mbuff_size;
+	size.s.mb_size = _cvmx_ipd_packet_pool.buffer_size / 8;
 	cvmx_write_csr(CVMX_IPD_PACKET_MBUFF_SIZE, size.u64);
 
-	first_back_struct.u64 = 0;
-	first_back_struct.s.back = first_back;
-	cvmx_write_csr(CVMX_IPD_1st_NEXT_PTR_BACK, first_back_struct.u64);
+	/* The +8 is to account for the next ptr */
+	back_struct.u64 = 0;
+	back_struct.s.back = (CVMX_IPD_FIRST_MBUF_SKIP + 8) / 128;
+	cvmx_write_csr(CVMX_IPD_1st_NEXT_PTR_BACK, back_struct.u64);
 
-	second_back_struct.u64 = 0;
-	second_back_struct.s.back = second_back;
-	cvmx_write_csr(CVMX_IPD_2nd_NEXT_PTR_BACK, second_back_struct.u64);
+	/* The +8 is to account for the next ptr */
+	back_struct.u64 = 0;
+	back_struct.s.back = (CVMX_IPD_NOT_FIRST_MBUF_SKIP + 8) / 128;
+	cvmx_write_csr(CVMX_IPD_2nd_NEXT_PTR_BACK, back_struct.u64);
 
 	wqe_pool.u64 = 0;
-	wqe_pool.s.wqe_pool = wqe_fpa_pool;
+	wqe_pool.s.wqe_pool = _cvmx_ipd_wqe_pool.pool_num;
 	cvmx_write_csr(CVMX_IPD_WQE_FPA_QUEUE, wqe_pool.u64);
 
 	ipd_ctl_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
-	ipd_ctl_reg.s.opc_mode = cache_mode;
-	ipd_ctl_reg.s.pbp_en = back_pres_enable_flag;
+	ipd_ctl_reg.s.opc_mode = CVMX_IPD_OPC_MODE_STT;
+	ipd_ctl_reg.s.pbp_en = 1;
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_ctl_reg.u64);
-
-	/* Note: the example RED code is below */
 }
 
-/**
- * Setup Random Early Drop on a specific input queue
- *
- * @queue:  Input queue to setup RED on (0-7)
- * @pass_thresh:
- *               Packets will begin slowly dropping when there are less than
- *               this many packet buffers free in FPA 0.
- * @drop_thresh:
- *               All incomming packets will be dropped when there are less
- *               than this many free packet buffers in FPA 0.
- * Returns Zero on success. Negative on failure
+/*
+ * cvmx_ipd_setup_red_queue() - Setup Random Early Drop on an input queue
+ * @queue:		Input queue to setup RED on (0-7)
+ * @pass_thresh:	Packets will begin slowly dropping when there are less
+ *			than this many packet buffers free in FPA 0.
+ * @drop_thresh:	All incoming packets will be dropped when there are
+ *			less than this many free packet buffers in FPA 0.
  */
-static int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
+static void cvmx_ipd_setup_red_queue(
+	int queue, int pass_thresh, int drop_thresh)
 {
 	union cvmx_ipd_qosx_red_marks red_marks;
 	union cvmx_ipd_red_quex_param red_param;
@@ -449,62 +433,85 @@ static int cvmx_ipd_setup_red_queue(int queue, int pass_thresh, int drop_thresh)
 	red_param.s.new_con = 255;
 	red_param.s.use_pcnt = 1;
 	cvmx_write_csr(CVMX_IPD_RED_QUEX_PARAM(queue), red_param.u64);
-	return 0;
 }
 
-/**
- * Setup Random Early Drop to automatically begin dropping packets.
- *
- * @pass_thresh:
- *               Packets will begin slowly dropping when there are less than
- *               this many packet buffers free in FPA 0.
- * @drop_thresh:
- *               All incomming packets will be dropped when there are less
- *               than this many free packet buffers in FPA 0.
- * Returns Zero on success. Negative on failure
- */
-int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
+static void cvmx_ipd_setup_red_no_pknd(int pass_thresh, int drop_thresh)
 {
 	int queue;
 	int interface;
 	int port;
+	union cvmx_ipd_portx_bp_page_cnt page_cnt;
+	union cvmx_ipd_red_port_enable red_port_enable;
 
 	/*
 	 * Disable backpressure based on queued buffers. It needs SW support
 	 */
-	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
-		int bpid;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
-		     interface++) {
-			int num_ports;
+	page_cnt.u64 = 0;
+	page_cnt.s.bp_enb = 0;
+	page_cnt.s.page_cnt = 100;
+	for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
+		for (
+			port = cvmx_helper_get_first_ipd_port(interface);
+			port < cvmx_helper_get_last_ipd_port(interface);
+			port++
+		)
+			cvmx_write_csr(CVMX_IPD_PORTX_BP_PAGE_CNT(port),
+				       page_cnt.u64);
+	}
 
-			num_ports = cvmx_helper_ports_on_interface(interface);
-			for (port = 0; port < num_ports; port++) {
-				bpid = cvmx_helper_get_bpid(interface, port);
-				if (bpid == CVMX_INVALID_BPID)
-					cvmx_dprintf
-					    ("setup_red: cvmx_helper_get_bpid(%d, %d) = %d\n",
-					     interface, port,
-					     cvmx_helper_get_bpid(interface,
-								  port));
-				else
-					cvmx_write_csr(CVMX_IPD_BPIDX_MBUF_TH
-						       (bpid), 0);
-			}
-		}
-	} else {
-		union cvmx_ipd_portx_bp_page_cnt page_cnt;
+	for (queue = 0; queue < 8; queue++)
+		cvmx_ipd_setup_red_queue(queue, pass_thresh, drop_thresh);
 
-		page_cnt.u64 = 0;
-		page_cnt.s.bp_enb = 0;
-		page_cnt.s.page_cnt = 100;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
-		     interface++) {
-			for (port = cvmx_helper_get_first_ipd_port(interface);
-			     port < cvmx_helper_get_last_ipd_port(interface);
-			     port++)
-				cvmx_write_csr(CVMX_IPD_PORTX_BP_PAGE_CNT(port),
-					       page_cnt.u64);
+	/*
+	 * Shutoff the dropping based on the per port page count. SW isn't
+	 * decrementing it right now
+	 */
+	cvmx_write_csr(CVMX_IPD_BP_PRT_RED_END, 0);
+
+	/*
+	 * Setting up avg_dly and prb_dly, enable bits
+`	 */
+	red_port_enable.u64 = 0;
+	red_port_enable.s.prt_enb = 0xfffffffffull;
+	red_port_enable.s.avg_dly = IPD_RED_AVG_DLY;
+	red_port_enable.s.prb_dly = IPD_RED_PRB_DLY;
+	cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE, red_port_enable.u64);
+
+	/*
+	 * Shutoff the dropping of packets based on RED for SRIO ports
+	 */
+	if (octeon_has_feature(OCTEON_FEATURE_SRIO)) {
+		union cvmx_ipd_red_port_enable2 red_port_enable2;
+
+		red_port_enable2.u64 = 0;
+		red_port_enable2.s.prt_enb = 0xf0;
+		cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE2, red_port_enable2.u64);
+	}
+}
+
+static void cvmx_ipd_setup_red_pknd(int pass_thresh, int drop_thresh)
+{
+	int queue;
+	int interface;
+	int num_ports;
+	int port;
+	int bpid;
+	union cvmx_ipd_red_delay red_delay;
+	union cvmx_ipd_red_bpid_enablex red_bpid_enable;
+
+	/*
+	 * Disable backpressure based on queued buffers. It needs SW support
+	 */
+	for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
+		num_ports = cvmx_helper_ports_on_interface(interface);
+		for (port = 0; port < num_ports; port++) {
+			bpid = cvmx_helper_get_bpid(interface, port);
+			if (bpid == CVMX_INVALID_BPID)
+				pr_debug("setup_red: cvmx_helper_get_bpid(%d, %d) = %d\n",
+					 interface, port,
+					 cvmx_helper_get_bpid(interface, port));
+			else
+				cvmx_write_csr(CVMX_IPD_BPIDX_MBUF_TH(bpid), 0);
 		}
 	}
 
@@ -515,66 +522,53 @@ int cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
 	 * Shutoff the dropping based on the per port page count. SW isn't
 	 * decrementing it right now
 	 */
-	if (octeon_has_feature(OCTEON_FEATURE_PKND))
-		cvmx_write_csr(CVMX_IPD_ON_BP_DROP_PKTX(0), 0);
-	else
-		cvmx_write_csr(CVMX_IPD_BP_PRT_RED_END, 0);
+	cvmx_write_csr(CVMX_IPD_ON_BP_DROP_PKTX(0), 0);
 
 	/*
 	 * Setting up avg_dly and prb_dly, enable bits
+`	 */
+	red_delay.u64 = 0;
+	red_delay.s.avg_dly = IPD_RED_AVG_DLY;
+	red_delay.s.prb_dly = IPD_RED_PRB_DLY;
+	cvmx_write_csr(CVMX_IPD_RED_DELAY, red_delay.u64);
+
+	/*
+	 * Only enable the gmx ports
 	 */
-	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
-		union cvmx_ipd_red_delay red_delay;
-		union cvmx_ipd_red_bpid_enablex red_bpid_enable;
+	red_bpid_enable.u64 = 0;
+	for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
+		int num_ports = cvmx_helper_ports_on_interface(interface);
 
-		red_delay.u64 = 0;
-		red_delay.s.avg_dly = IPD_RED_AVG_DLY;
-		red_delay.s.prb_dly = IPD_RED_PRB_DLY;
-		cvmx_write_csr(CVMX_IPD_RED_DELAY, red_delay.u64);
-
-		/*
-		 * Only enable the gmx ports
-		 */
-		red_bpid_enable.u64 = 0;
-		for (interface = 0; interface < CVMX_HELPER_MAX_GMX;
-		     interface++) {
-			int num_ports =
-			    cvmx_helper_ports_on_interface(interface);
-			for (port = 0; port < num_ports; port++)
-				red_bpid_enable.u64 |=
-				    (((uint64_t) 1) <<
-				     cvmx_helper_get_bpid(interface, port));
-		}
-		cvmx_write_csr(CVMX_IPD_RED_BPID_ENABLEX(0),
-			       red_bpid_enable.u64);
-	} else {
-		union cvmx_ipd_red_port_enable red_port_enable;
-
-		red_port_enable.u64 = 0;
-		red_port_enable.s.prt_enb = 0xfffffffffull;
-		red_port_enable.s.avg_dly = IPD_RED_AVG_DLY;
-		red_port_enable.s.prb_dly = IPD_RED_PRB_DLY;
-		cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE, red_port_enable.u64);
-
-		/*
-		 * Shutoff the dropping of packets based on RED for SRIO ports
-		 */
-		if (octeon_has_feature(OCTEON_FEATURE_SRIO)) {
-			union cvmx_ipd_red_port_enable2 red_port_enable2;
-			red_port_enable2.u64 = 0;
-			red_port_enable2.s.prt_enb = 0xf0;
-			cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE2,
-				       red_port_enable2.u64);
-		}
+		for (port = 0; port < num_ports; port++)
+			red_bpid_enable.u64 |=
+		     ((uint64_t)1 << cvmx_helper_get_bpid(interface, port));
 	}
 
-	return 0;
+	cvmx_write_csr(CVMX_IPD_RED_BPID_ENABLEX(0), red_bpid_enable.u64);
+}
+
+/*
+ * cvmx_ipd_setup_red() - Setup Random Early Drop
+ * @pass_thresh: Packets will begin slowly dropping when there are less than
+ *               this many packet buffers free in FPA 0.
+ * @drop_thresh: All incoming packets will be dropped when there are less
+ *               than this many free packet buffers in FPA 0.
+ *
+ * Setup Random Early Drop to automatically begin dropping packets.
+ */
+void cvmx_ipd_setup_red(int pass_thresh, int drop_thresh)
+{
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		cvmx_ipd_setup_red_pknd(pass_thresh, drop_thresh);
+	} else {
+		cvmx_ipd_setup_red_no_pknd(pass_thresh, drop_thresh);
+	}
 }
 
 EXPORT_SYMBOL(cvmx_ipd_setup_red);
 
-/**
- * Enable IPD
+/*
+ * cvmx_ipd_enable() - Enable IPD
  */
 void cvmx_ipd_enable(void)
 {
@@ -590,23 +584,17 @@ void cvmx_ipd_enable(void)
 			ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 
 	if (ipd_reg.s.ipd_en)
-		cvmx_dprintf
-		    ("Warning: Enabling IPD when IPD already enabled.\n");
+		pr_warn("Warning: Enabling IPD when IPD already enabled.\n");
 
 	ipd_reg.s.ipd_en = 1;
-
-	if (cvmx_ipd_cfg.enable_len_M8_fix) {
-		if (!OCTEON_IS_MODEL(OCTEON_CN38XX_PASS2))
-			ipd_reg.s.len_m8 = 1;
-	}
 
 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);
 }
 
 EXPORT_SYMBOL(cvmx_ipd_enable);
 
-/**
- * Disable IPD
+/*
+ * cvmx_ipd_disable() - Disable IPD
  */
 void cvmx_ipd_disable(void)
 {
@@ -617,3 +605,143 @@ void cvmx_ipd_disable(void)
 }
 
 EXPORT_SYMBOL(cvmx_ipd_disable);
+
+/*
+ * cvmx_ipd_port_setup() - Configure port
+ * @ipd_port: Port/Port kind to configure.
+ *	      This follows the IPD numbering, not the per interface numbering
+ *
+ * Configure the IPD/PIP tagging and QoS options for a specific
+ * port. This function determines the POW work queue entry
+ * contents for a port. The setup performed here is controlled by
+ * the defines in executive-config.h.
+ */
+static void cvmx_ipd_port_setup(int ipd_port)
+{
+	union cvmx_pip_prt_cfgx port_config;
+	union cvmx_pip_prt_tagx tag_config;
+
+	tag_config.u64 = 0;
+
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		int interface, index, pknd;
+		union cvmx_pip_prt_cfgbx prt_cfgbx;
+
+		interface = cvmx_helper_get_interface_num(ipd_port);
+		index = cvmx_helper_get_interface_index_num(ipd_port);
+		pknd = cvmx_helper_get_pknd(interface, index);
+
+		port_config.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGX(pknd));
+		tag_config.u64 = cvmx_read_csr(CVMX_PIP_PRT_TAGX(pknd));
+
+		port_config.s.qos = pknd & 0x7;
+
+		/* Default BPID to use for packets on this port-kind */
+		prt_cfgbx.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGBX(pknd));
+		prt_cfgbx.s.bpid = pknd;
+		cvmx_write_csr(CVMX_PIP_PRT_CFGBX(pknd), prt_cfgbx.u64);
+	} else {
+		port_config.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGX(ipd_port));
+		tag_config.u64 = cvmx_read_csr(CVMX_PIP_PRT_TAGX(ipd_port));
+
+		/* Have each port go to a different POW queue */
+		port_config.s.qos = ipd_port & 0x7;
+	}
+
+	/* Process the headers and place the IP header in the work queue */
+	port_config.s.mode = CVMX_PIP_PORT_CFG_MODE_SKIPL2;
+
+	tag_config.s.inc_prt_flag = 1;
+	tag_config.s.tcp6_tag_type = CVMX_POW_TAG_TYPE_ORDERED;
+	tag_config.s.tcp4_tag_type = CVMX_POW_TAG_TYPE_ORDERED;
+	tag_config.s.ip6_tag_type = CVMX_POW_TAG_TYPE_ORDERED;
+	tag_config.s.ip4_tag_type = CVMX_POW_TAG_TYPE_ORDERED;
+	tag_config.s.non_tag_type = CVMX_POW_TAG_TYPE_ORDERED;
+	/* Put all packets in group 0. Other groups can be used by the app */
+	tag_config.s.grp = 0;
+
+	cvmx_pip_config_port(ipd_port, port_config, tag_config);
+}
+
+/*
+ * cvmx_fcs_op() - Enable or disable FCS stripping.
+ * @interface: interface
+ * @nports: number of ports
+ * @has_fcs: 0 for disable and !0 for enable
+ *
+ * Enable or disable FCS stripping for all the ports on an interface.
+ */
+static void cvmx_fcs_op(int interface, int nports, int has_fcs)
+{
+	uint64_t port_bit;
+	int index;
+	int pknd;
+	union cvmx_pip_sub_pkind_fcsx pkind_fcsx;
+	union cvmx_pip_prt_cfgx port_cfg;
+
+	port_bit = 0;
+	for (index = 0; index < nports; index++)
+		port_bit |=
+		    ((uint64_t)1 << cvmx_helper_get_pknd(interface, index));
+
+	pkind_fcsx.u64 = cvmx_read_csr(CVMX_PIP_SUB_PKIND_FCSX(0));
+	if (has_fcs)
+		pkind_fcsx.s.port_bit |= port_bit;
+	else
+		pkind_fcsx.s.port_bit &= ~port_bit;
+	cvmx_write_csr(CVMX_PIP_SUB_PKIND_FCSX(0), pkind_fcsx.u64);
+
+	for (pknd = 0; pknd < 64; pknd++) {
+		if ((1ull << pknd) & port_bit) {
+			port_cfg.u64 = cvmx_read_csr(CVMX_PIP_PRT_CFGX(pknd));
+			port_cfg.s.crc_en = (has_fcs) ? 1 : 0;
+			cvmx_write_csr(CVMX_PIP_PRT_CFGX(pknd), port_cfg.u64);
+		}
+	}
+}
+
+/*
+ * cvmx_ipd_setup_interface() - Setup the IPD/PIP for the ports on an interface
+ * @interface: Interface to setup IPD/PIP for
+ *
+ * Setup the IPD/PIP for the ports on an interface. Packet
+ * classification and tagging are set for every port on the
+ * interface. The number of ports on the interface must already
+ * have been probed.
+ */
+void cvmx_ipd_setup_interface(int xiface)
+{
+	cvmx_helper_interface_mode_t mode;
+	int num_ports = cvmx_helper_ports_on_interface(xiface);
+	struct cvmx_xiface xi = cvmx_helper_xiface_to_node_interface(xiface);
+	int ipd_port = cvmx_helper_get_ipd_port(xiface, 0);
+	int delta;
+
+	if (num_ports == CVMX_HELPER_CFG_INVALID_VALUE)
+		return;
+
+	delta = 1;
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		if (xi.interface < CVMX_HELPER_MAX_GMX)
+			delta = 16;
+	}
+
+	while (num_ports--) {
+		if (!cvmx_helper_is_port_valid(xiface, num_ports))
+			continue;
+		cvmx_ipd_port_setup(ipd_port);
+		ipd_port += delta;
+	}
+
+	/* FCS settings */
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		cvmx_fcs_op(xiface,
+			    cvmx_helper_ports_on_interface(xiface),
+				 __cvmx_helper_get_has_fcs(xiface));
+	}
+
+	mode = cvmx_helper_interface_get_mode(xiface);
+
+	if (mode == CVMX_HELPER_INTERFACE_MODE_LOOP)
+		__cvmx_helper_loop_enable(xiface);
+}

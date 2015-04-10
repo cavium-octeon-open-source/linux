@@ -318,9 +318,6 @@ static int cvm_oct_configure_common_hw(void)
 					 FPA_OUTPUT_BUFFER_POOL_SIZE,
 					 cvm_oct_num_output_buffers);
 
-	/* more configuration needs to be done, so enable ipd seperately */
-	cvmx_ipd_cfg.ipd_enable = 0;
-
 	__cvmx_export_app_config_to_named_block(CVMX_APP_CONFIG);
 
 	cvmx_helper_initialize_packet_io_global();
