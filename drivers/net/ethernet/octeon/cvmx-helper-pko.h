@@ -37,17 +37,6 @@
 /* CSR typedefs have been moved to cvmx-pko-defs.h */
 
 /**
- * cvmx_override_pko_queue_priority(int ipd_port, uint64_t
- * priorities[16]) is a function pointer. It is meant to allow
- * customization of the PKO queue priorities based on the port
- * number. Users should set this pointer to a function before
- * calling any cvmx-helper operations.
- */
-extern CVMX_SHARED void (*cvmx_override_pko_queue_priority) (int ipd_port,
-							     uint8_t *
-							     priorities);
-
-/**
  * Gets the fpa pool number of pko pool
  */
 int64_t cvmx_fpa_get_pko_pool(void);

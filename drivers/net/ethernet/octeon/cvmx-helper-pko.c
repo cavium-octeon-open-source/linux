@@ -45,18 +45,6 @@ static CVMX_SHARED int64_t pko_fpa_config_pool = -1;
 static CVMX_SHARED uint64_t pko_fpa_config_size = 1024;
 static CVMX_SHARED uint64_t pko_fpa_config_count = 0;
 
-/**
- * cvmx_override_pko_queue_priority(int pko_port, uint64_t
- * priorities[16]) is a function pointer. It is meant to allow
- * customization of the PKO queue priorities based on the port
- * number. Users should set this pointer to a function before
- * calling any cvmx-helper operations.
- */
-CVMX_SHARED void (*cvmx_override_pko_queue_priority) (int ipd_port,
-						      uint8_t * priorities) =
-    NULL;
-EXPORT_SYMBOL(cvmx_override_pko_queue_priority);
-
 void cvmx_pko_set_cmd_que_pool_config(int64_t pool, uint64_t buffer_size,
 				      uint64_t buffer_count)
 {
@@ -160,12 +148,6 @@ int __cvmx_helper_interface_setup_pko(int interface)
 			continue;
 
 		ipd_port = cvmx_helper_get_ipd_port(interface, num_ports);
-		/*
-		 * Give the user a chance to override the per queue
-		 * priorities.
-		 */
-		if (cvmx_override_pko_queue_priority)
-			cvmx_override_pko_queue_priority(ipd_port, priorities);
 
 		cvmx_pko_config_port(ipd_port,
 				     cvmx_pko_get_base_queue(ipd_port),
