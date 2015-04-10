@@ -32,7 +32,6 @@
 #include "cvmx-pip-defs.h"
 #include "cvmx-ipd-defs.h"
 #include "cvmx-ipd.h"
-#include "cvmx-pip.h"
 
 struct cvmx_fpa_pool_config _cvmx_ipd_packet_pool = {
 	.pool_num = 0,
@@ -415,11 +414,9 @@ static void cvmx_ipd_setup_red_queue(
 	union cvmx_ipd_qosx_red_marks red_marks;
 	union cvmx_ipd_red_quex_param red_param;
 
-	/*
-	 * Set RED to begin dropping packets when there are
+	/* Set RED to begin dropping packets when there are
 	 * pass_thresh buffers left. It will linearly drop more
-	 * packets until reaching drop_thresh buffers.
-	 */
+	 * packets until reaching drop_thresh buffers. */
 	red_marks.u64 = 0;
 	red_marks.s.drop = drop_thresh;
 	red_marks.s.pass = pass_thresh;
@@ -443,9 +440,7 @@ static void cvmx_ipd_setup_red_no_pknd(int pass_thresh, int drop_thresh)
 	union cvmx_ipd_portx_bp_page_cnt page_cnt;
 	union cvmx_ipd_red_port_enable red_port_enable;
 
-	/*
-	 * Disable backpressure based on queued buffers. It needs SW support
-	 */
+	/* Disable backpressure based on queued buffers. It needs SW support */
 	page_cnt.u64 = 0;
 	page_cnt.s.bp_enb = 0;
 	page_cnt.s.page_cnt = 100;
@@ -462,24 +457,18 @@ static void cvmx_ipd_setup_red_no_pknd(int pass_thresh, int drop_thresh)
 	for (queue = 0; queue < 8; queue++)
 		cvmx_ipd_setup_red_queue(queue, pass_thresh, drop_thresh);
 
-	/*
-	 * Shutoff the dropping based on the per port page count. SW isn't
-	 * decrementing it right now
-	 */
+	/* Shutoff the dropping based on the per port page count. SW isn't
+	 * decrementing it right now */
 	cvmx_write_csr(CVMX_IPD_BP_PRT_RED_END, 0);
 
-	/*
-	 * Setting up avg_dly and prb_dly, enable bits
-`	 */
+	/* Setting up avg_dly and prb_dly, enable bits */
 	red_port_enable.u64 = 0;
 	red_port_enable.s.prt_enb = 0xfffffffffull;
 	red_port_enable.s.avg_dly = IPD_RED_AVG_DLY;
 	red_port_enable.s.prb_dly = IPD_RED_PRB_DLY;
 	cvmx_write_csr(CVMX_IPD_RED_PORT_ENABLE, red_port_enable.u64);
 
-	/*
-	 * Shutoff the dropping of packets based on RED for SRIO ports
-	 */
+	/* Shutoff the dropping of packets based on RED for SRIO ports */
 	if (octeon_has_feature(OCTEON_FEATURE_SRIO)) {
 		union cvmx_ipd_red_port_enable2 red_port_enable2;
 
@@ -499,9 +488,7 @@ static void cvmx_ipd_setup_red_pknd(int pass_thresh, int drop_thresh)
 	union cvmx_ipd_red_delay red_delay;
 	union cvmx_ipd_red_bpid_enablex red_bpid_enable;
 
-	/*
-	 * Disable backpressure based on queued buffers. It needs SW support
-	 */
+	/* Disable backpressure based on queued buffers. It needs SW support */
 	for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
 		num_ports = cvmx_helper_ports_on_interface(interface);
 		for (port = 0; port < num_ports; port++) {
@@ -518,23 +505,17 @@ static void cvmx_ipd_setup_red_pknd(int pass_thresh, int drop_thresh)
 	for (queue = 0; queue < 8; queue++)
 		cvmx_ipd_setup_red_queue(queue, pass_thresh, drop_thresh);
 
-	/*
-	 * Shutoff the dropping based on the per port page count. SW isn't
-	 * decrementing it right now
-	 */
+	/* Shutoff the dropping based on the per port page count. SW isn't
+	 * decrementing it right now */
 	cvmx_write_csr(CVMX_IPD_ON_BP_DROP_PKTX(0), 0);
 
-	/*
-	 * Setting up avg_dly and prb_dly, enable bits
-`	 */
+	/* Setting up avg_dly and prb_dly, enable bits */
 	red_delay.u64 = 0;
 	red_delay.s.avg_dly = IPD_RED_AVG_DLY;
 	red_delay.s.prb_dly = IPD_RED_PRB_DLY;
 	cvmx_write_csr(CVMX_IPD_RED_DELAY, red_delay.u64);
 
-	/*
-	 * Only enable the gmx ports
-	 */
+	/* Only enable the gmx ports */
 	red_bpid_enable.u64 = 0;
 	for (interface = 0; interface < CVMX_HELPER_MAX_GMX; interface++) {
 		int num_ports = cvmx_helper_ports_on_interface(interface);
@@ -576,9 +557,7 @@ void cvmx_ipd_enable(void)
 
 	ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
 
-	/*
-	 * busy-waiting for rst_done in o68
-	 */
+	/* busy-waiting for rst_done in o68 */
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX))
 		while (ipd_reg.s.rst_done != 0)
 			ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
@@ -660,7 +639,18 @@ static void cvmx_ipd_port_setup(int ipd_port)
 	/* Put all packets in group 0. Other groups can be used by the app */
 	tag_config.s.grp = 0;
 
-	cvmx_pip_config_port(ipd_port, port_config, tag_config);
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		int interface, index, pknd;
+
+		interface = cvmx_helper_get_interface_num(ipd_port);
+		index = cvmx_helper_get_interface_index_num(ipd_port);
+		pknd = cvmx_helper_get_pknd(interface, index);
+
+		/* overload port_num with pknd */
+		ipd_port = pknd;
+	}
+	cvmx_write_csr(CVMX_PIP_PRT_CFGX(ipd_port), port_config.u64);
+	cvmx_write_csr(CVMX_PIP_PRT_TAGX(ipd_port), tag_config.u64);
 }
 
 /*
