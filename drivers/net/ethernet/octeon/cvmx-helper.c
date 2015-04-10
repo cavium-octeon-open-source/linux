@@ -50,7 +50,6 @@
 
 #include "cvmx-agl.h"
 #include "cvmx-fpa.h"
-#include "cvmx-pip.h"
 #include "cvmx-hwpko.h"
 #include "cvmx-ipd.h"
 #include "cvmx-helper.h"

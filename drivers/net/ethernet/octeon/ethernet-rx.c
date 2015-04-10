@@ -59,7 +59,6 @@
 #include "cvmx-wqe.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-pow.h"
-#include "cvmx-pip.h"
 #include "cvmx-ipd.h"
 #include "cvmx-helper.h"
 

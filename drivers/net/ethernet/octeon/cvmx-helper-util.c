@@ -40,7 +40,6 @@
 
 #include "cvmx-helper-cfg.h"
 #include "cvmx-helper.h"
-#include "cvmx-pip.h"
 #include "cvmx-ipd.h"
 #include "cvmx-pko-defs.h"
 #include "cvmx-hwpko.h"

@@ -34,6 +34,8 @@
 
 #include "cvmx-fpa.h"
 
+#define CVMX_PIP_NUM_INPUT_PORTS 46
+
 /*
  * We have to export this in the header for cvmx-helper-errata.c
  */
@@ -125,5 +127,7 @@ void cvmx_ipd_setup_interface(int interface);
 void cvmx_ipd_free_ptr(void);
 void cvmx_ipd_setup_red(int pass_thresh, int drop_thresh);
 
+struct net_device;
+void cvmx_pip_get_port_status(uint64_t port_num, struct net_device *dev);
 
 #endif /*  __CVMX_IPD_H__ */

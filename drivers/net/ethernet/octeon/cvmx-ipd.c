@@ -26,6 +26,8 @@
  ***********************license end**************************************/
 
 #include <linux/module.h>
+#include <linux/netdevice.h>
+
 #include <asm/octeon/cvmx.h>
 
 #include "cvmx-helper-cfg.h"
@@ -735,3 +737,75 @@ void cvmx_ipd_setup_interface(int xiface)
 	if (mode == CVMX_HELPER_INTERFACE_MODE_LOOP)
 		__cvmx_helper_loop_enable(xiface);
 }
+
+/*
+ * cvmx_pip_get_port_status() - Get the status counters for a port.
+ * @port_num:	Port number (ipd_port) to get statistics for.
+ * @dev:	Where to put the results.
+ */
+void cvmx_pip_get_port_status(uint64_t port_num, struct net_device *dev)
+{
+	cvmx_pip_stat_ctl_t pip_stat_ctl;
+
+	cvmx_pip_stat0_prtx_t stat0;
+	cvmx_pip_stat3_prtx_t stat3;
+	cvmx_pip_stat7_prtx_t stat7;
+
+	cvmx_pip_stat_inb_pktsx_t pip_stat_inb_pktsx;
+	cvmx_pip_stat_inb_octsx_t pip_stat_inb_octsx;
+	cvmx_pip_stat_inb_errsx_t pip_stat_inb_errsx;
+
+	int interface = cvmx_helper_get_interface_num(port_num);
+	int index = cvmx_helper_get_interface_index_num(port_num);
+
+	pip_stat_ctl.u64 = 0;
+	pip_stat_ctl.s.rdclr = 1;
+	cvmx_write_csr(CVMX_PIP_STAT_CTL, pip_stat_ctl.u64);
+
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		int pknd = cvmx_helper_get_pknd(interface, index);
+
+		/* PIP_STAT_CTL[MODE] 0 means pkind. */
+		stat0.u64 = cvmx_read_csr(CVMX_PIP_STAT0_X(pknd));
+		stat3.u64 = cvmx_read_csr(CVMX_PIP_STAT3_X(pknd));
+		stat7.u64 = cvmx_read_csr(CVMX_PIP_STAT7_X(pknd));
+	} else if (port_num >= 40) {
+		stat0.u64 = cvmx_read_csr(CVMX_PIP_XSTAT0_PRTX(port_num));
+		stat3.u64 = cvmx_read_csr(CVMX_PIP_XSTAT3_PRTX(port_num));
+		stat7.u64 = cvmx_read_csr(CVMX_PIP_XSTAT7_PRTX(port_num));
+	} else {
+		stat0.u64 = cvmx_read_csr(CVMX_PIP_STAT0_PRTX(port_num));
+		stat3.u64 = cvmx_read_csr(CVMX_PIP_STAT3_PRTX(port_num));
+		stat7.u64 = cvmx_read_csr(CVMX_PIP_STAT7_PRTX(port_num));
+	}
+
+	/* The drop counter must be incremented atomically since the
+	 * RX tasklet also increments it. */
+	atomic64_add(stat0.s.drp_pkts, (atomic64_t *)&dev->stats.rx_dropped);
+
+	dev->stats.multicast += stat3.s.mcst;
+	dev->stats.rx_frame_errors += stat7.s.fcs;
+
+	if (octeon_has_feature(OCTEON_FEATURE_PKND)) {
+		int pknd = cvmx_helper_get_pknd(interface, index);
+
+		pip_stat_inb_pktsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_PKTS_PKNDX(pknd));
+		pip_stat_inb_octsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_OCTS_PKNDX(pknd));
+		pip_stat_inb_errsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_ERRS_PKNDX(pknd));
+	} else {
+		pip_stat_inb_pktsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_PKTSX(port_num));
+		pip_stat_inb_octsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_OCTSX(port_num));
+		pip_stat_inb_errsx.u64 =
+		    cvmx_read_csr(CVMX_PIP_STAT_INB_ERRSX(port_num));
+	}
+
+	dev->stats.rx_packets += pip_stat_inb_pktsx.s.pkts;
+	dev->stats.rx_bytes += pip_stat_inb_octsx.s.octs;
+	dev->stats.rx_crc_errors += pip_stat_inb_errsx.s.errs;
+}
+

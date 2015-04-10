@@ -47,7 +47,6 @@
 #include "cvmx-agl-defs.h"
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
-#include "cvmx-pip.h"
 #include "cvmx-hwpko.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-ipd.h"
@@ -408,49 +407,36 @@ static DEFINE_SPINLOCK(cvm_oct_tx_stat_lock);
 static struct net_device_stats *cvm_oct_common_get_stats(struct net_device *dev)
 {
 	unsigned long flags;
-	cvmx_pip_port_status_t rx_status;
 	cvmx_pko_port_status_t tx_status;
 	u64 current_tx_octets;
 	u32 current_tx_packets;
 	struct octeon_ethernet *priv = netdev_priv(dev);
 
-	if (octeon_is_simulation()) {
-		/* The simulator doesn't support statistics */
-		memset(&rx_status, 0, sizeof(rx_status));
-		memset(&tx_status, 0, sizeof(tx_status));
-	} else {
-		cvmx_pip_get_port_status(priv->ipd_port, 1, &rx_status);
+	/* The simulator doesn't support statistics */
+	if (octeon_is_simulation())
+		return &dev->stats;
 
-		spin_lock_irqsave(&cvm_oct_tx_stat_lock, flags);
-		cvmx_pko_get_port_status(priv->ipd_port, 0, &tx_status);
-		current_tx_packets = tx_status.packets;
-		current_tx_octets = tx_status.octets;
-		/* The tx_packets counter is 32-bits as are all these
-		 * variables.  No truncation necessary.
-		 */
-		tx_status.packets = current_tx_packets - priv->last_tx_packets;
-		/* The tx_octets counter is only 48-bits, so we need
-		 * to truncate in case there was a wrap-around
-		 */
-		tx_status.octets = (current_tx_octets - priv->last_tx_octets) & 0xffffffffffffull;
-		priv->last_tx_packets = current_tx_packets;
-		priv->last_tx_octets = current_tx_octets;
-		spin_unlock_irqrestore(&cvm_oct_tx_stat_lock, flags);
-	}
+	cvmx_pip_get_port_status(priv->ipd_port, dev);
 
-	dev->stats.rx_packets += rx_status.inb_packets;
-	dev->stats.tx_packets += tx_status.packets;
-	dev->stats.rx_bytes += rx_status.inb_octets;
-	dev->stats.tx_bytes += tx_status.octets;
-	dev->stats.multicast += rx_status.multicast_packets;
-	dev->stats.rx_crc_errors += rx_status.inb_errors;
-	dev->stats.rx_frame_errors += rx_status.fcs_align_err_packets;
-
-	/* The drop counter must be incremented atomically since the
-	 * RX tasklet also increments it.
+	spin_lock_irqsave(&cvm_oct_tx_stat_lock, flags);
+	cvmx_pko_get_port_status(priv->ipd_port, 0, &tx_status);
+	current_tx_packets = tx_status.packets;
+	current_tx_octets = tx_status.octets;
+	/* The tx_packets counter is 32-bits as are all these
+	 * variables.  No truncation necessary.
 	 */
-	atomic64_add(rx_status.dropped_packets,
-		     (atomic64_t *)&dev->stats.rx_dropped);
+	tx_status.packets = current_tx_packets - priv->last_tx_packets;
+	/* The tx_octets counter is only 48-bits, so we need
+	 * to truncate in case there was a wrap-around
+	 */
+	tx_status.octets = (current_tx_octets - priv->last_tx_octets) &
+		0xffffffffffffull;
+	priv->last_tx_packets = current_tx_packets;
+	priv->last_tx_octets = current_tx_octets;
+	spin_unlock_irqrestore(&cvm_oct_tx_stat_lock, flags);
+
+	dev->stats.tx_packets += tx_status.packets;
+	dev->stats.tx_bytes += tx_status.octets;
 
 	return &dev->stats;
 }
