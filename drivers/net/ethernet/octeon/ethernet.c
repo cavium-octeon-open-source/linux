@@ -47,7 +47,7 @@
 #include "cvmx-agl-defs.h"
 #include "ethernet-defines.h"
 #include "octeon-ethernet.h"
-#include "cvmx-hwpko.h"
+#include "cvmx-pko.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-ipd.h"
 #include "cvmx-pow-defs.h"

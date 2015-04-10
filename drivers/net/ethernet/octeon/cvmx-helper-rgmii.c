@@ -38,7 +38,7 @@
 #include <asm/octeon/cvmx-dbg-defs.h>
 
 #include "cvmx-npi-defs.h"
-#include "cvmx-hwpko.h"
+#include "cvmx-pko.h"
 #include "cvmx-pko-defs.h"
 #include "cvmx-helper.h"
 #include "cvmx-helper-board-ethernet.h"

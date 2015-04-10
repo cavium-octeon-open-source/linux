@@ -42,7 +42,7 @@
 #include "cvmx-helper.h"
 #include "cvmx-ipd.h"
 #include "cvmx-pko-defs.h"
-#include "cvmx-hwpko.h"
+#include "cvmx-pko.h"
 
 /**
  * @INTERNAL

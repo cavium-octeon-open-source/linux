@@ -67,7 +67,6 @@
 #include "cvmx-hwfau.h"
 #include "cvmx-fpa.h"
 #include "cvmx-pow.h"
-#include "cvmx-helper-pko.h"
 
 /* Adjust the command buffer size by 1 word so that in the case of using only
 ** two word PKO commands no command words stradle buffers.  The useful values
@@ -683,5 +682,29 @@ cvmx_hwpko_send_packet_finish3_pkoid(uint64_t pko_port, uint64_t queue,
 int cvmx_pko_queue_pend_count(cvmx_cmd_queue_id_t queue);
 
 void cvmx_pko_set_cmd_queue_pool_buffer_count(uint64_t buffer_count);
+
+
+
+/**
+ * Gets the fpa pool number of pko pool
+ */
+int64_t cvmx_fpa_get_pko_pool(void);
+
+/**
+ * Gets the buffer size of pko pool
+ */
+uint64_t cvmx_fpa_get_pko_pool_block_size(void);
+
+/**
+ * Gets the buffer size  of pko pool
+ */
+uint64_t cvmx_fpa_get_pko_pool_buffer_count(void);
+
+int cvmx_helper_pko_init(void);
+
+extern int __cvmx_helper_pko_drain(void);
+
+extern int __cvmx_helper_interface_setup_pko(int interface);
+
 
 #endif /* __CVMX_HWPKO_H__ */

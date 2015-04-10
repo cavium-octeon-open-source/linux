@@ -41,7 +41,7 @@
 
 #include "cvmx-ipd-defs.h"
 #include "cvmx-helper.h"
-#include "cvmx-hwpko.h"
+#include "cvmx-pko.h"
 #include "cvmx-ipd.h"
 
 /**

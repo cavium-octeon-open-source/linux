@@ -44,7 +44,7 @@
 #include "cvmx-wqe.h"
 #include "cvmx-hwfau.h"
 #include "cvmx-ipd.h"
-#include "cvmx-hwpko.h"
+#include "cvmx-pko.h"
 #include "cvmx-helper.h"
 
 /*
