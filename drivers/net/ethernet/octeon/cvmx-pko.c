@@ -356,19 +356,21 @@ static void __cvmx_pko1_chip_init(void)
 	}
 }
 
-/**
+/*
+ * cvmx_pko_init() - Initialize the PKO
+ *
  * Call before any other calls to initialize the packet
  * output system.  This does chip global config, and should only be
  * done by one core.
  */
-void cvmx_pko_hw_init(uint8_t pool, unsigned bufsize)
+void cvmx_pko_init(void)
 {
 	union cvmx_pko_reg_cmd_buf config;
 	union cvmx_iob_fau_timeout fau_to;
 	int i;
 
-	if (debug)
-		cvmx_dprintf("%s: pool=%u bufsz=%u\n", __func__, pool, bufsize);
+	/* CONFIGURATION */
+	__cvmx_helper_init_port_config_data(0);
 
 	/* chip-specific setup. */
 	if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
@@ -377,20 +379,16 @@ void cvmx_pko_hw_init(uint8_t pool, unsigned bufsize)
 		__cvmx_pko1_chip_init();
 	}
 
-	/*
-	 * Set the size of the PKO command buffers to an odd number of
+	/* Set the size of the PKO command buffers to an odd number of
 	 * 64bit words. This allows the normal two word send to stay
-	 * aligned and never span a command word buffer.
-	 */
+	 * aligned and never span a command word buffer. */
 	config.u64 = 0;
-	config.s.pool = pool;
-	config.s.size = bufsize / 8 - 1;
+	config.s.pool = cvmx_fpa_get_pko_pool();
+	config.s.size = cvmx_fpa_get_pko_pool_block_size() / 8 - 1;
 	cvmx_write_csr(CVMX_PKO_REG_CMD_BUF, config.u64);
 
-	/*
-	 * Disable tagwait FAU timeout. This needs to be done before
-	 * anyone might start packet output using tags.
-	 */
+	/* Disable tagwait FAU timeout. This needs to be done before
+	 * anyone might start packet output using tags. */
 	fau_to.u64 = 0;
 	fau_to.s.tout_val = 0xfff;
 	fau_to.s.tout_enb = 0;
@@ -410,13 +408,11 @@ void cvmx_pko_hw_init(uint8_t pool, unsigned bufsize)
 		cvmx_write_csr(CVMX_PKO_REG_MIN_PKT, min_pkt.u64);
 	}
 
-	/*
-	 * If we aren't using all of the queues optimize PKO's
-	 * internal memory.
-	 */
+	/* If we aren't using all of the queues optimize PKO's internal memory */
 	if (OCTEON_IS_MODEL(OCTEON_CN38XX) || OCTEON_IS_MODEL(OCTEON_CN58XX) ||
 	    OCTEON_IS_MODEL(OCTEON_CN56XX) || OCTEON_IS_MODEL(OCTEON_CN52XX) ||
 	    OCTEON_IS_OCTEON2() || OCTEON_IS_MODEL(OCTEON_CN70XX)) {
+
 		int max_queues = __cvmx_helper_cfg_pko_max_queue();
 
 		if (OCTEON_IS_MODEL(OCTEON_CN38XX)) {
@@ -435,10 +431,10 @@ void cvmx_pko_hw_init(uint8_t pool, unsigned bufsize)
 				cvmx_write_csr(CVMX_PKO_REG_QUEUE_MODE, 1);
 			else
 				cvmx_write_csr(CVMX_PKO_REG_QUEUE_MODE, 0);
+
 			if (OCTEON_IS_MODEL(OCTEON_CN68XX)) {
 				for (i = 0; i < 2; i++) {
-					union cvmx_pko_reg_engine_storagex
-					    engine_storage;
+					union cvmx_pko_reg_engine_storagex engine_storage;
 
 #define PKO_ASSIGN_ENGINE_STORAGE(index)                        \
         engine_storage.s.engine##index =                        \
@@ -461,9 +457,7 @@ void cvmx_pko_hw_init(uint8_t pool, unsigned bufsize)
 					PKO_ASSIGN_ENGINE_STORAGE(13);
 					PKO_ASSIGN_ENGINE_STORAGE(14);
 					PKO_ASSIGN_ENGINE_STORAGE(15);
-					cvmx_write_csr
-					    (CVMX_PKO_REG_ENGINE_STORAGEX(i),
-					     engine_storage.u64);
+					cvmx_write_csr(CVMX_PKO_REG_ENGINE_STORAGEX(i), engine_storage.u64);
 				}
 			}
 		}
@@ -1208,23 +1202,6 @@ uint64_t cvmx_fpa_get_pko_pool_buffer_count(void)
 }
 
 /**
- * Initialize the PKO
- *
- */
-int cvmx_helper_pko_init(void)
-{
-	//#     error "Pool number in kernel not implemented"
-
-	__cvmx_helper_init_port_config_data(0);
-
-	cvmx_pko_hw_init(cvmx_fpa_get_pko_pool(),
-			 cvmx_fpa_get_pko_pool_block_size()
-	    );
-	return 0;
-
-}
-
-/**
  * @INTERNAL
  * Setup the PKO for the ports on an interface. The number of
  * queues per port and the priority of each PKO output queue
@@ -1361,7 +1338,3 @@ int __cvmx_helper_pko_drain(void)
 	}
 	return result;
 }
-
-
-
-

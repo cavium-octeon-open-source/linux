@@ -700,7 +700,7 @@ uint64_t cvmx_fpa_get_pko_pool_block_size(void);
  */
 uint64_t cvmx_fpa_get_pko_pool_buffer_count(void);
 
-int cvmx_helper_pko_init(void);
+void cvmx_pko_init(void);
 
 extern int __cvmx_helper_pko_drain(void);
 

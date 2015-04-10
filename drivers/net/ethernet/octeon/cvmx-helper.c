@@ -1744,10 +1744,7 @@ int cvmx_helper_initialize_packet_io_global(void)
 		result |= cvmx_helper_interface_probe(xiface);
 	}
 
-	result = cvmx_helper_pko_init();
-
-	if (result < 0)
-		return result;
+	cvmx_pko_init();
 
 	for (interface = 0; interface < num_interfaces; interface++) {
 		xiface = cvmx_helper_node_interface_to_xiface(0, interface);
