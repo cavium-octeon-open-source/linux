@@ -33,8 +33,8 @@ enum octeon_mdiobus_mode {
 };
 
 struct octeon_mdiobus {
+	void __iomem *base;
 	struct mii_bus *mii_bus;
-	u64 register_base;
 	resource_size_t mdio_phys;
 	resource_size_t regsize;
 	enum octeon_mdiobus_mode mode;
@@ -49,10 +49,10 @@ static void octeon_mdiobus_set_mode(struct octeon_mdiobus *p,
 	if (m == p->mode)
 		return;
 
-	smi_clk.u64 = cvmx_read_csr(p->register_base + SMI_CLK);
+	smi_clk.u64 = readq(p->base + SMI_CLK);
 	smi_clk.s.mode = (m == C45) ? 1 : 0;
 	smi_clk.s.preamble = 1;
-	cvmx_write_csr(p->register_base + SMI_CLK, smi_clk.u64);
+	writeq(smi_clk.u64, p->base + SMI_CLK);
 	p->mode = m;
 }
 
@@ -67,7 +67,7 @@ static int octeon_mdiobus_c45_addr(struct octeon_mdiobus *p,
 
 	smi_wr.u64 = 0;
 	smi_wr.s.dat = regnum & 0xffff;
-	cvmx_write_csr(p->register_base + SMI_WR_DAT, smi_wr.u64);
+	writeq(smi_wr.u64, p->base + SMI_WR_DAT);
 
 	regnum = (regnum >> 16) & 0x1f;
 
@@ -75,14 +75,14 @@ static int octeon_mdiobus_c45_addr(struct octeon_mdiobus *p,
 	smi_cmd.s.phy_op = 0; /* MDIO_CLAUSE_45_ADDRESS */
 	smi_cmd.s.phy_adr = phy_id;
 	smi_cmd.s.reg_adr = regnum;
-	cvmx_write_csr(p->register_base + SMI_CMD, smi_cmd.u64);
+	writeq(smi_cmd.u64, p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_wr.u64 = cvmx_read_csr(p->register_base + SMI_WR_DAT);
+		smi_wr.u64 = readq(p->base + SMI_WR_DAT);
 	} while (smi_wr.s.pending && --timeout);
 
 	if (timeout <= 0)
@@ -114,14 +114,14 @@ static int octeon_mdiobus_read(struct mii_bus *bus, int phy_id, int regnum)
 	smi_cmd.s.phy_op = op;
 	smi_cmd.s.phy_adr = phy_id;
 	smi_cmd.s.reg_adr = regnum;
-	cvmx_write_csr(p->register_base + SMI_CMD, smi_cmd.u64);
+	writeq(smi_cmd.u64, p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_rd.u64 = cvmx_read_csr(p->register_base + SMI_RD_DAT);
+		smi_rd.u64 = readq(p->base + SMI_RD_DAT);
 	} while (smi_rd.s.pending && --timeout);
 
 	if (smi_rd.s.val)
@@ -153,20 +153,20 @@ static int octeon_mdiobus_write(struct mii_bus *bus, int phy_id,
 
 	smi_wr.u64 = 0;
 	smi_wr.s.dat = val;
-	cvmx_write_csr(p->register_base + SMI_WR_DAT, smi_wr.u64);
+	writeq(smi_wr.u64, p->base + SMI_WR_DAT);
 
 	smi_cmd.u64 = 0;
 	smi_cmd.s.phy_op = op;
 	smi_cmd.s.phy_adr = phy_id;
 	smi_cmd.s.reg_adr = regnum;
-	cvmx_write_csr(p->register_base + SMI_CMD, smi_cmd.u64);
+	writeq(smi_cmd.u64, p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_wr.u64 = cvmx_read_csr(p->register_base + SMI_WR_DAT);
+		smi_wr.u64 = readq(p->base + SMI_WR_DAT);
 	} while (smi_wr.s.pending && --timeout);
 
 	if (timeout <= 0)
@@ -200,8 +200,7 @@ static int octeon_mdiobus_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "request_mem_region failed\n");
 		goto fail;
 	}
-	bus->register_base =
-		(u64)devm_ioremap(&pdev->dev, bus->mdio_phys, bus->regsize);
+	bus->base = devm_ioremap(&pdev->dev, bus->mdio_phys, bus->regsize);
 
 	bus->mii_bus = mdiobus_alloc();
 
@@ -210,12 +209,12 @@ static int octeon_mdiobus_probe(struct platform_device *pdev)
 
 	smi_en.u64 = 0;
 	smi_en.s.en = 1;
-	cvmx_write_csr(bus->register_base + SMI_EN, smi_en.u64);
+	writeq(smi_en.u64, bus->base + SMI_EN);
 
 	bus->mii_bus->priv = bus;
 	bus->mii_bus->irq = bus->phy_irq;
 	bus->mii_bus->name = "mdio-octeon";
-	snprintf(bus->mii_bus->id, MII_BUS_ID_SIZE, "%llx", bus->register_base);
+	snprintf(bus->mii_bus->id, MII_BUS_ID_SIZE, "%llx", (u64)bus->base);
 	bus->mii_bus->parent = &pdev->dev;
 
 	bus->mii_bus->read = octeon_mdiobus_read;
@@ -234,7 +233,7 @@ fail_register:
 	mdiobus_free(bus->mii_bus);
 fail:
 	smi_en.u64 = 0;
-	cvmx_write_csr(bus->register_base + SMI_EN, smi_en.u64);
+	writeq(smi_en.u64, bus->base + SMI_EN);
 	return err;
 }
 
@@ -248,7 +247,7 @@ static int octeon_mdiobus_remove(struct platform_device *pdev)
 	mdiobus_unregister(bus->mii_bus);
 	mdiobus_free(bus->mii_bus);
 	smi_en.u64 = 0;
-	cvmx_write_csr(bus->register_base + SMI_EN, smi_en.u64);
+	writeq(smi_en.u64, bus->base + SMI_EN);
 	return 0;
 }
 
