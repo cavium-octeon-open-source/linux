@@ -14,9 +14,6 @@
 #include <linux/phy.h>
 #include <linux/io.h>
 
-#include <asm/octeon/octeon.h>
-#include <asm/octeon/cvmx-smix-defs.h>
-
 #define DRV_VERSION "1.0"
 #define DRV_DESCRIPTION "Cavium Networks Octeon SMI/MDIO driver"
 
@@ -25,6 +22,17 @@
 #define SMI_RD_DAT	0x10
 #define SMI_CLK		0x18
 #define SMI_EN		0x20
+
+static inline u64 smi_cmd(u64 phy_op, u64 phy_adr, u64 reg_adr)
+{
+	return ((phy_op & 3) << 16) | ((phy_adr & 0x1f) << 8) | (reg_adr & 0x1f);
+}
+
+#define SMI_DATA_PENDING BIT(17)
+#define SMI_DATA_VAL BIT(16)
+#define SMI_CLK_MODE BIT(24)
+#define SMI_CLK_PREAMBLE BIT(12)
+#define SMI_EN_EN BIT(0)
 
 enum octeon_mdiobus_mode {
 	UNINIT = 0,
@@ -44,46 +52,42 @@ struct octeon_mdiobus {
 static void octeon_mdiobus_set_mode(struct octeon_mdiobus *p,
 				    enum octeon_mdiobus_mode m)
 {
-	union cvmx_smix_clk smi_clk;
+	u64 clk;
 
 	if (m == p->mode)
 		return;
 
-	smi_clk.u64 = readq(p->base + SMI_CLK);
-	smi_clk.s.mode = (m == C45) ? 1 : 0;
-	smi_clk.s.preamble = 1;
-	writeq(smi_clk.u64, p->base + SMI_CLK);
+	clk = readq(p->base + SMI_CLK);
+	if (m == C45)
+		clk |= SMI_CLK_MODE;
+	else
+		clk &= ~SMI_CLK_MODE;
+	clk |= SMI_CLK_PREAMBLE;
+	writeq(clk, p->base + SMI_CLK);
 	p->mode = m;
 }
 
 static int octeon_mdiobus_c45_addr(struct octeon_mdiobus *p,
 				   int phy_id, int regnum)
 {
-	union cvmx_smix_cmd smi_cmd;
-	union cvmx_smix_wr_dat smi_wr;
 	int timeout = 1000;
+	u64 v;
 
 	octeon_mdiobus_set_mode(p, C45);
 
-	smi_wr.u64 = 0;
-	smi_wr.s.dat = regnum & 0xffff;
-	writeq(smi_wr.u64, p->base + SMI_WR_DAT);
+	writeq(regnum & 0xffff, p->base + SMI_WR_DAT);
 
 	regnum = (regnum >> 16) & 0x1f;
 
-	smi_cmd.u64 = 0;
-	smi_cmd.s.phy_op = 0; /* MDIO_CLAUSE_45_ADDRESS */
-	smi_cmd.s.phy_adr = phy_id;
-	smi_cmd.s.reg_adr = regnum;
-	writeq(smi_cmd.u64, p->base + SMI_CMD);
+	writeq(smi_cmd(0, phy_id, regnum), p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_wr.u64 = readq(p->base + SMI_WR_DAT);
-	} while (smi_wr.s.pending && --timeout);
+		v = readq(p->base + SMI_WR_DAT);
+	} while ((v & SMI_DATA_PENDING) && --timeout);
 
 	if (timeout <= 0)
 		return -EIO;
@@ -93,10 +97,9 @@ static int octeon_mdiobus_c45_addr(struct octeon_mdiobus *p,
 static int octeon_mdiobus_read(struct mii_bus *bus, int phy_id, int regnum)
 {
 	struct octeon_mdiobus *p = bus->priv;
-	union cvmx_smix_cmd smi_cmd;
-	union cvmx_smix_rd_dat smi_rd;
 	unsigned int op = 1; /* MDIO_CLAUSE_22_READ */
 	int timeout = 1000;
+	u64 v;
 
 	if (regnum & MII_ADDR_C45) {
 		int r = octeon_mdiobus_c45_addr(p, phy_id, regnum);
@@ -109,36 +112,26 @@ static int octeon_mdiobus_read(struct mii_bus *bus, int phy_id, int regnum)
 		octeon_mdiobus_set_mode(p, C22);
 	}
 
-
-	smi_cmd.u64 = 0;
-	smi_cmd.s.phy_op = op;
-	smi_cmd.s.phy_adr = phy_id;
-	smi_cmd.s.reg_adr = regnum;
-	writeq(smi_cmd.u64, p->base + SMI_CMD);
+	writeq(smi_cmd(op, phy_id, regnum), p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_rd.u64 = readq(p->base + SMI_RD_DAT);
-	} while (smi_rd.s.pending && --timeout);
+		v = readq(p->base + SMI_RD_DAT);
+	} while ((v & SMI_DATA_PENDING) && --timeout);
 
-	if (smi_rd.s.val)
-		return smi_rd.s.dat;
-	else
-		return -EIO;
+	return (v & SMI_DATA_VAL) ? (v & 0xffff) : -EIO;
 }
 
 static int octeon_mdiobus_write(struct mii_bus *bus, int phy_id,
 				int regnum, u16 val)
 {
 	struct octeon_mdiobus *p = bus->priv;
-	union cvmx_smix_cmd smi_cmd;
-	union cvmx_smix_wr_dat smi_wr;
 	unsigned int op = 0; /* MDIO_CLAUSE_22_WRITE */
 	int timeout = 1000;
-
+	u64 v;
 
 	if (regnum & MII_ADDR_C45) {
 		int r = octeon_mdiobus_c45_addr(p, phy_id, regnum);
@@ -151,23 +144,17 @@ static int octeon_mdiobus_write(struct mii_bus *bus, int phy_id,
 		octeon_mdiobus_set_mode(p, C22);
 	}
 
-	smi_wr.u64 = 0;
-	smi_wr.s.dat = val;
-	writeq(smi_wr.u64, p->base + SMI_WR_DAT);
+	writeq(val & 0xffff, p->base + SMI_WR_DAT);
 
-	smi_cmd.u64 = 0;
-	smi_cmd.s.phy_op = op;
-	smi_cmd.s.phy_adr = phy_id;
-	smi_cmd.s.reg_adr = regnum;
-	writeq(smi_cmd.u64, p->base + SMI_CMD);
+	writeq(smi_cmd(op, phy_id, regnum), p->base + SMI_CMD);
 
 	do {
 		/* Wait 1000 clocks so we don't saturate the RSL bus
 		 * doing reads.
 		 */
 		__delay(1000);
-		smi_wr.u64 = readq(p->base + SMI_WR_DAT);
-	} while (smi_wr.s.pending && --timeout);
+		v = readq(p->base + SMI_WR_DAT);
+	} while ((v & SMI_DATA_PENDING) && --timeout);
 
 	if (timeout <= 0)
 		return -EIO;
@@ -179,7 +166,6 @@ static int octeon_mdiobus_probe(struct platform_device *pdev)
 {
 	struct octeon_mdiobus *bus;
 	struct resource *res_mem;
-	union cvmx_smix_en smi_en;
 	int err = -ENOENT;
 
 	bus = devm_kzalloc(&pdev->dev, sizeof(*bus), GFP_KERNEL);
@@ -207,9 +193,7 @@ static int octeon_mdiobus_probe(struct platform_device *pdev)
 	if (!bus->mii_bus)
 		goto fail;
 
-	smi_en.u64 = 0;
-	smi_en.s.en = 1;
-	writeq(smi_en.u64, bus->base + SMI_EN);
+	writeq(SMI_EN_EN, bus->base + SMI_EN);
 
 	bus->mii_bus->priv = bus;
 	bus->mii_bus->irq = bus->phy_irq;
@@ -232,22 +216,19 @@ static int octeon_mdiobus_probe(struct platform_device *pdev)
 fail_register:
 	mdiobus_free(bus->mii_bus);
 fail:
-	smi_en.u64 = 0;
-	writeq(smi_en.u64, bus->base + SMI_EN);
+	writeq(0, bus->base + SMI_EN);
 	return err;
 }
 
 static int octeon_mdiobus_remove(struct platform_device *pdev)
 {
 	struct octeon_mdiobus *bus;
-	union cvmx_smix_en smi_en;
 
 	bus = platform_get_drvdata(pdev);
 
 	mdiobus_unregister(bus->mii_bus);
 	mdiobus_free(bus->mii_bus);
-	smi_en.u64 = 0;
-	writeq(smi_en.u64, bus->base + SMI_EN);
+	writeq(0, bus->base + SMI_EN);
 	return 0;
 }
 
